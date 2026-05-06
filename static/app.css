@@ -308,32 +308,12 @@ input {
   background: transparent;
 }
 
-.rime-skin-card {
-  gap: 0.85rem;
-  padding: 0.9rem 1rem;
-}
-
 .rime-option-card.is-auto {
   border-style: dashed;
 }
 
 .rime-option-card .rime-option-copy {
   gap: 0.3rem;
-}
-
-.rime-skin-row {
-  display: flex;
-  align-items: center;
-}
-
-.rime-skin-row {
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.rime-skin-toggle {
-  min-height: 2.2rem;
-  padding: 0 0.1rem;
 }
 
 .rime-option-action {
@@ -464,22 +444,18 @@ input {
   display: block;
 }
 
-.rime-skin-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 0.85rem;
-}
-
-.rime-skin-picker {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 0.75rem;
-}
-
 .keyboard-preview {
   width: 100%;
   margin: 0;
+}
+
+.rime-schema-previews {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.rime-schema-preview {
+  overflow: hidden;
 }
 
 .keyboard-preview-svg {
@@ -522,8 +498,7 @@ input {
 
   .rime-entry-grid,
   .rime-platform-grid,
-  .rime-option-grid,
-  .rime-skin-picker {
+  .rime-option-grid {
     grid-template-columns: 1fr;
   }
 
@@ -559,11 +534,4 @@ input {
     max-width: none;
   }
 
-  .rime-skin-row {
-    align-items: flex-start;
-  }
-
-  .rime-skin-row {
-    flex-direction: column;
-  }
 }

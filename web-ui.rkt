@@ -31,7 +31,6 @@
     'schemas "Schemas"
     'schemas-copy "Dependent schemas are added automatically."
     'skins "Skins"
-    'skins-copy "Skins are selected by the schema configuration."
     'include "Include"
     'selected "Selected"
     'auto "Auto"
@@ -60,7 +59,6 @@
     'schemas "方案"
     'schemas-copy "依賴方案會自動補上。"
     'skins "皮膚"
-    'skins-copy "皮膚由方案配置自動選擇。"
     'include "加入"
     'selected "已選"
     'auto "自動"
@@ -229,7 +227,18 @@
     (hx-swap "innerHTML")
     (hx-trigger "change")))
 
-(define (schema-card locale schema checked? auto?)
+(define (skin-by-id skins id)
+  (for/first ([skin (in-list skins)]
+              #:when (equal? (skin-id skin) id))
+    skin))
+
+(define (schema-preview skin)
+  `(div ((class "rime-schema-preview keyboard-preview keyboard-preview-svg-wrap"))
+        (img ((class "keyboard-preview-svg")
+              (src ,(format "/skins/~a/preview.svg" (skin-id skin)))
+              (alt ,(skin-name skin))))))
+
+(define (schema-card locale schema checked? auto? preview-skins)
   `(div ((class ,(classes "rime-option-card"
                           (and checked? "is-selected")
                           (and auto? "is-auto"))))
@@ -240,6 +249,11 @@
                         `((span ((class "rime-inline-note")) ,(t locale 'auto)))
                         '()))
              (span ((class "rime-option-id")) ,(schema-id schema)))
+        ,@(if (pair? preview-skins)
+              `((div ((class "rime-schema-previews"))
+                     ,@(for/list ([skin (in-list preview-skins)])
+                         (schema-preview skin))))
+              '())
         (label ((class "rime-option-toggle"))
                (input ,(append
                         (attrs `(type "checkbox")
@@ -251,24 +265,8 @@
                (span ((class "rime-option-toggle-label"))
                      ,(if checked? (t locale 'selected) (t locale 'include))))))
 
-(define (skin-card skin)
-  `(div ((class "rime-option-card rime-skin-card is-selected"))
-        (div ((class "rime-skin-row"))
-             (div ((class "rime-option-copy"))
-                  (span ((class "rime-option-title")) ,(skin-name skin))
-                  (span ((class "rime-option-id")) ,(skin-id skin))))
-        (div ((class "keyboard-preview keyboard-preview-svg-wrap"))
-             (img ((class "keyboard-preview-svg")
-                   (src ,(format "/skins/~a/preview.svg" (skin-id skin)))
-                   (alt ,(skin-name skin)))))))
-
 (define (summary-pill text)
   `(span ((class "rime-summary-pill")) ,text))
-
-(define (skin-by-id skins id)
-  (for/first ([skin (in-list skins)]
-              #:when (equal? (skin-id skin) id))
-    skin))
 
 (define (schema-summary locale schemas active-ids auto-ids)
   (if (null? active-ids)
@@ -320,20 +318,18 @@
                        (div ((class "rime-option-grid"))
                             ,@(for/list ([schema (in-list (visible-schemas schemas route))])
                                 (define id (schema-id schema))
+                                (define preview-skins
+                                  (if (eq? route 'mobile)
+                                      (filter values
+                                              (map (lambda (skin-id)
+                                                     (skin-by-id skins skin-id))
+                                                   (schema-mobile-skins schema)))
+                                      '()))
                                 (schema-card locale
                                              schema
                                              (member id active-ids)
-                                             (member id auto-ids)))))
-              ,@(if (and (eq? route 'mobile) (pair? shown-skins))
-                    `((section ((class "rime-section"))
-                               (div ((class "rime-section-header"))
-                                    (h2 ((class "rime-section-title")) ,(t locale 'skins))
-                                    (p ((class "rime-section-copy")) ,(t locale 'skins-copy)))
-                               (div ((class "rime-skin-layout"))
-                                    (div ((class "rime-skin-picker"))
-                                         ,@(for/list ([skin (in-list shown-skins)])
-                                             (skin-card skin))))))
-                    '()))
+                                             (member id auto-ids)
+                                             preview-skins)))))
          (aside ((class "rime-summary-column"))
                 (div ((class "rime-summary-card"))
                      (div ((class "rime-summary-intro"))

@@ -42,6 +42,8 @@
     (define html (render-page (req "/mobile") schemas skins #:route 'mobile))
     (check-true (regexp-match? #rx"小鶴十四鍵" html))
     (check-true (regexp-match? #rx"/skins/flypy_14/preview.svg" html))
+    (check-true (regexp-match? #rx"rime-schema-previews" html))
+    (check-false (regexp-match? #rx"rime-skin-layout" html))
     (check-true (regexp-match? #rx"<ol class=\"rime-help-list\">" html))
     (check-true (regexp-match? #rx"src=\"/support.svg\"" html))
     (check-true (regexp-match? #rx"htmx.org" html)))
