@@ -31,6 +31,15 @@
 (define normal-button-size
   (object ["width" "112.5/1125"]))
 
+(define middle-row-spacer-size
+  (object ["width" "56.25/1125"]))
+
+(define middle-row-spacer-entries
+  (hash "middleRowLeftSpacer"
+        (object ["size" middle-row-spacer-size])
+        "middleRowRightSpacer"
+        (object ["size" middle-row-spacer-size])))
+
 (define hint-size
   (object ["height" 50]
           ["width" 50]))
@@ -51,7 +60,8 @@
                             (object ["Cell" "pButton"]))])])
    (object ["HStack"
             (object ["subviews"
-                     (array (object ["Cell" "aButton"])
+                     (array (object ["Cell" "middleRowLeftSpacer"])
+                            (object ["Cell" "aButton"])
                             (object ["Cell" "sButton"])
                             (object ["Cell" "dButton"])
                             (object ["Cell" "fButton"])
@@ -59,7 +69,8 @@
                             (object ["Cell" "hButton"])
                             (object ["Cell" "jButton"])
                             (object ["Cell" "kButton"])
-                            (object ["Cell" "lButton"]))])])
+                            (object ["Cell" "lButton"])
+                            (object ["Cell" "middleRowRightSpacer"]))])])
    (object ["HStack"
             (object ["subviews"
                      (array (object ["Cell" "shiftButton"])
@@ -107,6 +118,7 @@
 (define (ordered-page base-page letter-builder dark? portrait?)
   (define combined
     (hash-union (base-page dark? portrait?)
+                middle-row-spacer-entries
                 (hash-set (letter-builder dark?) "keyboardLayout" standard-phone-keyboard-layout)
                 #:combine/key (lambda (_ left _right) left)))
   (auto-ordered-page combined))

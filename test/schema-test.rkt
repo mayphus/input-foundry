@@ -1,15 +1,41 @@
 #lang racket/base
 
 (require rackunit
+         json
+         racket/list
          racket/string
          (prefix-in flypy: "../schema/flypy.rkt")
          (prefix-in flypy_14: "../schema/flypy_14.rkt")
          (prefix-in luna_pinyin: "../schema/luna_pinyin.rkt")
          (prefix-in terra_pinyin: "../schema/terra_pinyin.rkt")
-         (prefix-in jyut6ping3: "../schema/jyut6ping3.rkt"))
+         (prefix-in jyut6ping3: "../schema/jyut6ping3.rkt")
+         "../schema/lib/mobile/core/preview.rkt"
+         "../schema/lib/mobile/layouts/standard-phone-pinyin-page.rkt")
 
 (define (generated-file files path)
   (hash-ref files path (lambda () (error 'generated-file "missing ~a" path))))
+
+(define (standard-phone-base-for-test dark? portrait?)
+  (cond
+    [(and dark? portrait?) standard-phone-portrait-dark-base]
+    [(and dark? (not portrait?)) standard-phone-landscape-dark-base]
+    [(and (not dark?) portrait?) standard-phone-portrait-light-base]
+    [else standard-phone-landscape-light-base]))
+
+(define (generated-json files path)
+  (bytes->jsexpr (string->bytes/utf-8 (generated-file files path))))
+
+(define (page-button page id)
+  (hash-ref page (string->symbol id)))
+
+(define (button-width page id)
+  (hash-ref (hash-ref (page-button page id) 'size) 'width))
+
+(define (layout-row-cell-ids page row-index)
+  (define row (list-ref (hash-ref page 'keyboardLayout) row-index))
+  (define subviews (hash-ref (hash-ref row 'HStack) 'subviews))
+  (for/list ([subview (in-list subviews)])
+    (hash-ref subview 'Cell)))
 
 (module+ test
   (test-case "flypy shared config emits desktop schema YAML"
@@ -52,6 +78,30 @@
     (check-not-false (string-contains? yaml "alphabet: qetuoadgjlzcbm"))
     (check-not-false (string-contains? yaml "dictionary: rime_ice"))
     (check-not-false (string-contains? yaml "prism: flypy_14")))
+
+  (test-case "standard phone middle row keeps real key widths"
+    (define files (make-flypy-phone-files standard-phone-base-for-test))
+    (define page (generated-json files "light/pinyinPortrait.yaml"))
+    (check-equal? (layout-row-cell-ids page 1)
+                  '("middleRowLeftSpacer"
+                    "aButton" "sButton" "dButton" "fButton" "gButton"
+                    "hButton" "jButton" "kButton" "lButton"
+                    "middleRowRightSpacer"))
+    (check-equal? (button-width page "qButton") "112.5/1125")
+    (check-equal? (button-width page "aButton") "112.5/1125")
+    (check-equal? (button-width page "lButton") "112.5/1125")
+    (check-false (hash-ref (page-button page "aButton") 'bounds #f))
+    (check-false (hash-ref (page-button page "lButton") 'bounds #f))
+    (check-equal? (button-width page "middleRowLeftSpacer") "56.25/1125")
+    (check-equal? (button-width page "middleRowRightSpacer") "56.25/1125"))
+
+  (test-case "phone preview hides middle row layout spacers"
+    (define files (make-flypy-phone-files standard-phone-base-for-test))
+    (define preview (preview-spec-from-files files))
+    (define middle-row (second (hash-ref preview 'rows)))
+    (check-equal? (map (lambda (key) (hash-ref key 'id)) middle-row)
+                  '("aButton" "sButton" "dButton" "fButton" "gButton"
+                    "hButton" "jButton" "kButton" "lButton")))
 
   (test-case "custom patch DSL emits direct Rime patch fields"
     (define yaml (generated-file jyut6ping3:config-files "jyut6ping3.custom.yaml"))

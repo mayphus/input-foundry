@@ -159,6 +159,10 @@
        (or (page-ref style 'systemImageName #f)
            (page-ref style 'highlightSystemImageName #f))))
 
+(define (layout-spacer-cell? cell-id)
+  (and (string? cell-id)
+       (regexp-match? #rx"Spacer$" cell-id)))
+
 (define (extract-key-preview page button-id)
   (define button (page-ref page button-id #f))
   (and (hash? button)
@@ -201,9 +205,12 @@
 (define (extract-row-preview page row-spec)
   (define hstack (page-ref row-spec 'HStack #f))
   (define subviews (and (hash? hstack) (page-ref hstack 'subviews '())))
-  (for/list ([subview (in-list (if (vector? subviews) (vector->list subviews) subviews))]
-             #:when (hash? subview))
-    (extract-key-preview page (page-ref subview 'Cell ""))))
+  (filter values
+          (for/list ([subview (in-list (if (vector? subviews) (vector->list subviews) subviews))]
+                     #:when (hash? subview)
+                     [cell-id (in-value (page-ref subview 'Cell ""))]
+                     #:unless (layout-spacer-cell? cell-id))
+            (extract-key-preview page cell-id))))
 
 (define (preferred-preview-page-path preview-files theme)
   (define keys (hash-keys preview-files))
