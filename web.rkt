@@ -91,6 +91,13 @@
   (html-response (render-page req schema-items skin-items #:route route)
                  (remember-locale-headers req)))
 
+(define (handle-metadata req)
+  (response/full
+   200 #"OK" (current-seconds) #"application/json" '()
+   (list (jsexpr->bytes
+          (hash 'service "rime-config"
+                'status "ok")))))
+
 (define (handle-app-css req)
   (if (file-exists? app-css-path)
       (response/full
@@ -180,6 +187,7 @@
 (define-values (dispatch url)
   (dispatch-rules
    [("") (lambda (req) (handle-page req 'home))]
+   [("metadata") handle-metadata]
    [("desktop") (lambda (req) (handle-page req 'desktop))]
    [("mobile") (lambda (req) (handle-page req 'mobile))]
    [("app.css") handle-app-css]
