@@ -414,7 +414,7 @@
                              (div ((class "rime-footer-support"))
                                   (span ((class "rime-footer-support-label")) ,(t locale 'support))
                                   (img ((class "rime-footer-support-image")
-                                        (src "/support.svg")
+                                        (src "/support-8f6d2b.svg")
                                         (alt ,(t locale 'support)))))
                              (a ((class "rime-language-toggle rime-footer-language")
                                  (href ,(format "~a?locale=~a"

@@ -15,7 +15,7 @@
 ;; ---- Helpers ---------------------------------------------------------------
 
 (define-runtime-path app-css-path "static/app.css")
-(define-runtime-path support-svg-path "static/support.svg")
+(define-runtime-path support-svg-path "static/support-8f6d2b.svg")
 
 (define (valid-id? s)
   (and (string? s) (regexp-match? #rx"^[a-zA-Z0-9_-]+$" s)))
@@ -191,7 +191,7 @@
    [("desktop") (lambda (req) (handle-page req 'desktop))]
    [("mobile") (lambda (req) (handle-page req 'mobile))]
    [("app.css") handle-app-css]
-   [("support.svg") handle-support-svg]
+   [("support-8f6d2b.svg") handle-support-svg]
    [("skins" (string-arg) "preview.svg") handle-skin-preview-svg]
    [("skins" (string-arg) "demo.png") handle-skin-demo]
    [("build") #:method "post" handle-build]))
