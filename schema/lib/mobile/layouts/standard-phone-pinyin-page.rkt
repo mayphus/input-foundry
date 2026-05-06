@@ -31,17 +31,6 @@
 (define normal-button-size
   (object ["width" "112.5/1125"]))
 
-(define wide-button-size
-  (object ["width" "168.75/1125"]))
-
-(define left-wide-bounds
-  (object ["alignment" "right"]
-          ["width" "111/168.75"]))
-
-(define right-wide-bounds
-  (object ["alignment" "left"]
-          ["width" "111/168.75"]))
-
 (define hint-size
   (object ["height" 50]
           ["width" 50]))
@@ -97,10 +86,7 @@
         'symbol       (object ["x" (json-number "0.72999999999999998")] ["y" (json-number "0.23999999999999999")])))
 
 (define (button-size+bounds spec)
-  (case (string-ref (key-spec-letter spec) 0)
-    [(#\a) (values wide-button-size left-wide-bounds '())]
-    [(#\l) (values wide-button-size right-wide-bounds '())]
-    [else (values normal-button-size #f '())]))
+  (values normal-button-size #f '()))
 
 (define (make-phone-letter-config layers)
   (hash
@@ -148,4 +134,3 @@
 (define (make-cangjie6-phone-files base-page)
   (define config (make-phone-letter-config '(cangjie)))
   (make-standard-phone-pinyin-files base-page config))
-

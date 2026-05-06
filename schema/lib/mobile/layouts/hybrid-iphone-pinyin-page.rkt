@@ -20,28 +20,14 @@
 (define normal-button-size
   (object ["width" "112.5/1125"]))
 
-(define wide-button-size
-  (object ["width" "168.75/1125"]))
-
-(define left-wide-bounds
-  (object ["alignment" "right"]
-          ["width" "111/168.75"]))
-
-(define right-wide-bounds
-  (object ["alignment" "left"]
-          ["width" "111/168.75"]))
-
 (define hint-size
   (object ["height" 50]
           ["width" 50]))
 
 (define iphone-letter-config
   (hash
-   'size-for (lambda (spec)
-               (case (string-ref (vector-ref (struct->vector spec) 1) 0)
-                 [(#\a) (values wide-button-size left-wide-bounds '())]
-                 [(#\l) (values wide-button-size right-wide-bounds '())]
-                 [else (values normal-button-size #f '())]))
+   'size-for (lambda (_spec)
+               (values normal-button-size #f '()))
    'abc-font-size (json-number "10.5")
    'cangjie-font-size (json-number "15.5")
    'symbol-font-size (json-number "8.5")
