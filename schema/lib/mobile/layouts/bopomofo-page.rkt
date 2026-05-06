@@ -159,7 +159,7 @@
   (hash
    "keyboardBackgroundStyle"
    (object ["buttonStyleType" "geometry"]
-           ["normalColor" (theme-color dark? "#D6D9E0" "#14181F")])
+           ["normalColor" (theme-color dark? "#ffffff03" "#00000003")])
    "alphabeticButtonBackgroundStyle"
    (object ["buttonStyleType" "geometry"]
            ["normalColor" (theme-color dark? "#FFFFFF" "#2B313B")]

@@ -306,6 +306,7 @@ input {
   gap: 0.7rem;
   padding: 0.8rem;
   background: transparent;
+  min-width: 0;
 }
 
 .rime-option-card.is-auto {
@@ -314,6 +315,13 @@ input {
 
 .rime-option-card .rime-option-copy {
   gap: 0.3rem;
+}
+
+.rime-option-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .rime-option-action {
@@ -328,6 +336,7 @@ input {
   gap: 0.55rem;
   padding: 0 0.1rem;
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .rime-option-toggle input {
@@ -451,17 +460,20 @@ input {
 
 .rime-schema-previews {
   display: grid;
-  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0;
 }
 
 .rime-schema-preview {
   overflow: hidden;
+  aspect-ratio: 375 / 216;
 }
 
 .keyboard-preview-svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
 }
 
 .keyboard-preview-svg-wrap {
