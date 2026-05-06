@@ -254,8 +254,8 @@ input {
 
 .rime-config-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 28rem);
-  gap: 1.4rem;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 1.2rem;
   align-items: start;
 }
 
