@@ -197,7 +197,7 @@
                           (bopomofo-spec-label spec)
                           #:font-size 25
                           #:center bopomofo-button-center
-                          #:font-weight "medium")))
+                          #:font-weight "bold")))
 
 (define enter-background-style
   (array
