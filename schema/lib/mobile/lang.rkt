@@ -37,7 +37,7 @@
 ;;       (centers                          ; optional: override legend positions
 ;;         [<layer-id> <x> <y>] ...)
 ;;       (fonts                            ; optional: override font sizes/styles
-;;         [<layer-id> <size> <#:secondary>? <#:weight bold>?] ...))
+;;         [<layer-id> <size> <#:primary|#:secondary>? <#:weight bold>?] ...))
 ;;
 ;;   Custom template form — for flypy18-compatible layouts with a fully custom
 ;;   keyboard grid and button set (advanced use):
@@ -59,7 +59,7 @@
 ;;       (centers                          ; optional: override legend positions
 ;;         [<layer-id> <x> <y>] ...)
 ;;       (fonts                            ; optional: override font sizes/styles
-;;         [<layer-id> <size> <#:secondary>? <#:weight bold>?] ...))
+;;         [<layer-id> <size> <#:primary|#:secondary>? <#:weight bold>?] ...))
 ;;
 ;; ─── theme ──────────────────────────────────────────────────────────────────
 ;;
@@ -180,19 +180,22 @@
                 (define kvs
                   (list #`'#,(string->symbol (string-append prefix "-font-size"))
                         (num->jn #'size)))
-                ;; #:secondary flag
-                (define kvs+sec
-                  (if (memv '#:secondary opts)
-                      (append kvs (list #`'#,(string->symbol (string-append prefix "-secondary?"))
-                                        #'#t))
-                      kvs))
+                ;; #:primary / #:secondary color role
+                (define role-kvs
+                  (cond
+                    [(memv '#:primary opts)
+                     (list #`'#,(string->symbol (string-append prefix "-secondary?")) #'#f)]
+                    [(memv '#:secondary opts)
+                     (list #`'#,(string->symbol (string-append prefix "-secondary?")) #'#t)]
+                    [else '()]))
+                (define kvs+role (append kvs role-kvs))
                 ;; #:weight bold
                 (define wi (memv '#:weight opts))
                 (if wi
-                    (append kvs+sec
+                    (append kvs+role
                             (list #`'#,(string->symbol (string-append prefix "-font-weight"))
                                   (datum->syntax entry (symbol->string (cadr wi)))))
-                    kvs+sec)]))))
+                    kvs+role)]))))
 
   ;; Expand (meta ...) → make-skin-meta call
   (define (expand-meta meta-stx slug-str)
