@@ -10,4 +10,15 @@
     (description "香港語言學學會粵拼方案。\n精簡版，適合移動端匯入")
     (patch "recognizer/patterns/punct" "^/([0-9]0?|[a-z]+)$")
     (patch "recognizer/patterns/flypy" "^`[a-z']*;?$")
-    (patch "recognizer/patterns/cangjie6" "^v[a-z]*;?$")))
+    (patch "recognizer/patterns/cangjie6" "^v[a-z]*;?$"))
+  (mobile-skin jyut6ping3
+    (meta
+      (name "Jyutping" "粵拼")
+      (summary "A Yuanshu skin for Jyutping Cantonese input.")
+      (features
+        "Standard QWERTY Jyutping phone layout"
+        "Standard iPad pinyin, numeric, and symbolic pages"))
+    (phone-layout
+      (layers abc)
+      (fonts [abc 14 #:weight bold]))
+    (ipad-layout standard-18)))
