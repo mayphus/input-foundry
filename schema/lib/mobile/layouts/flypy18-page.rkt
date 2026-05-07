@@ -48,9 +48,9 @@
   (object ["x" (json-number "0.5")]
           ["y" (json-number "0.20000000000000001")]))
 
-(define (label-text-style dark? text)
+(define (label-text-style dark? text center)
   (object ["buttonStyleType" "text"]
-          ["center" main-center]
+          ["center" center]
           ["fontSize" 18]
           ["fontWeight" "medium"]
           ["highlightColor" (theme-primary dark?)]
@@ -81,7 +81,7 @@
          (string-append prefix "TopSymbolForegroundStyle")
          (string-append prefix "DetailForegroundStyle")))
 
-(define (merged-button-entries dark? spec detail-font-size)
+(define (merged-button-entries dark? spec detail-font-size label-center)
   (define prefix (merged18-spec-name spec))
   (define base-spec (find-hybrid-letter-spec (merged18-spec-base-letter spec)))
   (define swipe-down-action
@@ -107,9 +107,9 @@
   (list
    (cons prefix button)
    (cons (string-append prefix "MainForegroundStyle")
-         (label-text-style dark? (merged18-spec-label spec)))
+         (label-text-style dark? (merged18-spec-label spec) label-center))
    (cons (string-append prefix "MainUppercaseForegroundStyle")
-         (label-text-style dark? (string-upcase (merged18-spec-label spec))))
+         (label-text-style dark? (string-upcase (merged18-spec-label spec)) label-center))
    (cons (string-append prefix "TopSymbolForegroundStyle")
          (secondary-text-style dark? (key-spec-symbol base-spec) top-center 9))
    (cons (string-append prefix "DetailForegroundStyle")
@@ -126,12 +126,12 @@
          #:base-page base-page
          #:keyboard-layout keyboard-layout
          #:button-specs button-specs
-         #:detail-font-size detail-font-size)
+         #:detail-font-size detail-font-size
+         #:label-center [label-center main-center])
   (define (page-builder dark? portrait?)
     (make-grid-page dark? portrait?
                     #:base-page-builder base-page
                     #:keyboard-layout keyboard-layout
                     #:button-specs button-specs
-                    #:button-renderer (lambda (d s) (merged-button-entries d s detail-font-size))))
+                    #:button-renderer (lambda (d s) (merged-button-entries d s detail-font-size label-center))))
   (make-pinyin-bundle portrait-name landscape-name page-builder))
-

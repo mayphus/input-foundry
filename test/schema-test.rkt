@@ -144,6 +144,19 @@
                     '("shiftButton" "zx14Button" "cv14Button" "bn14Button" "m14Button"
                       "backspaceButton"))))
 
+  (test-case "full pinyin 14-key skin leaves bottom detail labels blank"
+    (define page (generated-json pinyin14-layout:pinyin-14-iphone-pinyin-files
+                                 "light/pinyinPortrait.yaml"))
+    (define flypy-page (generated-json flypy14-layout:flypy-14-iphone-pinyin-files
+                                       "light/pinyinPortrait.yaml"))
+    (check-equal? (hash-ref (hash-ref page 'qw14ButtonDetailForegroundStyle) 'text) "")
+    (check-equal? (hash-ref (hash-ref (hash-ref page 'qw14ButtonMainForegroundStyle) 'center) 'y)
+                  0.5)
+    (check-equal? (hash-ref (hash-ref flypy-page 'qw14ButtonDetailForegroundStyle) 'text)
+                  "iu ei ia ua")
+    (check-equal? (hash-ref (hash-ref (hash-ref flypy-page 'qw14ButtonMainForegroundStyle) 'center) 'y)
+                  0.46))
+
   (test-case "standard phone middle row keeps real key widths"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define page (generated-json files "light/pinyinPortrait.yaml"))

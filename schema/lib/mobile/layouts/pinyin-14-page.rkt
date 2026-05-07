@@ -56,22 +56,26 @@
 
 (define button-specs
   (list
-   (merged18-spec "qw14Button" "q" "QW" "q w" five-column-size #f #f)
-   (merged18-spec "er14Button" "e" "ER" "e r" five-column-size #f (key-spec-swipe-down (find-hybrid-letter-spec "e")))
-   (merged18-spec "ty14Button" "t" "TY" "t y" five-column-size #f #f)
-   (merged18-spec "ui14Button" "u" "UI" "u i" five-column-size #f #f)
-   (merged18-spec "op14Button" "o" "OP" "o p" five-column-size #f #f)
-   (merged18-spec "as14Button" "a" "AS" "a s" five-column-size #f #f)
-   (merged18-spec "df14Button" "d" "DF" "d f" five-column-size #f #f)
-   (merged18-spec "gh14Button" "g" "GH" "g h" five-column-size #f #f)
-   (merged18-spec "jk14Button" "j" "JK" "j k" five-column-size #f #f)
-   (merged18-spec "l14Button" "l" "L" "l" five-column-size #f #f)
-   (merged18-spec "zx14Button" "z" "ZX" "z x" six-column-size #f #f)
-   (merged18-spec "cv14Button" "c" "CV" "c v" six-column-size #f #f)
-   (merged18-spec "bn14Button" "b" "BN" "b n" six-column-size #f #f)
-   (merged18-spec "m14Button" "m" "M" "m" six-column-size #f #f)))
+   (merged18-spec "qw14Button" "q" "QW" "" five-column-size #f #f)
+   (merged18-spec "er14Button" "e" "ER" "" five-column-size #f (key-spec-swipe-down (find-hybrid-letter-spec "e")))
+   (merged18-spec "ty14Button" "t" "TY" "" five-column-size #f #f)
+   (merged18-spec "ui14Button" "u" "UI" "" five-column-size #f #f)
+   (merged18-spec "op14Button" "o" "OP" "" five-column-size #f #f)
+   (merged18-spec "as14Button" "a" "AS" "" five-column-size #f #f)
+   (merged18-spec "df14Button" "d" "DF" "" five-column-size #f #f)
+   (merged18-spec "gh14Button" "g" "GH" "" five-column-size #f #f)
+   (merged18-spec "jk14Button" "j" "JK" "" five-column-size #f #f)
+   (merged18-spec "l14Button" "l" "L" "" five-column-size #f #f)
+   (merged18-spec "zx14Button" "z" "ZX" "" six-column-size #f #f)
+   (merged18-spec "cv14Button" "c" "CV" "" six-column-size #f #f)
+   (merged18-spec "bn14Button" "b" "BN" "" six-column-size #f #f)
+   (merged18-spec "m14Button" "m" "M" "" six-column-size #f #f)))
 
 (define third-row-system-size six-column-size)
+
+(define centered-label-center
+  (object ["x" (json-number "0.5")]
+          ["y" (json-number "0.5")]))
 
 (define (set-entry entry key value)
   (for/list ([pair (in-list entry)])
@@ -108,4 +112,5 @@
    #:base-page       base-page
    #:keyboard-layout keyboard-layout
    #:button-specs    button-specs
-   #:detail-font-size 10))
+   #:detail-font-size 10
+   #:label-center    centered-label-center))
