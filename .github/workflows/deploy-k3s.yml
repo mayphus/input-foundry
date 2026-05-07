@@ -101,7 +101,6 @@ jobs:
       - name: Deploy manifests
         shell: bash
         run: |
-          kubectl -n rime-config delete deployment/rime-config-engine service/rime-config-engine ingress/rime-config-engine --ignore-not-found
           kubectl apply -k k8s
           kubectl -n rime-config set image deployment/rime-config app=${IMAGE_NAME}:${IMAGE_TAG}
           if ! kubectl -n rime-config rollout status deployment/rime-config --timeout=600s; then
