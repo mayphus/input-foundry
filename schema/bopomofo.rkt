@@ -2,6 +2,7 @@
 
 (rime-schema bopomofo
   (name "注音")
+  (static-files "terra_pinyin.dict.yaml" "zhuyin.yaml")
   (mobile-skin bopomofo
     (meta
       (name "Bopomofo" "注音")
