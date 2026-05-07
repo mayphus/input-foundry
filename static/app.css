@@ -16,6 +16,10 @@
   --inline-note-bg: rgba(21, 26, 23, 0.045);
   --keyboard-special-bg: rgba(232, 232, 232, 0.95);
   --qr-frame-bg: transparent;
+  --glass-button-bg: rgba(255, 255, 255, 0.24);
+  --glass-button-bg-hover: rgba(255, 255, 255, 0.48);
+  --glass-button-border: rgba(255, 255, 255, 0.42);
+  --glass-button-shadow: 0 10px 30px rgba(21, 26, 23, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   --error: #a83f2f;
   --radius-lg: 1.1rem;
   --radius-md: 0.85rem;
@@ -41,6 +45,10 @@
     --inline-note-bg: rgba(255, 255, 255, 0.085);
     --keyboard-special-bg: rgba(255, 255, 255, 0.16);
     --qr-frame-bg: #fff;
+    --glass-button-bg: rgba(31, 30, 28, 0.26);
+    --glass-button-bg-hover: rgba(31, 30, 28, 0.52);
+    --glass-button-border: rgba(255, 255, 255, 0.18);
+    --glass-button-shadow: 0 10px 30px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     --error: #ff9a88;
   }
 }
@@ -383,17 +391,22 @@ input {
 
 .rime-sticky-build-button {
   width: auto;
+  min-width: max-content;
   min-height: 2.65rem;
   padding: 0.7rem 1.1rem;
   border-radius: 999px;
-  background: var(--bg-soft);
-  box-shadow: 0 0 0 4px var(--bg-soft);
+  border-color: var(--glass-button-border);
+  background: var(--glass-button-bg);
+  box-shadow: var(--glass-button-shadow);
+  backdrop-filter: blur(20px) saturate(1.55);
+  -webkit-backdrop-filter: blur(20px) saturate(1.55);
   pointer-events: auto;
+  white-space: nowrap;
 }
 
 .rime-sticky-build-button:hover {
   border-color: var(--selected-line);
-  background: var(--accent-soft);
+  background: var(--glass-button-bg-hover);
 }
 
 .rime-build-button.is-disabled,
@@ -544,8 +557,11 @@ input {
   }
 
   .rime-sticky-build-button {
+    max-width: calc(100vw - 1.8rem);
     min-height: 3rem;
     padding: 0.78rem 1.15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
 }
