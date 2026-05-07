@@ -50,21 +50,23 @@
 (struct skin-module (schema skin body) #:transparent)
 
 (define skin-module-namespace (make-base-namespace))
+(define declared-skin-modules (mutable-set))
 
 (define (skin-runtime-module-name schema skin)
   (string->symbol (format "rime-config-skin-~a-~a" schema skin)))
 
 (define (declare-skin-module! mod ns)
-  (with-handlers ([exn:fail:contract?
-                   (lambda (exn)
-                     (unless (regexp-match? #rx"module.*already" (exn-message exn))
-                       (raise exn)))])
+  (define name (skin-runtime-module-name (skin-module-schema mod) (skin-module-skin mod)))
+  (unless (and (eq? ns skin-module-namespace)
+               (set-member? declared-skin-modules name))
     (parameterize ([current-namespace ns])
-      (eval `(module ,(skin-runtime-module-name (skin-module-schema mod) (skin-module-skin mod))
+      (eval `(module ,name
                (file ,(path->string mobile-lang-path))
                (skin ,(string->symbol (skin-module-skin mod))
                  (triggers ,(string->symbol (skin-module-schema mod)))
-                 ,@(skin-module-body mod)))))))
+                 ,@(skin-module-body mod)))))
+    (when (eq? ns skin-module-namespace)
+      (set-add! declared-skin-modules name))))
 
 (define (skin-module-ref mod export-sym [default-thunk #f] #:fresh? [fresh? #f])
   (define ns (if fresh? (make-base-namespace) skin-module-namespace))
