@@ -11,15 +11,6 @@
 (define five-column-size
   (object ["width" "225/1125"]))
 
-(define third-row-spacer-size
-  (object ["width" "82.5/1125"]))
-
-(define third-row-spacer-entries
-  (hash "thirdRowLeftSpacer"
-        (object ["size" third-row-spacer-size])
-        "thirdRowRightSpacer"
-        (object ["size" third-row-spacer-size])))
-
 (define keyboard-layout
   (array
    (object ["HStack"
@@ -38,14 +29,11 @@
                             (object ["Cell" "l14Button"]))])])
    (object ["HStack"
             (object ["subviews"
-                     (array (object ["Cell" "thirdRowLeftSpacer"])
-                            (object ["Cell" "shiftButton"])
-                            (object ["Cell" "zx14Button"])
+                     (array (object ["Cell" "zx14Button"])
                             (object ["Cell" "cv14Button"])
                             (object ["Cell" "bn14Button"])
                             (object ["Cell" "m14Button"])
-                            (object ["Cell" "backspaceButton"])
-                            (object ["Cell" "thirdRowRightSpacer"]))])])
+                            (object ["Cell" "backspaceButton"]))])])
    (object ["HStack"
             (object ["subviews"
                      (array (object ["Cell" "numericButton"])
@@ -66,12 +54,12 @@
    (merged18-spec "gh14Button" "g" "GH" "" five-column-size #f #f)
    (merged18-spec "jk14Button" "j" "JK" "" five-column-size #f #f)
    (merged18-spec "l14Button" "l" "L" "" five-column-size #f #f)
-   (merged18-spec "zx14Button" "z" "ZX" "" six-column-size #f #f)
-   (merged18-spec "cv14Button" "c" "CV" "" six-column-size #f #f)
-   (merged18-spec "bn14Button" "b" "BN" "" six-column-size #f #f)
-   (merged18-spec "m14Button" "m" "M" "" six-column-size #f #f)))
+   (merged18-spec "zx14Button" "z" "ZX" "" five-column-size #f #f)
+   (merged18-spec "cv14Button" "c" "CV" "" five-column-size #f #f)
+   (merged18-spec "bn14Button" "b" "BN" "" five-column-size #f #f)
+   (merged18-spec "m14Button" "m" "M" "" five-column-size #f #f)))
 
-(define third-row-system-size six-column-size)
+(define third-row-system-size five-column-size)
 
 (define centered-label-center
   (object ["x" (json-number "0.5")]
@@ -84,18 +72,11 @@
         pair)))
 
 (define (with-14-key-system-sizes page)
-  (hash-union
-   (hash-set* page
-              "shiftButton"
-              (set-entry (hash-ref page "shiftButton")
-                         "size"
-                         third-row-system-size)
-              "backspaceButton"
-              (set-entry (hash-ref page "backspaceButton")
-                         "size"
-                         third-row-system-size))
-   third-row-spacer-entries
-   #:combine/key (lambda (_ _left right) right)))
+  (hash-set page
+            "backspaceButton"
+            (set-entry (hash-ref page "backspaceButton")
+                       "size"
+                       third-row-system-size)))
 
 (define (base-page dark? portrait?)
   (with-14-key-system-sizes

@@ -126,22 +126,20 @@
     (check-not-false (string-contains? yaml "dictionary: rime_ice"))
     (check-not-false (string-contains? yaml "prism: flypy_14")))
 
-  (test-case "14-key third row keeps backspace same width as shift"
+  (test-case "14-key third row uses five equal-width buttons"
     (for ([files (in-list (list flypy14-layout:flypy-14-iphone-pinyin-files
                                 pinyin14-layout:pinyin-14-iphone-pinyin-files))])
       (define page (generated-json files "light/pinyinPortrait.yaml"))
       (check-equal? (layout-row-cell-ids page 2)
-                    '("thirdRowLeftSpacer"
-                      "shiftButton" "zx14Button" "cv14Button" "bn14Button" "m14Button"
-                      "backspaceButton"
-                      "thirdRowRightSpacer"))
-      (check-equal? (button-width page "shiftButton") "160/1125")
-      (check-equal? (button-width page "backspaceButton") "160/1125")
-      (check-equal? (button-width page "thirdRowLeftSpacer") "82.5/1125")
-      (check-equal? (button-width page "thirdRowRightSpacer") "82.5/1125")
+                    '("zx14Button" "cv14Button" "bn14Button" "m14Button"
+                      "backspaceButton"))
+      (for ([button-id (in-list '("qw14Button" "as14Button" "zx14Button"
+                                  "cv14Button" "bn14Button" "m14Button"
+                                  "backspaceButton"))])
+        (check-equal? (button-width page button-id) "225/1125"))
       (define preview (preview-spec-from-files files))
       (check-equal? (visible-preview-row-ids preview 2)
-                    '("shiftButton" "zx14Button" "cv14Button" "bn14Button" "m14Button"
+                    '("zx14Button" "cv14Button" "bn14Button" "m14Button"
                       "backspaceButton"))))
 
   (test-case "full pinyin 14-key skin leaves bottom detail labels blank"
