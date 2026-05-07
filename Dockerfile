@@ -11,6 +11,7 @@ RUN apt-get update \
     libjpeg62-turbo \
     libpangocairo-1.0-0 \
     libpng16-16 \
+    librsvg2-bin \
     racket \
     zip \
  && rm -rf /var/lib/apt/lists/*

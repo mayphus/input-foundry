@@ -10,7 +10,8 @@
          preview-spec->svgs)
 
 (define demo-width 996)
-(define demo-height 660)
+(define demo-height 770)
+(define demo-keyboard-scale 0.9)
 (define keyboard-pad 8)
 (define key-gap 4)
 (define row-gap 6)
@@ -292,7 +293,9 @@
   (define width (numberish (hash-get size 'width 375) 375))
   (define height (numberish (hash-get size 'height 216) 216))
   (define background (hash-get preview 'background "#f2f3f7"))
-  (format "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ~a ~a\" role=\"img\" aria-label=\"Keyboard preview\"><rect width=\"~a\" height=\"~a\" rx=\"18\" ~a/>~a</svg>"
+  (format "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"~a\" height=\"~a\" viewBox=\"0 0 ~a ~a\" role=\"img\" aria-label=\"Keyboard preview\"><rect width=\"~a\" height=\"~a\" rx=\"18\" ~a/>~a</svg>"
+          (real->decimal-string width 2)
+          (real->decimal-string height 2)
           (real->decimal-string width 2)
           (real->decimal-string height 2)
           (real->decimal-string width 2)
@@ -301,26 +304,37 @@
           (keyboard-body-svg preview)))
 
 (define (demo-preview-svg title preview)
-  (define keyboard-x 68)
-  (define keyboard-y 120)
-  (define keyboard-width 860)
-  (define keyboard-height 482)
+  (define panel-x 92)
+  (define panel-y 150)
+  (define panel-width 812)
+  (define panel-height 548)
+  (define keyboard-x (+ panel-x 34))
+  (define keyboard-y (+ panel-y 88))
+  (define keyboard-width (- panel-width 68))
+  (define keyboard-height (- panel-height 128))
   (define size (hash-get preview 'size (hash)))
   (define logical-width (numberish (hash-get size 'width 375) 375))
   (define logical-height (numberish (hash-get size 'height 216) 216))
-  (define scale (min (/ keyboard-width logical-width)
-                     (/ keyboard-height logical-height)))
+  (define scale (* demo-keyboard-scale
+                   (min (/ keyboard-width logical-width)
+                        (/ keyboard-height logical-height))))
   (define scaled-width (* logical-width scale))
   (define scaled-height (* logical-height scale))
   (define offset-x (+ keyboard-x (/ (- keyboard-width scaled-width) 2)))
   (define offset-y (+ keyboard-y (/ (- keyboard-height scaled-height) 2)))
-  (format "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"~a\" height=\"~a\" viewBox=\"0 0 ~a ~a\" role=\"img\" aria-label=\"~a\"><rect width=\"100%\" height=\"100%\" fill=\"#F6F7FA\"/><rect x=\"42\" y=\"36\" width=\"912\" height=\"588\" rx=\"42\" fill=\"#ECEEF4\" stroke=\"#D7D9E1\"/><text x=\"498\" y=\"82\" text-anchor=\"middle\" dominant-baseline=\"central\" font-family=\"Avenir Next, SF Pro Display, Segoe UI, Noto Sans, PingFang TC, sans-serif\" font-size=\"38\" font-weight=\"700\" fill=\"#202124\">~a</text><g transform=\"translate(~a ~a) scale(~a)\">~a</g></svg>"
+  (format "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"~a\" height=\"~a\" viewBox=\"0 0 ~a ~a\" role=\"img\" aria-label=\"~a\"><rect width=\"100%\" height=\"100%\" fill=\"#FAFAFA\"/><text x=\"~a\" y=\"72\" font-family=\"Avenir Next, SF Pro Display, Segoe UI, Noto Sans, PingFang TC, sans-serif\" font-size=\"42\" font-weight=\"700\" fill=\"#5F6368\">~a</text><text x=\"~a\" y=\"114\" font-family=\"Avenir Next, SF Pro Display, Segoe UI, Noto Sans, PingFang TC, sans-serif\" font-size=\"22\" font-weight=\"600\" fill=\"#6F747B\">Yuanshu skin preview</text><rect x=\"~a\" y=\"~a\" width=\"~a\" height=\"~a\" rx=\"30\" fill=\"#E9ECEF\"/><g transform=\"translate(~a ~a) scale(~a)\">~a</g></svg>"
           demo-width
           demo-height
           demo-width
           demo-height
           (attr-escape title)
+          panel-x
           (text-escape title)
+          panel-x
+          panel-x
+          panel-y
+          panel-width
+          panel-height
           (real->decimal-string offset-x 2)
           (real->decimal-string offset-y 2)
           (real->decimal-string scale 4)
