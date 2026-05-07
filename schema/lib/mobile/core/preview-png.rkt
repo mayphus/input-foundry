@@ -70,8 +70,26 @@
              #:family 'default
              #:weight (font-weight-symbol weight)))
 
-(define (draw-centered-text dc text cx cy size weight color)
-  (send dc set-font (font size weight))
+(define (text-fits? dc text max-width max-height)
+  (define-values (tw th _descent _space) (send dc get-text-extent text))
+  (and (<= tw max-width)
+       (<= th max-height)))
+
+(define (fit-font-size dc text size weight max-width max-height)
+  (let loop ([current size])
+    (send dc set-font (font current weight))
+    (cond
+      [(or (<= current 6)
+           (text-fits? dc text max-width max-height))
+       current]
+      [else (loop (- current 0.5))])))
+
+(define (draw-centered-text dc text cx cy size weight color
+                            #:max-width [max-width +inf.0]
+                            #:max-height [max-height +inf.0])
+  (define fitted-size
+    (fit-font-size dc text size weight max-width max-height))
+  (send dc set-font (font fitted-size weight))
   (send dc set-text-foreground (rgba color "#111111"))
   (define-values (tw th _descent _space) (send dc get-text-extent text))
   (send dc draw-text text (- cx (/ tw 2)) (- cy (/ th 2))))
@@ -151,15 +169,42 @@
            (and (equal? kind "enter") "↵")
            icon))
      (when (and (string? label) (not (string=? label "")))
-       (draw-centered-text dc label cx cy (if (equal? kind "numeric") 16 18) "medium" color))]))
+       (draw-centered-text dc
+                           label
+                           cx
+                           cy
+                           (if (equal? kind "numeric") 16 18)
+                           "medium"
+                           color
+                           #:max-width (- width 10)
+                           #:max-height (- height 8)))]))
 
-(define (draw-layer dc layer x y width height scale)
+(define (draw-layer dc layer x y width height scale visible-layer-count)
   (define text (hash-get layer 'text ""))
   (when (and (string? text) (not (string=? text "")))
     (define lx (+ x (* (numberish (hash-get layer 'x 0.5) 0.5) width)))
     (define ly (+ y (* (numberish (hash-get layer 'y 0.5) 0.5) height)))
-    (define size (max 9 (* scale (numberish (hash-get layer 'font-size 14) 14))))
-    (draw-centered-text dc text lx ly size (hash-get layer 'font-weight "") (hash-get layer 'color "#111111"))))
+    (define size (max 6 (* scale (numberish (hash-get layer 'font-size 14) 14))))
+    (define max-layer-height
+      (* height
+         (cond
+           [(>= visible-layer-count 3) 0.28]
+           [(= visible-layer-count 2) 0.34]
+           [else 0.48])))
+    (draw-centered-text dc
+                        text
+                        lx
+                        ly
+                        size
+                        (hash-get layer 'font-weight "")
+                        (hash-get layer 'color "#111111")
+                        #:max-width (- width 8)
+                        #:max-height max-layer-height)))
+
+(define (visible-layer-count layers)
+  (for/sum ([layer (in-list layers)])
+    (define text (hash-get layer 'text ""))
+    (if (and (string? text) (not (string=? text ""))) 1 0)))
 
 (define (draw-key dc key x y width height)
   (define background (hash-get key 'background "#ffffff"))
@@ -168,8 +213,9 @@
   (send dc draw-rounded-rectangle x y width height 8)
   (define layers (hash-get key 'layers '()))
   (if (and (list? layers) (pair? layers))
-      (for ([layer (in-list layers)])
-        (draw-layer dc layer x y width height 1.02))
+      (let ([count (visible-layer-count layers)])
+        (for ([layer (in-list layers)])
+          (draw-layer dc layer x y width height 1.02 count)))
       (draw-special dc key x y width height)))
 
 (define (draw-keyboard dc preview)
