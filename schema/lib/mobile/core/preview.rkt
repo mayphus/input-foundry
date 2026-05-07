@@ -159,6 +159,12 @@
        (or (page-ref style 'systemImageName #f)
            (page-ref style 'highlightSystemImageName #f))))
 
+(define (button-icon-size page style-name)
+  (define style (page-ref page style-name #f))
+  (and (hash? style)
+       (equal? (page-ref style 'buttonStyleType #f) "systemImage")
+       (parse-numberish (page-ref style 'fontSize #f))))
+
 (define (layout-spacer-cell? cell-id)
   (and (string? cell-id)
        (regexp-match? #rx"Spacer$" cell-id)))
@@ -189,11 +195,18 @@
                  (cond
                    [(null? refs) #f]
                    [else (or (button-icon page (car refs))
+                             (loop (cdr refs)))]))]
+              [icon-size
+               (let loop ([refs foreground-refs])
+                 (cond
+                   [(null? refs) #f]
+                   [else (or (button-icon-size page (car refs))
                              (loop (cdr refs)))]))])
          (hash 'id button-id
                'kind (button-kind button-id button)
                'label (or (and primary-layer (hash-ref primary-layer 'text "")) "")
                'icon (or icon "")
+               'icon-size (or icon-size 20)
                'width (or (parse-numberish (page-ref size 'width #f)) 1)
                'align (or (page-ref bounds 'alignment #f) "center")
                'background (or (and (hash? background-style) (page-ref background-style 'normalColor #f))

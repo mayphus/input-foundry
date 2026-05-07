@@ -56,10 +56,12 @@
           ["normalColor" normal]))
 
 ;; System image foreground style
-(define (system-image-style dark? image-name #:highlight-image [highlight-image #f])
+(define (system-image-style dark? image-name
+                            #:font-size [font-size (json-number "20")]
+                            #:highlight-image [highlight-image #f])
   (append
    (list (cons "buttonStyleType" "systemImage")
-         (cons "fontSize" (json-number "20")))
+         (cons "fontSize" font-size))
    (if highlight-image
        (list (cons "highlightColor" (theme-primary dark?))
              (cons "highlightSystemImageName" highlight-image))

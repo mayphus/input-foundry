@@ -114,33 +114,35 @@
              (list (cons (+ cx 6) (- cy 4))
                    (cons (- cx 2) (+ cy 4)))))
 
-(define (draw-face dc cx cy width color)
-  (define r (min 12 (* width 0.2)))
+(define (draw-face dc cx cy width height icon-size color)
+  (define r (min (* icon-size 0.6) (* height 0.4)))
+  (define scale (/ r 12))
   (send dc set-brush (new brush% [style 'transparent]))
   (send dc set-pen (new pen% [color (rgba color "#111111")] [width 1.9]))
   (send dc draw-ellipse (- cx r) (- cy r) (* 2 r) (* 2 r))
   (send dc set-brush (new brush% [color (rgba color "#111111")]))
   (send dc set-pen (new pen% [color (rgba color "#111111")] [width 1]))
-  (send dc draw-ellipse (- cx 5.55) (- cy 4.55) 2.7 2.7)
-  (send dc draw-ellipse (+ cx 2.85) (- cy 4.55) 2.7 2.7)
+  (send dc draw-ellipse (- cx (* 5.55 scale)) (- cy (* 4.55 scale)) (* 2.7 scale) (* 2.7 scale))
+  (send dc draw-ellipse (+ cx (* 2.85 scale)) (- cy (* 4.55 scale)) (* 2.7 scale) (* 2.7 scale))
   (send dc set-brush (new brush% [style 'transparent]))
   (send dc set-pen (new pen% [color (rgba color "#111111")] [width 1.8] [cap 'round]))
   (define path (new dc-path%))
-  (send path move-to (- cx 5.5) (+ cy 3.2))
-  (send path curve-to (- cx 2.5) (+ cy 6.4) (+ cx 2.5) (+ cy 6.4) (+ cx 5.5) (+ cy 3.2))
+  (send path move-to (- cx (* 5.5 scale)) (+ cy (* 3.2 scale)))
+  (send path curve-to (- cx (* 2.5 scale)) (+ cy (* 6.4 scale)) (+ cx (* 2.5 scale)) (+ cy (* 6.4 scale)) (+ cx (* 5.5 scale)) (+ cy (* 3.2 scale)))
   (send dc draw-path path))
 
 (define (draw-special dc key x y width height)
   (define color (fallback-color (hash-get key 'background "#ffffff")))
   (define kind (hash-get key 'kind ""))
   (define icon (hash-get key 'icon ""))
+  (define icon-size (numberish (hash-get key 'icon-size 20) 20))
   (define cx (+ x (/ width 2)))
   (define cy (+ y (/ height 2)))
   (cond
     [(or (equal? kind "space") (equal? icon "space")) (draw-space dc x y width height color)]
     [(or (equal? kind "shift") (member icon '("shift" "shift.fill" "capslock.fill"))) (draw-shift dc cx cy color)]
     [(or (equal? kind "backspace") (member icon '("delete.left" "delete.left.fill"))) (draw-backspace dc cx cy color)]
-    [(member icon '("face.smiling" "emojis")) (draw-face dc cx cy width color)]
+    [(member icon '("face.smiling" "emojis")) (draw-face dc cx cy width height icon-size color)]
     [else
      (define label
        (or (and (not (equal? (hash-get key 'label "") "")) (hash-get key 'label ""))

@@ -148,9 +148,10 @@
           d
           (attr-escape color)))
 
-(define (special-icon-svg kind x y width height color)
+(define (special-icon-svg kind x y width height color [icon-size 20])
   (define cx (+ x (/ width 2)))
   (define cy (+ y (/ height 2)))
+  (define face-scale (/ (min (* icon-size 0.6) (* height 0.4)) 12))
   (match kind
     [(or "space" "space.fill") (space-icon-svg x y width height color)]
     [(or "shift" "shift.fill" "capslock.fill")
@@ -202,35 +203,40 @@
               (real->decimal-string (+ cy 11) 2))
       color)]
     [(or "face.smiling" "emojis")
+     (define r (* 12 face-scale))
      (string-append
       (format "<circle cx=\"~a\" cy=\"~a\" r=\"~a\" fill=\"none\" stroke=\"~a\" stroke-width=\"1.9\"/>"
               (real->decimal-string cx 2)
               (real->decimal-string cy 2)
-              (real->decimal-string (min 12 (* width 0.2)) 2)
+              (real->decimal-string r 2)
               (attr-escape color))
-      (format "<circle cx=\"~a\" cy=\"~a\" r=\"1.35\" fill=\"~a\"/>"
-              (real->decimal-string (- cx 4.2) 2)
-              (real->decimal-string (- cy 3.2) 2)
+      (format "<circle cx=\"~a\" cy=\"~a\" r=\"~a\" fill=\"~a\"/>"
+              (real->decimal-string (- cx (* 4.2 face-scale)) 2)
+              (real->decimal-string (- cy (* 3.2 face-scale)) 2)
+              (real->decimal-string (* 1.35 face-scale) 2)
               (attr-escape color))
-      (format "<circle cx=\"~a\" cy=\"~a\" r=\"1.35\" fill=\"~a\"/>"
-              (real->decimal-string (+ cx 4.2) 2)
-              (real->decimal-string (- cy 3.2) 2)
+      (format "<circle cx=\"~a\" cy=\"~a\" r=\"~a\" fill=\"~a\"/>"
+              (real->decimal-string (+ cx (* 4.2 face-scale)) 2)
+              (real->decimal-string (- cy (* 3.2 face-scale)) 2)
+              (real->decimal-string (* 1.35 face-scale) 2)
               (attr-escape color))
-      (format "<path d=\"M ~a ~a Q ~a ~a ~a ~a\" fill=\"none\" stroke=\"~a\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>"
-              (real->decimal-string (- cx 5.5) 2)
-              (real->decimal-string (+ cy 3.2) 2)
+      (format "<path d=\"M ~a ~a Q ~a ~a ~a ~a\" fill=\"none\" stroke=\"~a\" stroke-width=\"~a\" stroke-linecap=\"round\"/>"
+              (real->decimal-string (- cx (* 5.5 face-scale)) 2)
+              (real->decimal-string (+ cy (* 3.2 face-scale)) 2)
               (real->decimal-string cx 2)
-              (real->decimal-string (+ cy 7.2) 2)
-              (real->decimal-string (+ cx 5.5) 2)
-              (real->decimal-string (+ cy 3.2) 2)
-              (attr-escape color)))]
+              (real->decimal-string (+ cy (* 7.2 face-scale)) 2)
+              (real->decimal-string (+ cx (* 5.5 face-scale)) 2)
+              (real->decimal-string (+ cy (* 3.2 face-scale)) 2)
+              (attr-escape color)
+              (real->decimal-string (* 1.8 face-scale) 2)))]
     [_ #f]))
 
 (define (fallback-label-svg key x y width height)
   (define color (fallback-color (hash-get key 'background "#ffffff")))
   (define kind (hash-get key 'kind ""))
-  (define icon (or (special-icon-svg kind x y width height color)
-                   (special-icon-svg (hash-get key 'icon "") x y width height color)))
+  (define icon-size (numberish (hash-get key 'icon-size 20) 20))
+  (define icon (or (special-icon-svg kind x y width height color icon-size)
+                   (special-icon-svg (hash-get key 'icon "") x y width height color icon-size)))
   (if icon
       icon
       (let ([label (special-label key)])

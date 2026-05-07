@@ -38,6 +38,12 @@
   (for/list ([subview (in-list subviews)])
     (hash-ref subview 'Cell)))
 
+(define (preview-key preview id)
+  (for*/first ([row (in-list (hash-ref preview 'rows))]
+               [key (in-list row)]
+               #:when (equal? (hash-ref key 'id) id))
+    key))
+
 (module+ test
   (test-case "flypy shared config emits desktop schema YAML"
     (define yaml (generated-file flypy:config-files "flypy.schema.yaml"))
@@ -80,6 +86,21 @@
     (check-equal? (hash-ref (hash-ref (page-button page "anButton") 'action) 'character) "0")
     (check-equal? (hash-ref (hash-ref (page-button page "anButton") 'swipeUpAction) 'character) "-")
     (check-equal? (button-width page "engButton") "112.5/1125"))
+
+  (test-case "bopomofo delete key is wide enough for the icon"
+    (define page (generated-json bopomofo-pinyin-files "light/pinyinPortrait.yaml"))
+    (check-equal? (button-width page "backspaceButton") "300/1125"))
+
+  (test-case "bopomofo emoji key is wide enough for the icon"
+    (define page (generated-json bopomofo-pinyin-files "light/pinyinPortrait.yaml"))
+    (define preview (preview-spec-from-files bopomofo-pinyin-files))
+    (check-equal? (button-width page "emojiButton") "150/1125")
+    (check-equal? (hash-ref (hash-ref page 'emojiButtonForegroundStyle) 'fontSize) 28)
+    (check-equal? (hash-ref (preview-key preview "emojiButton") 'icon-size) 28))
+
+  (test-case "bopomofo search key matches standard phone width"
+    (define page (generated-json bopomofo-pinyin-files "light/pinyinPortrait.yaml"))
+    (check-equal? (button-width page "enterButton") "280/1125"))
 
   (test-case "flypy_14 schema DSL emits stable schema YAML"
     (define yaml (generated-file flypy_14:config-files "flypy_14.schema.yaml"))

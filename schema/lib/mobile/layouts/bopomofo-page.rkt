@@ -256,9 +256,9 @@
    (object ["action" (keyboard-type-action "emojis")]
            ["backgroundStyle" "systemButtonBackgroundStyle"]
            ["foregroundStyle" "emojiButtonForegroundStyle"]
-           ["size" (object ["width" "118/1125"])])
+           ["size" (object ["width" "150/1125"])])
    "emojiButtonForegroundStyle"
-   (system-image-style dark? "face.smiling")
+   (system-image-style dark? "face.smiling" #:font-size 28)
    "numericButton"
    (object ["action" (keyboard-type-action "numeric")]
            ["backgroundStyle" "systemButtonBackgroundStyle"]
@@ -279,7 +279,7 @@
            ["backgroundStyle" "systemButtonBackgroundStyle"]
            ["foregroundStyle" "backspaceButtonForegroundStyle"]
            ["repeatAction" "backspace"]
-           ["size" (object ["width" "118/1125"])])
+           ["size" (object ["width" "300/1125"])])
    "backspaceButtonForegroundStyle"
    (system-image-style dark? "delete.left" #:highlight-image "delete.left.fill")
    "enterButton"
@@ -288,7 +288,7 @@
            ["foregroundStyle" enter-foreground-style]
            ["notification" (array "returnKeyTypeChangedNotification"
                                   "preeditChangedForEnterButtonNotification")]
-           ["size" (object ["width" "178/1125"])])
+           ["size" (object ["width" "280/1125"])])
    "enterButtonForegroundStyle"
    (text-foreground-style dark? "$returnKeyType")))
 
