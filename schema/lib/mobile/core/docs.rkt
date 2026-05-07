@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require racket/string
+         racket/runtime-path
          "preview-svg.rkt")
 
 (provide (struct-out skin-meta)
@@ -10,8 +11,10 @@
 
 (struct skin-meta (slug english-name chinese-name summary features) #:transparent)
 
+(define-runtime-path preview-png-path "preview-png.rkt")
+
 (define (demo-preview-png-bytes title preview-spec)
-  ((dynamic-require "preview-png.rkt" 'demo-preview-png-bytes) title preview-spec))
+  ((dynamic-require preview-png-path 'demo-preview-png-bytes) title preview-spec))
 
 (define (make-skin-meta #:slug slug
                         #:english-name english-name
@@ -52,7 +55,9 @@
   (if (and preview-spec
            (string=? (or (getenv "RIME_RENDER_SKIN_DOCS") "") "1"))
       (with-handlers ([exn:fail?
-                       (lambda (_)
+                       (lambda (exn)
+                         (define out (current-error-port))
+                         (fprintf out "skin demo render failed: ~a\n" (exn-message exn))
                          (hash))])
         (define svg (demo-svg meta preview-spec))
         (hash "demo.svg" svg
@@ -64,7 +69,9 @@
   (if (and preview-spec
            (string=? (or (getenv "RIME_RENDER_SKIN_DOCS") "") "1"))
       (with-handlers ([exn:fail?
-                       (lambda (_)
+                       (lambda (exn)
+                         (define out (current-error-port))
+                         (fprintf out "skin doc render failed: ~a\n" (exn-message exn))
                          (hash "README.md" readme))])
         (define svg (demo-svg meta preview-spec))
         (hash "README.md" readme

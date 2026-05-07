@@ -427,13 +427,15 @@
         (error 'build-one-skin! "No mobile skin definition for ~a" skin)))
   skin-rkt)
 
-(define (write-unpacked-skin! skin-rkt out-dir)
+(define (write-unpacked-skin! skin-rkt out-dir #:with-docs? [with-docs? #f])
   (make-directory* out-dir)
-  ;; Runtime uploads only need skin files; preview docs are built separately.
-  (write-module-files! skin-rkt
-                       out-dir
-                       'skin-preview-files
-                       #:fresh? #t))
+  (with-skin-doc-rendering
+   with-docs?
+   (lambda ()
+     (write-module-files! skin-rkt
+                          out-dir
+                          (if with-docs? 'skin-files 'skin-preview-files)
+                          #:fresh? #t))))
 
 (define (build-one-skin! skin schemas profile-name profile-out)
   (define skin-rkt (skin-module-path! skin schemas))
@@ -462,7 +464,8 @@
   (for ([skin (in-list skins)])
     (printf "Building skin folder: ~a\n" skin)
     (write-unpacked-skin! (skin-module-path! skin schemas)
-                          (build-path out-dir skin))))
+                          (build-path out-dir skin)
+                          #:with-docs? #t)))
 
 (define (build-profile-skin-directories! profile profile-name out-dir)
   (define schemas (resolve-schemas profile))
