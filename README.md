@@ -72,8 +72,7 @@ racket gui.rkt
 
 Open Yuanshu's WiFi transfer screen on the iPhone, keep both devices on the
 same LAN, then paste the URL shown by Yuanshu into the GUI and press
-`Push to iPhone`. Leaving the URL blank lets the sync tool scan its known LAN
-candidates.
+`Push to iPhone`. Leaving the URL blank lets the sync tool scan the current LAN.
 
 GUI upload syncs schemas to `RimeUserData/rime/`, then refreshes Yuanshu
 `Skins/` with only the selected generated skin folders. The Rime delete checkbox

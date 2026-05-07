@@ -27,7 +27,7 @@
 (define manifest-basename "yuanshu-sync-manifest")
 (define default-preserve-exact '("default.custom.yaml" "installation.yaml" "user.yaml"))
 (define default-preserve-dirs '("build" "sync"))
-(define default-discovery-candidates '("192.168.36.157" "192.168.36.240" "172.20.10.2"))
+(define default-discovery-candidates '())
 (define current-yuanshu-sync-log (make-parameter (lambda (_line) (void))))
 
 (struct remote-item (rel-path dir? size) #:transparent)
