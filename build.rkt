@@ -185,47 +185,14 @@
 
 ;; ---- Schema dependency expansion -------------------------------------------
 
-(define (read-schema-deps-from-yaml schema)
-  (define yaml-path
-    (for/or ([base (list rime-dir root-dir)])
-      (define p (build-path base (string-append schema ".schema.yaml")))
-      (and (file-exists? p) p)))
-  (if (not yaml-path)
-      '()
-      (call-with-input-file yaml-path
-        (lambda (in)
-          (let loop ([in-deps? #f] [acc '()])
-            (define line (read-line in))
-            (cond
-              [(eof-object? line) (reverse acc)]
-              [(regexp-match? #rx"^  dependencies:" line)
-               (loop #t acc)]
-              [(and in-deps? (regexp-match #rx"^    - (.+)" line))
-               => (lambda (m) (loop #t (cons (string-trim (cadr m)) acc)))]
-              [in-deps? (reverse acc)]
-              [else (loop #f acc)]))))))
-
 (define (read-schema-name-from-yaml schema)
-  (define yaml-path
-    (for/or ([base (list rime-dir root-dir)])
-      (define p (build-path base (string-append schema ".schema.yaml")))
-      (and (file-exists? p) p)))
-  (if (not yaml-path)
-      #f
-      (call-with-input-file yaml-path
-        (lambda (in)
-          (let loop ()
-            (define line (read-line in))
-            (cond
-              [(eof-object? line) #f]
-              [(regexp-match #rx"^  name: \"?([^\"]+)\"?" line)
-               => (lambda (m) (string-trim (cadr m)))]
-              [else (loop)]))))))
+  (static-schema-name schema))
 
-;; For generated schemas, read deps from the module; fall back to YAML for static ones.
+;; For generated schemas, read deps from the module; fall back to registry
+;; metadata for static imported schemas.
 (define (read-schema-deps schema)
   (schema-module-ref schema 'schema-deps
-                     (read-schema-deps-from-yaml schema)))
+                     (static-schema-deps schema)))
 
 (define (read-schema-mobile-skins schema)
   (define skins (schema-module-ref schema 'mobile-skins '()))

@@ -7,6 +7,8 @@
          generated-config-ids
          extra-schema-ids-with-mobile
          schema-source-id
+         static-schema-deps
+         static-schema-name
          schema-catalog-order
          schema-id->catalog-id
          schema-catalog-label)
@@ -37,6 +39,20 @@
 
 (define (schema-source-id schema)
   (hash-ref schema-source-ids schema schema))
+
+(define static-schema-metadata
+  (hash "bopomofo" (hash 'name "注音"
+                         'deps '())
+        "cangjie6" (hash 'name "蒼頡"
+                         'deps '("flypy"))
+        "jyut6ping3" (hash 'name "粵拼"
+                           'deps '("flypy" "cangjie6"))))
+
+(define (static-schema-deps schema)
+  (hash-ref (hash-ref static-schema-metadata schema (hash)) 'deps '()))
+
+(define (static-schema-name schema)
+  (hash-ref (hash-ref static-schema-metadata schema (hash)) 'name #f))
 
 (define schema-catalog-order
   '("double-pinyin" "full-pinyin" "shape" "cantonese" "phonetic" "other"))
