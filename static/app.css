@@ -379,25 +379,26 @@ input {
 }
 
 .rime-sticky-actions {
-  position: fixed;
-  left: 50%;
-  bottom: 1rem;
+  position: sticky;
+  bottom: 0.85rem;
   z-index: 5;
   display: flex;
   justify-content: center;
-  transform: translateX(-50%);
+  margin-top: 1rem;
+  padding: 0.35rem 0;
   pointer-events: none;
 }
 
 .rime-sticky-build-button {
   width: auto;
   min-width: max-content;
-  min-height: 2.65rem;
-  padding: 0.7rem 1.1rem;
+  min-height: 2.55rem;
+  padding: 0.68rem 1.05rem;
   border-radius: 999px;
   border-color: var(--glass-button-border);
   background: var(--glass-button-bg);
   box-shadow: var(--glass-button-shadow);
+  font-size: 0.96rem;
   backdrop-filter: blur(20px) saturate(1.55);
   -webkit-backdrop-filter: blur(20px) saturate(1.55);
   pointer-events: auto;
@@ -552,14 +553,13 @@ input {
   }
 
   .rime-sticky-actions {
-    left: 50%;
-    bottom: 0.9rem;
+    bottom: 0.65rem;
   }
 
   .rime-sticky-build-button {
     max-width: calc(100vw - 1.8rem);
-    min-height: 3rem;
-    padding: 0.78rem 1.15rem;
+    min-height: 2.75rem;
+    padding: 0.72rem 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
   }

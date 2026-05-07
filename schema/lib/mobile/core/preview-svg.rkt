@@ -44,6 +44,9 @@
 (define (hash-get h key fallback)
   (if (hash? h) (hash-ref h key fallback) fallback))
 
+(define (key-corner-radius key)
+  (numberish (hash-get key 'corner-radius 8) 8))
+
 (define (color-components color)
   (and (string? color)
        (regexp-match #px"^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?$" color)))
@@ -253,12 +256,14 @@
 (define (key-svg key x y width height)
   (define background (hash-get key 'background "#ffffff"))
   (define layers (hash-get key 'layers '()))
+  (define radius (key-corner-radius key))
   (string-append
-   (format "<rect x=\"~a\" y=\"~a\" width=\"~a\" height=\"~a\" rx=\"8\" ~a ~a/>"
+   (format "<rect x=\"~a\" y=\"~a\" width=\"~a\" height=\"~a\" rx=\"~a\" ~a ~a/>"
            (real->decimal-string x 2)
            (real->decimal-string y 2)
            (real->decimal-string width 2)
            (real->decimal-string height 2)
+           (real->decimal-string radius 2)
            (fill-attrs background "#ffffff")
            (stroke-attrs (key-stroke-color background) 0.75))
    (if (and (list? layers) (pair? layers))

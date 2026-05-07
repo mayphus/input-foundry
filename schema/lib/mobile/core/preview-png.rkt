@@ -23,6 +23,9 @@
 (define (hash-get h key fallback)
   (if (hash? h) (hash-ref h key fallback) fallback))
 
+(define (key-corner-radius key)
+  (numberish (hash-get key 'corner-radius 8) 8))
+
 (define (color-components color)
   (and (string? color)
        (regexp-match #px"^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?$" color)))
@@ -208,9 +211,10 @@
 
 (define (draw-key dc key x y width height)
   (define background (hash-get key 'background "#ffffff"))
+  (define radius (key-corner-radius key))
   (send dc set-brush (new brush% [color (rgba background "#ffffff")]))
   (send dc set-pen (new pen% [color (rgba (key-stroke-color background) "#00000022")] [width 0.75]))
-  (send dc draw-rounded-rectangle x y width height 8)
+  (send dc draw-rounded-rectangle x y width height radius)
   (define layers (hash-get key 'layers '()))
   (if (and (list? layers) (pair? layers))
       (let ([count (visible-layer-count layers)])

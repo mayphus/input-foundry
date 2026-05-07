@@ -167,6 +167,13 @@
        (equal? (page-ref style 'buttonStyleType #f) "systemImage")
        (parse-numberish (page-ref style 'fontSize #f))))
 
+(define (preview-insets value)
+  (and (hash? value)
+       (hash 'top (or (parse-numberish (page-ref value 'top #f)) 0)
+             'right (or (parse-numberish (page-ref value 'right #f)) 0)
+             'bottom (or (parse-numberish (page-ref value 'bottom #f)) 0)
+             'left (or (parse-numberish (page-ref value 'left #f)) 0))))
+
 (define (layout-spacer-cell? cell-id)
   (and (string? cell-id)
        (regexp-match? #rx"Spacer$" cell-id)))
@@ -219,6 +226,12 @@
                                "#ffffff")
                'highlight-background (or (and (hash? background-style) (page-ref background-style 'highlightColor #f))
                                          "#e6e6e6")
+               'corner-radius (or (and (hash? background-style)
+                                       (parse-numberish (page-ref background-style 'cornerRadius #f)))
+                                  8)
+               'insets (or (and (hash? background-style)
+                                (preview-insets (page-ref background-style 'insets #f)))
+                           (hash 'top 0 'right 0 'bottom 0 'left 0))
                'layers sorted-layers))))
 
 (define (extract-row-preview page row-spec)
@@ -340,6 +353,8 @@
            'keyboardBackgroundStyle (hash 'buttonStyleType "geometry"
                                           'normalColor "#00000003")
            'systemButtonBackgroundStyle (hash 'buttonStyleType "geometry"
+                                              'cornerRadius 8.5
+                                              'insets (hash 'top 4 'right 3 'bottom 4 'left 3)
                                               'normalColor "#4C4C4C"
                                               'highlightColor "#707070")
            'blueButtonBackgroundStyle (hash 'buttonStyleType "geometry"
@@ -382,4 +397,7 @@
 
   (check-equal? (hash-ref enter-key 'background) "#4C4C4C")
   (check-equal? (hash-ref enter-key 'label) "搜尋")
+  (check-equal? (hash-ref enter-key 'corner-radius) 8.5)
+  (check-equal? (hash-ref (hash-ref enter-key 'insets) 'top) 4)
+  (check-equal? (hash-ref (hash-ref enter-key 'insets) 'left) 3)
   (check-equal? (hash-ref (first (hash-ref enter-key 'layers)) 'text) "搜尋"))
