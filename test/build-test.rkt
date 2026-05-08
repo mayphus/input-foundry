@@ -150,6 +150,13 @@
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f))))
 
+  (test-case "static upstream schemas reuse preview keyboard layouts"
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin") '("luna_pinyin"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin_flypy") '("flypy"))
+    (check-equal? (read-schema-keyboard-layouts "cangjie5") '("cangjie6"))
+    (check-equal? (read-schema-keyboard-layouts "quick5") '("cangjie6"))
+    (check-equal? (read-schema-keyboard-layouts "wubi86") '("luna_pinyin")))
+
   (test-case "legacy desktop flag still maps to yuanshu artifact behavior"
     (define tmp (make-temporary-file "rime-config-legacy-artifact-~a" 'directory))
     (dynamic-wind

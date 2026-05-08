@@ -243,7 +243,8 @@
 
 (define (read-schema-keyboard-layouts schema)
   (define layouts (schema-module-ref schema 'keyboard-layouts
-                                     (schema-module-ref schema 'mobile-skins '())))
+                                     (schema-module-ref schema 'mobile-skins
+                                                        (static-schema-keyboard-layouts schema))))
   (cond
     [(not layouts) '()]
     [(list? layouts) layouts]
