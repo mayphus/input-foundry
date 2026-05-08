@@ -33,27 +33,20 @@
    locale
    current-path
    (if schema
-       (let* ([schema-layouts (schema-layout-items schema layouts)]
-              [artifacts (schema-artifacts schema)])
-         `((section ((class "rime-hero-card rime-exhibit-hero"))
-                    (div ((class "rime-hero-head"))
-                         (div
-                          (a ((class "rime-back-link") (href "/")) ,(t locale 'back))
-                          (h1 ((class "page-title")) ,(schema-name locale schema))
-                          (p ((class "rime-section-copy rime-hero-copy"))
-                             ,(schema-description locale schema)))))
-           (section ((class "rime-exhibit-actions"))
-                    ,(artifact-form locale
-                                    schema
-                                    (schema-artifact-variant-items schema schemas artifacts)
-                                    artifacts
-                                    layouts))
-           (section ((class "rime-section rime-exhibit-section"))
-                    (h2 ((class "rime-section-title")) ,(t locale 'layouts))
-                    (div ((class "rime-layout-grid"))
-                         ,@(for/list ([layout (in-list schema-layouts)])
-                             (layout-detail-card locale layout))))
-           (section ((class "rime-section rime-exhibit-section"))
+       (let ([artifacts (schema-artifacts schema)])
+         `((section ((class "rime-exhibit-overview"))
+                    (div ((class "rime-exhibit-copy"))
+                         (a ((class "rime-back-link") (href "/")) ,(t locale 'back))
+                         (h1 ((class "page-title")) ,(schema-name locale schema))
+                         (p ((class "rime-section-copy rime-hero-copy"))
+                            ,(schema-description locale schema)))
+                    (div ((class "rime-exhibit-download"))
+                         ,(artifact-form locale
+                                         schema
+                                         (schema-artifact-variant-items schema schemas artifacts)
+                                         artifacts
+                                         layouts)))
+           (section ((class "rime-section rime-exhibit-section rime-deps-section"))
                     (h2 ((class "rime-section-title")) ,(t locale 'dependencies))
                     ,(dependency-list locale (schema-deps schema)))))
        `((section ((class "rime-hero-card"))
