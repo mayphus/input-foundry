@@ -13,9 +13,10 @@
 
 (define app-profile-name "rime-config")
 (define mobile-output-name "gui-mobile")
+(define default-wifi-transfer-host "192.168.36.240")
 (define default-schema-ids '("flypy"))
 (define gui-schema-ids
-  (remove-duplicates (append generated-config-ids '("bopomofo"))))
+  (remove-duplicates (append generated-config-ids (list-static-schema-ids))))
 
 (define (schema-options)
   (for/list ([id (in-list gui-schema-ids)])
@@ -36,7 +37,16 @@
    schema-catalog-order))
 
 (define (option-label item)
-  (format "~a    ~a" (option-name item) (option-id item)))
+  (option-name item))
+
+(define (wifi-transfer-url raw)
+  (define value (string-trim raw))
+  (cond
+    [(string=? value "") #f]
+    [(or (string-prefix? value "http://")
+         (string-prefix? value "https://"))
+     value]
+    [else (string-append "http://" value)]))
 
 (define (selected-ids rows)
   (for/list ([row (in-list rows)]
@@ -150,8 +160,7 @@
              (set-status! status "Select at least one schema.")
              (append-log! log-field "Nothing selected.")]
             [else
-             (define raw-url (string-trim (send url-field get-value)))
-             (define base-url (and (not (string=? raw-url "")) raw-url))
+             (define base-url (wifi-transfer-url (send url-field get-value)))
              (reset-log! log-field (format "Selected schemas: ~a" (string-join schemas ", ")))
              (set-status! status "Building mobile bundle...")
              (append-log! log-field "Building mobile bundle...")
@@ -178,142 +187,74 @@
              (append-log! log-field done)])))))))
 
 (define (make-section parent catalog-id options default-ids)
-  (define group
-    (new group-box-panel%
-         [label (schema-catalog-label catalog-id)]
-         [parent parent]
-         [alignment '(left top)]
-         [spacing 4]
-         [stretchable-height #f]))
+  (new message%
+       [parent parent]
+       [label (schema-catalog-label catalog-id)])
   (define rows '())
   (for ([item (in-list options)])
     (define checkbox
       (new check-box%
            [label (option-label item)]
-           [parent group]
+           [parent parent]
            [value (and (member (option-id item) default-ids) #t)]))
     (set! rows (append rows (list (cons item checkbox)))))
   rows)
+
+(define (lightest-column columns)
+  (argmin cdr columns))
+
+(define (add-catalog-to-column column catalog)
+  (cons (cons catalog (car column))
+        (+ (cdr column) (length (cdr catalog)))))
+
+(define (split-catalogs catalogs column-count)
+  (let loop ([remaining catalogs]
+             [columns (for/list ([_ (in-range column-count)])
+                        (cons '() 0))])
+    (cond
+      [(null? remaining)
+       (map (lambda (column) (reverse (car column))) columns)]
+      [else
+       (define catalog (car remaining))
+       (define target (lightest-column columns))
+       (loop (cdr remaining)
+             (for/list ([column (in-list columns)])
+               (if (eq? column target)
+                   (add-catalog-to-column column catalog)
+                   column)))])))
 
 (define (start-gui)
   (define frame
     (new frame%
          [label "Rime Config"]
-         [width 980]
-         [height 620]))
+         [width 900]
+         [height 460]))
   (define root
     (new vertical-panel%
          [parent frame]
          [alignment '(left top)]
-         [spacing 10]
-         [border 16]))
+         [spacing 6]
+         [border 10]))
 
-  (define content
+  (define upload-row
     (new horizontal-panel%
          [parent root]
-         [alignment '(left top)]
-         [spacing 14]
-         [stretchable-width #t]
-         [stretchable-height #t]))
-
-  (define schema-column
-    (new group-box-panel%
-         [label "Schemas"]
-         [parent content]
-         [alignment '(left top)]
+         [alignment '(left center)]
          [spacing 8]
-         [min-width 440]
          [stretchable-width #t]
-         [stretchable-height #t]))
-
-  (define top-actions
-    (new horizontal-panel%
-         [parent schema-column]
-         [spacing 8]
          [stretchable-height #f]))
-
-  (define schema-pane
-    (new vertical-panel%
-         [parent schema-column]
-         [alignment '(left top)]
-         [spacing 8]
-         [stretchable-height #t]))
-
-  (define schema-rows
-    (append*
-     (for/list ([catalog (in-list (cataloged-options (schema-options)))])
-       (make-section schema-pane (car catalog) (cdr catalog) default-schema-ids))))
-
-  (new button%
-       [label "Select all shown"]
-       [parent top-actions]
-       [callback (lambda (_button _event) (set-row-values! schema-rows #t))])
-  (new button%
-       [label "Clear"]
-       [parent top-actions]
-       [callback (lambda (_button _event) (set-row-values! schema-rows #f))])
-  (new button%
-       [label "Flypy default"]
-       [parent top-actions]
-       [callback
-        (lambda (_button _event)
-          (set-row-values! schema-rows #f)
-          (for ([row (in-list schema-rows)])
-            (when (member (option-id (car row)) default-schema-ids)
-              (send (cdr row) set-value #t))))])
-
-  (define transfer-group
-    (new group-box-panel%
-         [label "iPhone Upload"]
-         [parent content]
-         [alignment '(left top)]
-         [spacing 10]
-         [min-width 420]
-         [stretchable-width #t]
-         [stretchable-height #t]))
+  (new message% [parent upload-row] [label "WiFi"])
   (define url-field
     (new text-field%
-         [label "WiFi transfer URL"]
-         [parent transfer-group]
-         [init-value ""]
-         [min-width 360]))
-  (new message%
-       [parent transfer-group]
-       [label "Leave blank to scan LAN, or paste the URL from Yuanshu."])
-  (define upload-options
-    (new horizontal-panel%
-         [parent transfer-group]
-         [spacing 12]
-         [stretchable-height #f]))
-  (define allow-delete
-    (new check-box%
-         [label "Delete remote files not in this bundle"]
-         [parent upload-options]
-         [value #f]))
-  (define include-big-dicts
-    (new check-box%
-         [label "Include large dictionaries"]
-         [parent upload-options]
-         [value #t]))
-
-  (define status
-    (new message%
-         [parent transfer-group]
-         [label "Ready."]
-         [stretchable-width #t]))
-  (define log-field
-    (new text-field%
-         [label "Status report"]
-         [parent transfer-group]
-         [init-value "Ready."]
-         [style '(multiple)]
-         [min-height 240]
-         [stretchable-width #t]))
+         [label #f]
+         [parent upload-row]
+         [init-value default-wifi-transfer-host]
+         [min-width 170]))
 
   (define actions
     (new horizontal-panel%
-         [parent transfer-group]
-         [spacing 8]
+         [parent upload-row]
+         [spacing 6]
          [stretchable-height #f]))
   (define build-button #f)
   (define push-button #f)
@@ -338,8 +279,89 @@
                            status
                            log-field
                            action-buttons))]))
+
+  (define allow-delete
+    (new check-box%
+         [label "Delete extras"]
+         [parent upload-row]
+         [value #f]))
+  (define include-big-dicts
+    (new check-box%
+         [label "Big dicts"]
+         [parent upload-row]
+         [value #t]))
+
+  (define status
+    (new message%
+         [parent upload-row]
+         [label "Ready."]
+         [stretchable-width #t]))
+
+  (define log-field
+    (new text-field%
+         [label #f]
+         [parent root]
+         [init-value "Ready."]
+         [style '(multiple)]
+         [min-height 58]
+         [stretchable-width #t]
+         [stretchable-height #f]))
+
+  (define schema-actions
+    (new horizontal-panel%
+         [parent root]
+         [alignment '(left center)]
+         [spacing 6]
+         [stretchable-height #f]))
+  (new message% [parent schema-actions] [label "Schemas"])
+
+  (define schema-grid
+    (new horizontal-panel%
+         [parent root]
+         [alignment '(left top)]
+         [spacing 18]
+         [stretchable-width #t]
+         [stretchable-height #t]))
+  (define schema-columns
+    (for/list ([_ (in-range 3)])
+      (new vertical-panel%
+           [parent schema-grid]
+           [alignment '(left top)]
+           [spacing 2]
+           [min-width 250]
+           [stretchable-width #t]
+           [stretchable-height #t])))
+
+  (define catalog-columns
+    (split-catalogs (cataloged-options (schema-options)) 3))
+  (define schema-rows
+    (append*
+     (for/list ([column (in-list schema-columns)]
+                [catalogs (in-list catalog-columns)])
+       (append*
+        (for/list ([catalog (in-list catalogs)])
+          (make-section column (car catalog) (cdr catalog) default-schema-ids))))))
+
+  (new button%
+       [label "All"]
+       [parent schema-actions]
+       [callback (lambda (_button _event) (set-row-values! schema-rows #t))])
+  (new button%
+       [label "Clear"]
+       [parent schema-actions]
+       [callback (lambda (_button _event) (set-row-values! schema-rows #f))])
+  (new button%
+       [label "Flypy"]
+       [parent schema-actions]
+       [callback
+        (lambda (_button _event)
+          (set-row-values! schema-rows #f)
+          (for ([row (in-list schema-rows)])
+            (when (member (option-id (car row)) default-schema-ids)
+              (send (cdr row) set-value #t))))])
   (set! action-buttons (list build-button push-button))
 
+  (send frame center)
   (send frame show #t))
 
 (module+ main

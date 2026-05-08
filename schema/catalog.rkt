@@ -61,6 +61,8 @@
 (define extra-schema-ids-with-mobile
   '("bopomofo"))
 
+(define mobile-rime-artifacts '("rime" "yuanshu"))
+
 (define schema-definitions
   (list
    (schema "flypy"
@@ -122,7 +124,7 @@
            #:zh-description "14 鍵全拼元書方案，使用相鄰 QWERTY 分組。")
    (schema "double_pinyin"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("luna_pinyin")
            #:en-name "Double Pinyin ZRM"
@@ -131,7 +133,7 @@
            #:zh-description "上游 Rime 自然碼雙拼方案。")
    (schema "double_pinyin_abc"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("luna_pinyin")
            #:en-name "Double Pinyin ABC"
@@ -140,7 +142,7 @@
            #:zh-description "上游 Rime 智能 ABC 雙拼方案。")
    (schema "double_pinyin_flypy"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("flypy")
            #:en-name "Double Pinyin Flypy"
@@ -149,7 +151,7 @@
            #:zh-description "上游 Rime 小鶴雙拼方案。")
    (schema "double_pinyin_mspy"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("luna_pinyin")
            #:en-name "Double Pinyin MSPY"
@@ -158,7 +160,7 @@
            #:zh-description "上游 Rime 微軟雙拼方案。")
    (schema "double_pinyin_pyjj"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("luna_pinyin")
            #:en-name "Double Pinyin PYJJ"
@@ -167,7 +169,7 @@
            #:zh-description "上游 Rime 拼音加加雙拼方案。")
    (schema "double_pinyin_st"
            #:catalog "double-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("luna_pinyin")
            #:en-name "Double Pinyin ST"
@@ -176,7 +178,7 @@
            #:zh-description "上游 Rime 四通雙拼方案。")
    (schema "cangjie5"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("luna_quanpin")
            #:static-files '("cangjie5.dict.yaml")
            #:keyboard-layouts '("cangjie6")
@@ -186,7 +188,7 @@
            #:zh-description "上游 Rime 第五代倉頡字形輸入方案。")
    (schema "cangjie5_express"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("luna_quanpin")
            #:static-files '("cangjie5.dict.yaml")
            #:keyboard-layouts '("cangjie6")
@@ -205,7 +207,7 @@
            #:zh-description "第六代蒼頡字形輸入，提供 Rime 設定與元書鍵盤佈局。")
    (schema "wubi86"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
            #:keyboard-layouts '("luna_pinyin")
@@ -215,7 +217,7 @@
            #:zh-description "上游 Rime 五筆 86 字形輸入方案。")
    (schema "wubi_pinyin"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
            #:keyboard-layouts '("luna_pinyin")
@@ -225,7 +227,7 @@
            #:zh-description "上游 Rime 五筆拼音混輸方案。")
    (schema "wubi_trad"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
            #:keyboard-layouts '("luna_pinyin")
@@ -235,7 +237,7 @@
            #:zh-description "上游 Rime 五筆簡入繁出方案。")
    (schema "quick5"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("luna_quanpin")
            #:static-files '("quick5.dict.yaml")
            #:keyboard-layouts '("cangjie6")
@@ -245,7 +247,7 @@
            #:zh-description "上游 Rime 速成五代字形輸入方案。")
    (schema "stroke"
            #:catalog "shape"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("luna_pinyin")
            #:static-files '("stroke.dict.yaml")
            #:keyboard-layouts '("luna_pinyin")
@@ -255,7 +257,7 @@
            #:zh-description "上游雙拼與五筆方案使用的五筆畫反查支援方案。")
    (schema "pinyin_simp"
            #:catalog "full-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:static-files '("pinyin_simp.dict.yaml")
            #:keyboard-layouts '("luna_pinyin")
@@ -265,7 +267,7 @@
            #:zh-description "上游五筆方案使用的簡化字拼音反查支援方案。")
    (schema "luna_quanpin"
            #:catalog "full-pinyin"
-           #:artifacts '("rime")
+           #:artifacts mobile-rime-artifacts
            #:deps '("luna_pinyin")
            #:static-files '("pinyin.yaml")
            #:keyboard-layouts '("luna_pinyin")

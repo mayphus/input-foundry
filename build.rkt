@@ -18,6 +18,7 @@
          read-schema-artifacts
          read-schema-keyboard-layouts
          read-schema-mobile-skins
+         list-static-schema-ids
          schema-keyboard-layout-module-path
          schema-mobile-skin-module-path
          list-keyboard-layout-items

@@ -121,6 +121,7 @@
     (check-equal? (registry:schema-source-id "flypy_ice") "flypy")
     (check-equal? (registry:static-schema-deps "double_pinyin") '("stroke"))
     (check-equal? (registry:static-schema-extra-files "wubi_pinyin") '("wubi86.dict.yaml"))
+    (check-equal? (registry:static-schema-artifacts "double_pinyin") '("rime" "yuanshu"))
     (check-equal? (registry:static-schema-artifacts "bopomofo") '("yuanshu"))
     (check-equal? (registry:schema-id->catalog-id "cangjie6") "shape")
     (check-equal? (registry:schema-catalog-label "double-pinyin" 'zh-Hant) "雙拼"))
