@@ -1,11 +1,11 @@
 #lang racket/base
 
-;; yuanshu-skin DSL language module
+;; Yuanshu keyboard-layout DSL language module
 ;;
-;; Usage in skin files:
+;; Usage in keyboard layout files:
 ;;   #lang s-exp "lib/lang.rkt"
 ;;
-;;   (skin <slug>
+;;   (keyboard-layout <slug>
 ;;     (triggers <schema-id> ... | default)
 ;;     (meta
 ;;       (name "<english>" "<chinese>")
@@ -94,8 +94,9 @@
          (for-syntax racket/base
                      syntax/parse))
 
-;; Re-export racket/base (minus #%module-begin which we replace) and all skin
-;; library bindings, so skin modules get everything automatically.
+;; Re-export racket/base (minus #%module-begin which we replace) and all
+;; keyboard layout library bindings, so generated layout modules get everything
+;; automatically.
 (provide (except-out (all-from-out racket/base) #%module-begin)
          #%datum
          (all-from-out racket/hash
@@ -120,10 +121,11 @@
                        "layouts/bopomofo-page.rkt"
                        "layouts/soft46-page.rkt")
          (rename-out [yuanshu-module-begin #%module-begin])
+         keyboard-layout
          skin)
 
 ;;; ============================================================
-;;; #%module-begin — thin wrapper; all real work is in `skin`
+;;; #%module-begin — thin wrapper; all real work is in `keyboard-layout`
 ;;; ============================================================
 
 (define-syntax (yuanshu-module-begin stx)
@@ -197,7 +199,7 @@
                                   (datum->syntax entry (symbol->string (cadr wi)))))
                     kvs+role)]))))
 
-  ;; Expand (meta ...) → make-skin-meta call
+  ;; Expand (meta ...) -> make-keyboard-layout-meta call
   (define (expand-meta meta-stx slug-str)
     (define sub      (cdr (syntax->list meta-stx)))
     (define name-cl  (find-clause sub 'name))
@@ -208,7 +210,7 @@
     (define zh       (if (>= (length names) 2) (cadr names) #'""))
     (define summary  (if sum-cl  (cadr (syntax->list sum-cl)) #'""))
     (define features (if feat-cl (cdr  (syntax->list feat-cl)) '()))
-    #`(make-skin-meta
+    #`(make-keyboard-layout-meta
        #:slug         #,(datum->syntax meta-stx slug-str)
        #:english-name #,en
        #:chinese-name #,zh
@@ -391,10 +393,10 @@
 ) ; end begin-for-syntax
 
 ;;; ============================================================
-;;; skin — top-level form; emits all defines + provide
+;;; keyboard-layout — top-level form; emits all defines + provide
 ;;; ============================================================
 
-(define-syntax (skin stx)
+(define-syntax (keyboard-layout stx)
   (syntax-parse stx
     [(_ slug:id clause ...)
      (define clauses  (syntax->list #'(clause ...)))
@@ -422,15 +424,16 @@
      (define phone-expr (if phone-cl (expand-phone phone-cl) #'(hash)))
      (define ipad-expr  (if ipad-cl  (expand-ipad  ipad-cl)  #'(hash)))
      (define preview-bundle-expr
-       #`(bundle (make-standard-skin-files -phone- -ipad-)))
+       #`(bundle (make-standard-keyboard-layout-files -phone- -ipad-)))
      (define (bundle-expr render-docs?-expr)
        #`(bundle #,preview-bundle-expr
                  (if -meta-
-                     (make-skin-doc-files -meta-
-                                          skin-preview-spec
-                                          #:render-demo? #,render-docs?-expr)
+                     (make-keyboard-layout-doc-files
+                      -meta-
+                      keyboard-layout-preview-spec
+                      #:render-demo? #,render-docs?-expr)
                      (hash))))
-     (define skin-preview-files-expr
+     (define keyboard-layout-preview-files-expr
        (if theme-cl
            #`(let ([-phone- #,phone-expr]
                    [-ipad-  #,ipad-expr])
@@ -439,9 +442,9 @@
            #`(let ([-phone- #,phone-expr]
                    [-ipad-  #,ipad-expr])
                #,preview-bundle-expr)))
-     (define skin-preview-spec-expr
-       #`(preview-spec-from-files skin-preview-files))
-     (define make-skin-files-expr
+     (define keyboard-layout-preview-spec-expr
+       #`(preview-spec-from-files keyboard-layout-preview-files))
+     (define make-keyboard-layout-files-expr
        (if theme-cl
            #`(let ([-phone- #,phone-expr]
                    [-ipad-  #,ipad-expr])
@@ -454,16 +457,29 @@
          (define trigger-schemas #,trigger-expr)
          (define -meta-
            #,(if meta-cl (expand-meta meta-cl slug-str) #'#f))
-         (define chinese-name (if -meta- (skin-meta-chinese-name -meta-) ""))
-         (define english-name (if -meta- (skin-meta-english-name -meta-) ""))
-         (define skin-preview-files #,skin-preview-files-expr)
-         (define skin-preview-spec #,skin-preview-spec-expr)
-         (define skin-preview-svgs (preview-spec->svgs skin-preview-spec))
-         (define (make-skin-files render-docs?)
-           #,make-skin-files-expr)
-         (define skin-files (make-skin-files #f))
-         (define skin-files-with-docs (lambda () (make-skin-files #t)))
-         (provide skin-preview-files
+         (define chinese-name (if -meta- (keyboard-layout-meta-chinese-name -meta-) ""))
+         (define english-name (if -meta- (keyboard-layout-meta-english-name -meta-) ""))
+         (define keyboard-layout-preview-files #,keyboard-layout-preview-files-expr)
+         (define keyboard-layout-preview-spec #,keyboard-layout-preview-spec-expr)
+         (define keyboard-layout-preview-svgs
+           (preview-spec->svgs keyboard-layout-preview-spec))
+         (define (make-keyboard-layout-files render-docs?)
+           #,make-keyboard-layout-files-expr)
+         (define keyboard-layout-files (make-keyboard-layout-files #f))
+         (define keyboard-layout-files-with-docs
+           (lambda () (make-keyboard-layout-files #t)))
+         (define skin-preview-files keyboard-layout-preview-files)
+         (define skin-preview-spec keyboard-layout-preview-spec)
+         (define skin-preview-svgs keyboard-layout-preview-svgs)
+         (define make-skin-files make-keyboard-layout-files)
+         (define skin-files keyboard-layout-files)
+         (define skin-files-with-docs keyboard-layout-files-with-docs)
+         (provide keyboard-layout-preview-files
+                  keyboard-layout-preview-spec
+                  keyboard-layout-preview-svgs
+                  keyboard-layout-files
+                  keyboard-layout-files-with-docs
+                  skin-preview-files
                   skin-preview-spec
                   skin-preview-svgs
                   skin-files
@@ -471,3 +487,8 @@
                   trigger-schemas
                   chinese-name
                   english-name))]))
+
+(define-syntax (skin stx)
+  (syntax-parse stx
+    [(_ slug:id clause ...)
+     #'(keyboard-layout slug clause ...)]))

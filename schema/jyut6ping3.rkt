@@ -11,10 +11,10 @@
     (patch "recognizer/patterns/punct" "^/([0-9]0?|[a-z]+)$")
     (patch "recognizer/patterns/flypy" "^`[a-z']*;?$")
     (patch "recognizer/patterns/cangjie6" "^v[a-z]*;?$"))
-  (mobile-skin jyut6ping3
+  (keyboard-layout jyut6ping3
     (meta
       (name "Jyutping" "粵拼")
-      (summary "A Yuanshu skin for Jyutping Cantonese input.")
+      (summary "A Yuanshu keyboard layout for Jyutping Cantonese input.")
       (features
         "Standard QWERTY Jyutping phone layout"
         "Standard iPad pinyin, numeric, and symbolic pages"))

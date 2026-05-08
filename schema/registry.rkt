@@ -9,9 +9,12 @@
          schema-source-id
          static-schema-deps
          static-schema-name
+         static-schema-description
+         static-schema-artifacts
          schema-catalog-order
          schema-id->catalog-id
-         schema-catalog-label)
+         schema-catalog-label
+         schema-catalog-summary)
 
 (define generated-schema-ids
   '("flypy"
@@ -42,17 +45,29 @@
 
 (define static-schema-metadata
   (hash "bopomofo" (hash 'name "注音"
-                         'deps '())
+                         'description "Bopomofo phonetic input for Mandarin, arranged for Yuanshu keyboard layouts."
+                         'deps '()
+                         'artifacts '("yuanshu"))
         "cangjie6" (hash 'name "蒼頡"
-                         'deps '("flypy"))
+                         'description "Sixth-generation Cangjie shape input with Rime config and Yuanshu keyboard layout support."
+                         'deps '("flypy")
+                         'artifacts '("rime" "yuanshu"))
         "jyut6ping3" (hash 'name "粵拼"
-                           'deps '("flypy" "cangjie6"))))
+                           'description "Jyutping Cantonese input with Cantonese dictionaries and Yuanshu keyboard layout support."
+                           'deps '("flypy" "cangjie6")
+                           'artifacts '("rime" "yuanshu"))))
 
 (define (static-schema-deps schema)
   (hash-ref (hash-ref static-schema-metadata schema (hash)) 'deps '()))
 
 (define (static-schema-name schema)
   (hash-ref (hash-ref static-schema-metadata schema (hash)) 'name #f))
+
+(define (static-schema-description schema)
+  (hash-ref (hash-ref static-schema-metadata schema (hash)) 'description #f))
+
+(define (static-schema-artifacts schema)
+  (hash-ref (hash-ref static-schema-metadata schema (hash)) 'artifacts '("rime" "yuanshu")))
 
 (define schema-catalog-order
   '("double-pinyin" "full-pinyin" "shape" "cantonese" "phonetic" "other"))
@@ -75,3 +90,13 @@
                   "other" "Other")
             catalog-id
             catalog-id))
+
+(define (schema-catalog-summary catalog-id)
+  (hash-ref (hash "double-pinyin" "Compact phonetic systems that trade full syllable spelling for paired initials and finals."
+                  "full-pinyin" "Full Mandarin pinyin systems, useful as the baseline for modern phonetic input."
+                  "shape" "Shape-based methods that encode character structure rather than pronunciation."
+                  "cantonese" "Cantonese input methods and dictionaries for Jyutping-style typing."
+                  "phonetic" "Keyboard layouts based on phonetic symbols rather than Latin pinyin letters."
+                  "other" "Additional input experiments and supporting schemas.")
+            catalog-id
+            "Additional input experiments and supporting schemas."))

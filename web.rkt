@@ -12,9 +12,11 @@
          "web-ui.rkt"
          "build.rkt")
 
-(provide skin-items
+(provide keyboard-layout-items
+         skin-items
          list-static-schemas
-         canonical-redirect-location)
+         canonical-redirect-location
+         canonical-dispatch)
 
 ;; ---- Helpers ---------------------------------------------------------------
 
@@ -24,17 +26,20 @@
 (define (valid-id? s)
   (and (string? s) (regexp-match? #rx"^[a-zA-Z0-9_-]+$" s)))
 
-(define (skin-demo-path skin-id)
-  (build-path output-dir "compiled-skins" skin-id "demo.png"))
+(define (keyboard-layout-demo-path layout-id)
+  (define primary (build-path output-dir "compiled-keyboard-layouts" layout-id "demo.png"))
+  (if (file-exists? primary)
+      primary
+      (build-path output-dir "compiled-skins" layout-id "demo.png")))
 
-(define (skin-preview-svgs skin-module)
+(define (keyboard-layout-preview-svgs layout-module)
   (with-handlers ([exn:fail? (lambda (_) (hash))])
-    (skin-module-ref skin-module 'skin-preview-svgs)))
+    (keyboard-layout-module-ref layout-module 'keyboard-layout-preview-svgs)))
 
-(define (skin-preview-svg skin-id [theme 'light])
-  (for/or ([item (in-list skin-items)]
-           #:when (equal? skin-id (car item)))
-    (define preview-svgs (cadddr item))
+(define (keyboard-layout-preview-svg layout-id [theme 'light])
+  (for/or ([item (in-list keyboard-layout-items)]
+           #:when (equal? layout-id (hash-ref item 'id)))
+    (define preview-svgs (hash-ref item 'preview-svgs))
     (hash-ref preview-svgs theme #f)))
 
 (define (list-static-schemas)
@@ -73,30 +78,39 @@
          (make-header #"Cache-Control" #"public, max-age=86400"))
    (list #"Redirecting to rime.mayphus.org")))
 
-;; Precompute skin data once at startup. Concrete skins are declared by
-;; schema modules and materialized into temporary modules for the existing
-;; Yuanshu skin compiler.
-(define skin-items
-  (for/list ([item (in-list (list-mobile-skin-items schema-ids))])
+;; Precompute keyboard layout data once at startup. Concrete layouts are
+;; declared by schema modules and materialized into temporary modules for the
+;; Yuanshu .cskin compiler.
+(define keyboard-layout-items
+  (for/list ([item (in-list (list-keyboard-layout-items schema-ids))])
     (define schema-id (car item))
-    (define skin-id (cadr item))
-    (define skin-module (caddr item))
-    (list skin-id
-          (list schema-id)
-          (skin-module-ref skin-module 'chinese-name (lambda () ""))
-          (skin-preview-svgs skin-module))))
+    (define layout-id (cadr item))
+    (define layout-module (caddr item))
+    (hash 'id layout-id
+          'schemas (list schema-id)
+          'name (keyboard-layout-module-ref layout-module 'chinese-name (lambda () ""))
+          'preview-svgs (keyboard-layout-preview-svgs layout-module))))
+
+(define skin-items
+  (for/list ([layout (in-list keyboard-layout-items)])
+    (list (hash-ref layout 'id)
+          (hash-ref layout 'schemas)
+          (hash-ref layout 'name)
+          (hash-ref layout 'preview-svgs))))
 
 (define schema-items
   (for/list ([s (in-list schema-ids)])
-    (define mo? (schema-module-ref s 'mobile-only? #f))
     (define deps (read-schema-deps s))
-    (define mobile-skins (read-schema-mobile-skins s))
+    (define artifacts (read-schema-artifacts s))
+    (define keyboard-layouts (read-schema-keyboard-layouts s))
     (define zh-name (schema-module-ref s 'chinese-name (read-schema-name-from-yaml s)))
+    (define description (or (read-schema-description s) ""))
     (hash 'id s
           'name (or zh-name s)
+          'description description
           'deps deps
-          'mobile-skins mobile-skins
-          'mobile-only? mo?)))
+          'artifacts artifacts
+          'keyboard-layouts keyboard-layouts)))
 
 ;; ---- Handlers --------------------------------------------------------------
 
@@ -110,15 +124,27 @@
    200 #"OK" (current-seconds) #"text/html; charset=utf-8" headers
    (list (string->bytes/utf-8 html))))
 
+(define (redirect-response location [code 302])
+  (response/full
+   code #"Found" (current-seconds) #"text/plain; charset=utf-8"
+   (list (make-header #"Location" (string->bytes/utf-8 location)))
+   (list #"Redirecting")))
+
 (define (svg-response svg)
   (response/full
    200 #"OK" (current-seconds) #"image/svg+xml"
    (list (make-header #"Cache-Control" #"public, max-age=300"))
    (list (string->bytes/utf-8 svg))))
 
-(define (handle-page req route)
-  (html-response (render-page req schema-items skin-items #:route route)
+(define (handle-page req)
+  (html-response (render-page req schema-items keyboard-layout-items)
                  (remember-locale-headers req)))
+
+(define (handle-exhibit req schema-id)
+  (if (valid-id? schema-id)
+      (html-response (render-exhibit-page req schema-items keyboard-layout-items schema-id)
+                     (remember-locale-headers req))
+      (json-error "Invalid schema id")))
 
 (define (handle-metadata req)
   (response/full
@@ -147,12 +173,12 @@
        404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
        (list #"Support QR not found"))))
 
-(define (handle-skin-demo req skin-id)
+(define (handle-keyboard-layout-demo req layout-id)
   (cond
-    [(not (valid-id? skin-id))
-     (json-error "Invalid skin id")]
+    [(not (valid-id? layout-id))
+     (json-error "Invalid keyboard layout id")]
     [else
-     (define demo-path (skin-demo-path skin-id))
+     (define demo-path (keyboard-layout-demo-path layout-id))
      (if (file-exists? demo-path)
          (response/full
           200 #"OK" (current-seconds) #"image/png"
@@ -162,13 +188,13 @@
           404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
          (list #"Preview image not found")))]))
 
-(define (handle-skin-preview-svg req skin-id [theme 'light])
+(define (handle-keyboard-layout-preview-svg req layout-id [theme 'light])
   (cond
-    [(not (valid-id? skin-id))
-     (json-error "Invalid skin id")]
+    [(not (valid-id? layout-id))
+     (json-error "Invalid keyboard layout id")]
     [else
-     (define svg (or (skin-preview-svg skin-id theme)
-                     (skin-preview-svg skin-id 'light)))
+     (define svg (or (keyboard-layout-preview-svg layout-id theme)
+                     (keyboard-layout-preview-svg layout-id 'light)))
      (if svg
          (svg-response svg)
          (response/full
@@ -183,14 +209,15 @@
       [body-bytes (bytes->jsexpr body-bytes)]
       [else (hash)]))
   (define schemas     (hash-ref data 'schemas '()))
+  (define artifact    (profile-artifact data))
   (cond
     [(not (and (list? schemas) (andmap valid-id? schemas)))
      (json-error "Invalid schema id")]
     [else
      (define profile (hash 'schemas     schemas
-                           'desktop?    (hash-ref data 'desktop? #t)))
+                           'artifact    artifact))
      (define final-profile
-       (if (hash-ref profile 'desktop?)
+       (if (equal? artifact "rime")
            (hash-set profile 'extra-src-files '("squirrel.custom.yaml"))
            profile))
 
@@ -215,15 +242,22 @@
 
 (define-values (dispatch url)
   (dispatch-rules
-   [("") (lambda (req) (handle-page req 'mobile))]
+   [("") handle-page]
    [("metadata") handle-metadata]
-   [("desktop") (lambda (req) (handle-page req 'desktop))]
+   [("desktop") (lambda (req) (redirect-response "/"))]
+   [("exhibits" (string-arg)) handle-exhibit]
    [("app.css") handle-app-css]
    [("support-8f6d2b.svg") handle-support-svg]
-   [("skins" (string-arg) "preview.svg") handle-skin-preview-svg]
-   [("skins" (string-arg) "preview-dark.svg") (lambda (req skin-id)
-                                                (handle-skin-preview-svg req skin-id 'dark))]
-   [("skins" (string-arg) "demo.png") handle-skin-demo]
+   [("layouts" (string-arg) "preview.svg") handle-keyboard-layout-preview-svg]
+   [("layouts" (string-arg) "preview-dark.svg")
+    (lambda (req layout-id)
+      (handle-keyboard-layout-preview-svg req layout-id 'dark))]
+   [("layouts" (string-arg) "demo.png") handle-keyboard-layout-demo]
+   [("skins" (string-arg) "preview.svg") handle-keyboard-layout-preview-svg]
+   [("skins" (string-arg) "preview-dark.svg")
+    (lambda (req layout-id)
+      (handle-keyboard-layout-preview-svg req layout-id 'dark))]
+   [("skins" (string-arg) "demo.png") handle-keyboard-layout-demo]
    [("build") #:method "post" handle-build]))
 
 (define (canonical-dispatch req)

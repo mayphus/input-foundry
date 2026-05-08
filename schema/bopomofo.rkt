@@ -3,10 +3,10 @@
 (rime-schema bopomofo
   (name "注音")
   (static-files "terra_pinyin.dict.yaml" "zhuyin.yaml")
-  (mobile-skin bopomofo
+  (keyboard-layout bopomofo
     (meta
       (name "Bopomofo" "注音")
-      (summary "A Yuanshu skin for Bopomofo input with the standard secondary pages.")
+      (summary "A Yuanshu keyboard layout for Bopomofo input with the standard secondary pages.")
       (features
         "Bopomofo phone layout"
         "Bundled custom iPad pages"))

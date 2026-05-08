@@ -122,6 +122,7 @@ input {
 }
 
 .rime-config-shell,
+.rime-museum-shell,
 .rime-primary-column,
 .rime-section-header,
 .rime-option-copy,
@@ -133,6 +134,10 @@ input {
 
 .rime-config-shell {
   gap: 1rem;
+}
+
+.rime-museum-shell {
+  gap: 1.25rem;
 }
 
 .rime-hero-card,
@@ -280,6 +285,8 @@ input {
 }
 
 .rime-option-card,
+.rime-exhibit-card,
+.rime-layout-card,
 .rime-build-button {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -292,20 +299,30 @@ input {
 }
 
 .rime-option-card.is-selected,
-.rime-option-card:has(.rime-option-input:checked) {
+.rime-option-card:has(.rime-option-input:checked),
+.rime-exhibit-card:hover {
   border-color: var(--selected-line);
   background: var(--accent-soft);
 }
 
-.rime-option-card {
+.rime-option-card,
+.rime-exhibit-card,
+.rime-layout-card {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
   padding: 0.65rem;
   background: transparent;
-  cursor: pointer;
   min-width: 0;
+}
+
+.rime-exhibit-card {
+  text-decoration: none;
+}
+
+.rime-option-card {
+  cursor: pointer;
 }
 
 .rime-option-card.is-auto {
@@ -341,7 +358,9 @@ input {
 
 .rime-platform-hint,
 .rime-option-id,
-.rime-inline-note {
+.rime-inline-note,
+.rime-family-label,
+.rime-artifact-chip {
   font-size: 0.82rem;
 }
 
@@ -365,6 +384,30 @@ input {
   background: var(--inline-note-bg);
 }
 
+.rime-family-label,
+.rime-artifact-chip {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  padding: 0.12rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.rime-artifact-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.rime-card-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 .rime-option-card.is-auto .rime-inline-note {
   display: inline-flex;
 }
@@ -376,6 +419,30 @@ input {
   background: transparent;
   color: var(--ink);
   font-weight: 800;
+}
+
+.rime-build-button:hover {
+  border-color: var(--selected-line);
+  background: var(--accent-soft);
+}
+
+.rime-build-button-secondary {
+  border-color: var(--selected-line);
+}
+
+.rime-exhibit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.35rem 0 0.2rem;
+}
+
+.rime-artifact-form {
+  margin: 0;
+}
+
+.rime-artifact-form .rime-build-button {
+  min-width: 13rem;
 }
 
 .rime-sticky-actions {
@@ -427,6 +494,55 @@ input {
   font-size: 0.82rem;
 }
 
+.rime-catalog-heading,
+.rime-exhibit-meta,
+.rime-exhibit-section,
+.rime-layout-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.rime-catalog-heading {
+  gap: 0.35rem;
+}
+
+.rime-exhibit-meta {
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.rime-exhibit-section {
+  gap: 0.7rem;
+}
+
+.rime-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+  gap: 0.7rem;
+}
+
+.rime-layout-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.rime-dependency-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rime-dependency-list code {
+  display: inline-flex;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
 .rime-footer-credit {
   flex: 1 1 12rem;
 }
@@ -473,7 +589,8 @@ input {
   width: 100%;
 }
 
-.rime-schema-preview {
+.rime-schema-preview,
+.rime-layout-preview {
   overflow: hidden;
   width: 100%;
 }

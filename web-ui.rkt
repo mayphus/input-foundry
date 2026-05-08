@@ -9,103 +9,62 @@
          "schema/registry.rkt")
 
 (provide render-page
+         render-exhibit-page
          remember-locale-headers
          form-profile
          form-request?)
 
-;; The Racket UI is deliberately boring HTML. The form posts directly to the
-;; ZIP build path; CSS handles the immediate selected-card state.
-
-(define htmx-script
-  "https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js")
-
-(define app-css-href "/app.css?v=20260508")
+(define app-css-href "/app.css?v=20260508-museum")
 
 (define copy
   (hash
    'en
    (hash
-    'title "Rime Config"
-    'landing-copy "Build a small Rime package for the place you type most."
-    'desktop-copy "Export desktop Rime schemas for Squirrel, Weasel, or fcitx-rime."
-    'mobile-copy "Export Yuanshu IME schemas and matching skins for iPhone or iPad."
-    'desktop "Desktop"
-    'mobile "Mobile"
-    'home "Home"
-    'instructions-title "Use"
-    'instructions-mobile "Pick the keyboard preview you want, then build the ZIP and import it in Yuanshu."
-    'instructions-desktop "Pick the desktop schemas you want, then build a ZIP for Squirrel, Weasel, or fcitx-rime."
-    'instructions-deps "Required dependencies are added automatically."
-    'schemas "Schemas"
-    'schemas-copy "Dependent schemas are added automatically."
-    'skins "Skins"
-    'auto "Auto"
-    'summary "Summary"
-    'platform "Platform"
-    'summary-copy "Review the package contents, then generate the archive."
-    'empty "Nothing selected yet."
-    'build "Build and Download"
-    'zip-help "Output is a ZIP archive."
-    'yuanshu-help "Use in Yuanshu"
-    'yuanshu-steps
-    '("Install Yuanshu IME on iPhone or iPad."
-      "Open the ZIP in Yuanshu, or use Input Schemas -> ... -> Import."
-      "Remove any old skin with the same name before importing.")
+    'title "Chinese Input Museum"
+    'landing-copy "A small working museum for Chinese input methods. Browse an exhibit, inspect its keyboard layout, then download a Rime or Yuanshu package."
+    'home "Museum"
+    'back "Back to museum"
+    'details "Exhibit"
+    'families "Families"
+    'layouts "Keyboard layouts"
+    'dependencies "Dependencies"
+    'no-dependencies "No extra schema dependencies."
+    'artifacts "Artifacts"
+    'rime "Rime"
+    'yuanshu "Yuanshu"
+    'download-rime "Download Rime package"
+    'download-yuanshu "Download Yuanshu package"
+    'layout-copy "The same keyboard layout data renders as web SVG previews and as Yuanshu .cskin packages with demo.png."
+    'missing "Exhibit not found."
     'support "Support"
-    'footer-credit "Powered by 🎾 Racket · 🖥 pb62"
+    'footer-credit "Powered by Racket on pb62"
     'language "繁")
    'zh-Hant
    (hash
-    'title "Rime 配置"
-    'landing-copy "為你最常輸入的地方生成一份小而完整的 Rime 配置。"
-    'desktop-copy "導出桌面 Rime 方案，可用於鼠鬚管、小狼毫或 fcitx-rime。"
-    'mobile-copy "導出元書輸入法方案與配套皮膚，適合 iPhone 或 iPad。"
-    'desktop "桌面"
-    'mobile "移動端"
-    'home "首頁"
-    'instructions-title "使用"
-    'instructions-mobile "選擇你想要的鍵盤預覽，然後編譯 ZIP 並導入元書。"
-    'instructions-desktop "選擇需要的桌面方案，然後編譯適合鼠鬚管、小狼毫或 fcitx-rime 的 ZIP。"
-    'instructions-deps "需要的依賴方案會自動加入。"
-    'schemas "方案"
-    'schemas-copy "依賴方案會自動補上。"
-    'skins "皮膚"
-    'auto "自動"
-    'summary "摘要"
-    'platform "平台"
-    'summary-copy "確認打包內容後即可生成壓縮檔。"
-    'empty "目前尚未選擇。"
-    'build "編譯並下載"
-    'zip-help "輸出為 ZIP 壓縮包。"
-    'yuanshu-help "如何在元書中使用"
-    'yuanshu-steps
-    '("先在 iPhone 或 iPad 安裝元書輸入法。"
-      "用元書打開這個 ZIP，或在「輸入方案」->「...」->「導入方案」中導入。"
-      "導入前請先刪除同名舊皮膚。")
+    'title "中文輸入博物館"
+    'landing-copy "一座可以實際使用的中文輸入博物館。瀏覽展品、查看鍵盤佈局，然後下載 Rime 或元書輸入法套件。"
+    'home "博物館"
+    'back "回到博物館"
+    'details "展品"
+    'families "分類"
+    'layouts "鍵盤佈局"
+    'dependencies "依賴方案"
+    'no-dependencies "沒有額外方案依賴。"
+    'artifacts "輸出"
+    'rime "Rime"
+    'yuanshu "元書"
+    'download-rime "下載 Rime 套件"
+    'download-yuanshu "下載元書套件"
+    'layout-copy "同一份鍵盤佈局資料可以渲染成網頁 SVG 預覽，也可以生成元書 .cskin 套件與 demo.png。"
+    'missing "找不到這個展品。"
     'support "支持"
-    'footer-credit "Powered by 🎾 Racket · 🖥 pb62"
+    'footer-credit "Powered by Racket on pb62"
     'language "EN")))
 
-(struct ui-state (route locale selected-schemas configured?)
-  #:transparent)
+(define locale-cookie-name "rime-locale")
 
 (define (t locale key)
   (hash-ref (hash-ref copy locale) key))
-
-(define (hero-copy locale route)
-  (case route
-    [(desktop) (list (t locale 'desktop-copy))]
-    [(mobile)
-     (case locale
-       [(zh-Hant)
-        (list "導出元書輸入法方案與配套皮膚，適合 iPhone 或 "
-              '(del ((class "rime-unready-device")) "iPad")
-              "。")]
-       [else
-        (list "Export Yuanshu IME schemas and matching skins for iPhone or "
-              '(del ((class "rime-unready-device")) "iPad")
-              ".")])]
-    [else (list (t locale 'landing-copy))]))
 
 (define (next-locale locale)
   (if (eq? locale 'zh-Hant) 'en 'zh-Hant))
@@ -113,38 +72,9 @@
 (define (locale-param value)
   (if (equal? value "zh-Hant") 'zh-Hant 'en))
 
-(define locale-cookie-name "rime-locale")
-
 (define (locale-value? value)
   (or (equal? value "en")
       (equal? value "zh-Hant")))
-
-(define (request-cookie-value req name)
-  (for/first ([cookie (in-list (request-cookies req))]
-              #:when (equal? (client-cookie-name cookie) name))
-    (client-cookie-value cookie)))
-
-(define (remember-locale-headers req)
-  (define locale (request-value req "locale" #f))
-  (if (locale-value? locale)
-      (list (cookie->header
-             (make-cookie locale-cookie-name locale
-                          #:path "/"
-                          #:max-age (* 60 60 24 365))))
-      '()))
-
-(define (route-param value fallback)
-  (match value
-    ["desktop" 'desktop]
-    ["mobile" 'mobile]
-    ["home" 'home]
-    [_ fallback]))
-
-(define (route-path route)
-  (case route
-    [(desktop) "/desktop"]
-    [(mobile) "/"]
-    [else "/"]))
 
 (define (binding-value binding)
   (and (binding:form? binding)
@@ -168,8 +98,25 @@
     [(list value _ ...) value]
     [_ default]))
 
-(define (present? req key)
-  (not (null? (request-values req key))))
+(define (request-cookie-value req name)
+  (for/first ([cookie (in-list (request-cookies req))]
+              #:when (equal? (client-cookie-name cookie) name))
+    (client-cookie-value cookie)))
+
+(define (request-locale req)
+  (locale-param
+   (or (request-value req "locale" #f)
+       (request-cookie-value req locale-cookie-name)
+       "en")))
+
+(define (remember-locale-headers req)
+  (define locale (request-value req "locale" #f))
+  (if (locale-value? locale)
+      (list (cookie->header
+             (make-cookie locale-cookie-name locale
+                          #:path "/"
+                          #:max-age (* 60 60 24 365))))
+      '()))
 
 (define (form-request? req)
   (define headers (request-headers/raw req))
@@ -178,47 +125,61 @@
          (regexp-match? #rx#"application/x-www-form-urlencoded"
                         (header-value header)))))
 
+(define (valid-artifact value)
+  (cond
+    [(or (equal? value "rime") (equal? value "yuanshu")) value]
+    [(equal? value "true") "rime"]
+    [(equal? value "false") "yuanshu"]
+    [else #f]))
+
+(define (form-profile req)
+  (define schemas (request-values req "schemas"))
+  (define artifact
+    (or (valid-artifact (request-value req "artifact" #f))
+        (valid-artifact (request-value req "desktop?" #f))
+        "rime"))
+  (hash 'schemas schemas
+        'artifact artifact))
+
 (define (schema-id schema)
   (hash-ref schema 'id))
 
 (define (schema-name schema)
   (hash-ref schema 'name (schema-id schema)))
 
-(define (schema-mobile-only? schema)
-  (hash-ref schema 'mobile-only? #f))
+(define (schema-description schema)
+  (hash-ref schema 'description ""))
 
 (define (schema-deps schema)
   (hash-ref schema 'deps '()))
 
-(define (schema-mobile-skins schema)
-  (hash-ref schema 'mobile-skins '()))
+(define (schema-artifacts schema)
+  (hash-ref schema 'artifacts '()))
+
+(define (schema-keyboard-layouts schema)
+  (hash-ref schema 'keyboard-layouts '()))
 
 (define (schema-by-id schemas id)
   (for/first ([schema (in-list schemas)]
               #:when (equal? id (schema-id schema)))
     schema))
 
-(define (auto-deps schemas selected)
-  (let loop ([visited selected] [queue selected] [auto '()])
-    (match queue
-      ['() (reverse auto)]
-      [(cons id rest)
-       (define schema (schema-by-id schemas id))
-       (define new-deps
-         (filter (lambda (dep) (not (member dep visited)))
-                 (if schema (schema-deps schema) '())))
-       (loop (append visited new-deps)
-             (append rest new-deps)
-             (append new-deps auto))])))
+(define (layout-id layout)
+  (hash-ref layout 'id))
 
-(define (active-schema-ids schemas selected)
-  (remove-duplicates (append selected (auto-deps schemas selected))))
+(define (layout-name layout)
+  (define name (hash-ref layout 'name ""))
+  (if (string=? name "") (layout-id layout) name))
 
-(define (visible-schemas schemas route)
-  (filter (lambda (schema)
-            (or (eq? route 'mobile)
-                (not (schema-mobile-only? schema))))
-          schemas))
+(define (layout-by-id layouts id)
+  (for/first ([layout (in-list layouts)]
+              #:when (equal? id (layout-id layout)))
+    layout))
+
+(define (schema-layout-items schema layouts)
+  (filter values
+          (for/list ([layout-id (in-list (schema-keyboard-layouts schema))])
+            (layout-by-id layouts layout-id))))
 
 (define (cataloged-schemas schemas)
   (filter-map
@@ -230,209 +191,182 @@
      (and (pair? items) (cons catalog-id items)))
    schema-catalog-order))
 
-(define (skin-id skin)
-  (list-ref skin 0))
-
-(define (skin-name skin)
-  (define name (list-ref skin 2))
-  (if (string=? name "") (skin-id skin) name))
-
-(define (visible-skins schemas skins route selected-ids)
-  (if (not (eq? route 'mobile))
-      '()
-      (let ([skin-ids
-             (remove-duplicates
-              (append-map
-               (lambda (id)
-                 (define schema (schema-by-id schemas id))
-                 (if schema (schema-mobile-skins schema) '()))
-               selected-ids))])
-        (filter (lambda (skin) (member (skin-id skin) skin-ids)) skins))))
-
-(define (selected-or-default req route)
-  (define configured? (present? req "configured"))
-  (define selected (request-values req "schemas"))
-  (cond
-    [configured? selected]
-    [(eq? route 'mobile) '("flypy")]
-    [else '("flypy")]))
-
-(define (parse-state req route)
-  (define locale
-    (locale-param
-     (or (request-value req "locale" #f)
-         (request-cookie-value req locale-cookie-name)
-         "en")))
-  (define actual-route (route-param (request-value req "route" #f) route))
-  (define configured? (present? req "configured"))
-  (ui-state actual-route
-            locale
-            (selected-or-default req actual-route)
-            configured?))
+(define (classes . parts)
+  (string-join (filter (lambda (part) part) parts) " "))
 
 (define (attrs . pairs)
   (filter values pairs))
 
-(define (input-hidden name value)
-  `(input ((type "hidden") (name ,name) (value ,value))))
+(define (language-toggle locale current-path)
+  `(a ((class "rime-language-toggle rime-footer-language")
+       (href ,(format "~a?locale=~a"
+                      current-path
+                      (symbol->string (next-locale locale)))))
+      ,(t locale 'language)))
 
-(define (classes . values)
-  (string-join (filter (lambda (value) value) values) " "))
+(define (artifact-label locale artifact)
+  (cond
+    [(equal? artifact "yuanshu") (t locale 'yuanshu)]
+    [else (t locale 'rime)]))
 
-(define (skin-by-id skins id)
-  (for/first ([skin (in-list skins)]
-              #:when (equal? (skin-id skin) id))
-    skin))
+(define (artifact-chips locale artifacts)
+  `(div ((class "rime-artifact-chips"))
+        ,@(for/list ([artifact (in-list artifacts)])
+            `(span ((class "rime-artifact-chip"))
+                   ,(artifact-label locale artifact)))))
 
-(define (schema-preview skin)
-  `(div ((class "rime-schema-preview keyboard-preview keyboard-preview-svg-wrap"))
+(define (layout-preview layout)
+  `(div ((class "rime-layout-preview keyboard-preview keyboard-preview-svg-wrap"))
         (picture
          (source ((media "(prefers-color-scheme: dark)")
-                  (srcset ,(format "/skins/~a/preview-dark.svg" (skin-id skin)))))
+                  (srcset ,(format "/layouts/~a/preview-dark.svg" (layout-id layout)))))
          (img ((class "keyboard-preview-svg")
                (loading "lazy")
-               (src ,(format "/skins/~a/preview.svg" (skin-id skin)))
-               (alt ,(skin-name skin)))))))
+               (src ,(format "/layouts/~a/preview.svg" (layout-id layout)))
+               (alt ,(layout-name layout)))))))
 
-(define (schema-card locale schema checked? auto? preview-skins)
-  `(label ((class ,(classes "rime-option-card"
-                            (and checked? "is-selected")
-                            (and auto? "is-auto"))))
-          (input ,(attrs `(class "rime-option-input")
-                         `(type "checkbox")
-                         `(name "schemas")
-                         `(value ,(schema-id schema))
-                         (and checked? `(checked "checked"))))
-        (div ((class "rime-option-head"))
-             (div ((class "rime-option-copy"))
-                  (div ((class "rime-option-title-row"))
-                       (span ((class "rime-option-title")) ,(schema-name schema))
-                       (span ((class "rime-option-id")) ,(schema-id schema))
-                       ,@(if auto?
-                             `((span ((class "rime-inline-note")) ,(t locale 'auto)))
-                             '()))))
-        ,@(if (pair? preview-skins)
-              `((div ((class "rime-schema-previews"))
-                     ,@(for/list ([skin (in-list preview-skins)])
-                         (schema-preview skin))))
-              '())))
+(define (schema-card locale schema layouts)
+  (define catalog-id (schema-id->catalog-id (schema-id schema)))
+  (define preview-layouts (schema-layout-items schema layouts))
+  `(a ((class "rime-exhibit-card")
+       (href ,(format "/exhibits/~a" (schema-id schema))))
+      (div ((class "rime-option-head"))
+           (div ((class "rime-option-copy"))
+                (div ((class "rime-option-title-row"))
+                     (span ((class "rime-option-title")) ,(schema-name schema))
+                     (span ((class "rime-option-id")) ,(schema-id schema)))
+                (span ((class "rime-family-label")) ,(schema-catalog-label catalog-id))))
+      (p ((class "rime-card-description")) ,(schema-description schema))
+      ,(artifact-chips locale (schema-artifacts schema))
+      ,@(if (pair? preview-layouts)
+            `((div ((class "rime-schema-previews"))
+                   ,@(for/list ([layout (in-list preview-layouts)])
+                       (layout-preview layout))))
+            '())))
 
-(define (schema-card-for locale route skins selected-ids active-ids auto-ids schema)
-  (define id (schema-id schema))
-  (define preview-skins
-    (if (eq? route 'mobile)
-        (filter values
-                (map (lambda (skin-id)
-                       (skin-by-id skins skin-id))
-                     (schema-mobile-skins schema)))
-        '()))
-  (schema-card locale
-               schema
-               (member id selected-ids)
-               (member id auto-ids)
-               preview-skins))
-
-(define (schema-catalog-section locale route skins selected-ids active-ids auto-ids catalog)
+(define (catalog-section locale layouts catalog)
   (define catalog-id (car catalog))
   (define schemas (cdr catalog))
   `(section ((class "rime-schema-catalog"))
-            (h3 ((class "rime-schema-catalog-title")) ,(schema-catalog-label catalog-id))
+            (div ((class "rime-catalog-heading"))
+                 (h2 ((class "rime-schema-catalog-title"))
+                     ,(schema-catalog-label catalog-id))
+                 (p ((class "rime-section-copy"))
+                    ,(schema-catalog-summary catalog-id)))
             (div ((class "rime-option-grid"))
                  ,@(for/list ([schema (in-list schemas)])
-                     (schema-card-for locale route skins selected-ids active-ids auto-ids schema)))))
+                     (schema-card locale schema layouts)))))
 
-(define (configurator-xexpr req schemas skins #:route [fallback-route 'desktop])
-  (define state (parse-state req fallback-route))
-  (define route (ui-state-route state))
-  (define locale (ui-state-locale state))
-  (define selected-ids (ui-state-selected-schemas state))
-  (define auto-ids (auto-deps schemas selected-ids))
-  (define active-ids (active-schema-ids schemas selected-ids))
-  `(form ((id "configurator-form")
-          (class "rime-config-grid")
-          (method "post")
-          (action "/build"))
-     ,(input-hidden "configured" "1")
-     ,(input-hidden "route" (symbol->string route))
-     ,(input-hidden "locale" (symbol->string locale))
-     ,(input-hidden "desktop?" (if (eq? route 'desktop) "true" "false"))
-     (div ((class "rime-primary-column"))
-          (section ((class "rime-section"))
-                   (div ((class "rime-schema-catalogs"))
-                        ,@(for/list ([catalog (in-list (cataloged-schemas
-                                                        (visible-schemas schemas route)))])
-                            (schema-catalog-section locale
-                                                    route
-                                                    skins
-                                                    selected-ids
-                                                    active-ids
-                                                    auto-ids
-                                                    catalog))))
-          (div ((class "rime-sticky-actions"))
-               (button ((class "rime-build-button rime-sticky-build-button")
-                        (type "submit"))
-                       ,(t locale 'build))))))
+(define (footer locale current-path)
+  `(footer ((class "rime-footer"))
+           (span ((class "rime-footer-credit")) ,(t locale 'footer-credit))
+           (div ((class "rime-footer-support"))
+                (span ((class "rime-footer-support-label")) ,(t locale 'support))
+                (img ((class "rime-footer-support-image")
+                      (src "/support-8f6d2b.svg")
+                      (alt ,(t locale 'support)))))
+           ,(language-toggle locale current-path)))
 
-(define (instructions-section locale route)
-  `(section ((class "rime-instructions"))
-            (h2 ((class "rime-instructions-title")) ,(t locale 'instructions-title))
-            (p ,(if (eq? route 'desktop)
-                    (t locale 'instructions-desktop)
-                    (t locale 'instructions-mobile)))
-            (p ,(t locale 'instructions-deps))))
-
-(define (page-shell req schemas skins route)
-  (define route* (if (eq? route 'home) 'mobile route))
-  (define state (parse-state req route*))
-  (define locale (ui-state-locale state))
-  (define current-route (ui-state-route state))
+(define (page-xexpr locale current-path body)
   `(html ((lang ,(if (eq? locale 'zh-Hant) "zh-Hant" "en")))
          (head
           (meta ((charset "utf-8")))
           (meta ((name "viewport") (content "width=device-width, initial-scale=1")))
           (title ,(t locale 'title))
-          (link ((rel "stylesheet") (href ,app-css-href)))
-          (script ((src ,htmx-script)
-                   (defer "defer")) ""))
+          (link ((rel "stylesheet") (href ,app-css-href))))
          (body
           (main ((id "app"))
-                (div ((class "rime-config-shell"))
-                     (section ((class "rime-hero-card"))
-                              (div ((class "rime-hero-head"))
-                                   (div
-                                    (a ((class "rime-back-link")
-                                        (href "/")) ,(t locale 'home))
-                                   (h1 ((class "page-title")) ,(t locale 'title))
-                                   (p ((class "rime-section-copy"))
-                                      ,@(hero-copy locale current-route))))
-                     (nav ((class "rime-platform-tabs"))
-                                   (a ((class ,(classes "rime-platform-tab"
-                                                        (and (eq? current-route 'mobile) "is-active")))
-                                       (href "/")) ,(t locale 'mobile))
-                                   (a ((class ,(classes "rime-platform-tab"
-                                                        (and (eq? current-route 'desktop) "is-active")))
-                                       (href "/desktop")) ,(t locale 'desktop))))
-                     ,(instructions-section locale current-route)
-                     (div ((id "configurator"))
-                          ,(configurator-xexpr req schemas skins #:route current-route))
-                     (footer ((class "rime-footer"))
-                             (span ((class "rime-footer-credit")) ,(t locale 'footer-credit))
-                             (div ((class "rime-footer-support"))
-                                  (span ((class "rime-footer-support-label")) ,(t locale 'support))
-                                  (img ((class "rime-footer-support-image")
-                                        (src "/support-8f6d2b.svg")
-                                        (alt ,(t locale 'support)))))
-                             (a ((class "rime-language-toggle rime-footer-language")
-                                 (href ,(format "~a?locale=~a"
-                                                (route-path route)
-                                                (symbol->string (next-locale locale)))))
-                                ,(t locale 'language))))))))
+                (div ((class "rime-museum-shell"))
+                     ,@body
+                     ,(footer locale current-path))))))
 
-(define (render-page req schemas skins #:route [route 'mobile])
-  (xexpr->string (page-shell req schemas skins route)))
+(define (catalog-page req schemas layouts)
+  (define locale (request-locale req))
+  (page-xexpr
+   locale
+   "/"
+   `((section ((class "rime-hero-card"))
+              (div ((class "rime-hero-head"))
+                   (div
+                    (a ((class "rime-back-link") (href "/")) ,(t locale 'home))
+                    (h1 ((class "page-title")) ,(t locale 'title))
+                    (p ((class "rime-section-copy rime-hero-copy"))
+                       ,(t locale 'landing-copy)))))
+     (section ((class "rime-instructions"))
+              (h2 ((class "rime-instructions-title")) ,(t locale 'families))
+              (p ,(t locale 'layout-copy)))
+     (div ((class "rime-schema-catalogs"))
+          ,@(for/list ([catalog (in-list (cataloged-schemas schemas))])
+              (catalog-section locale layouts catalog))))))
 
-(define (form-profile req)
-  (define schemas (request-values req "schemas"))
-  (define desktop? (equal? (request-value req "desktop?" "true") "true"))
-  (hash 'schemas schemas
-        'desktop? desktop?))
+(define (dependency-list locale deps)
+  (if (null? deps)
+      `(p ((class "rime-empty-state")) ,(t locale 'no-dependencies))
+      `(ul ((class "rime-dependency-list"))
+           ,@(for/list ([dep (in-list deps)])
+               `(li (code ,dep))))))
+
+(define (artifact-form locale schema artifact)
+  `(form ((class "rime-artifact-form")
+          (method "post")
+          (action "/build"))
+         (input ((type "hidden") (name "schemas") (value ,(schema-id schema))))
+         (input ((type "hidden") (name "artifact") (value ,artifact)))
+         (button ((class ,(classes "rime-build-button"
+                                   (and (equal? artifact "yuanshu")
+                                        "rime-build-button-secondary")))
+                  (type "submit"))
+                 ,(if (equal? artifact "yuanshu")
+                      (t locale 'download-yuanshu)
+                      (t locale 'download-rime)))))
+
+(define (layout-detail-card layout)
+  `(article ((class "rime-layout-card"))
+            (div ((class "rime-option-title-row"))
+                 (h3 ((class "rime-layout-title")) ,(layout-name layout))
+                 (span ((class "rime-option-id")) ,(layout-id layout)))
+            ,(layout-preview layout)))
+
+(define (exhibit-page req schemas layouts schema-id*)
+  (define locale (request-locale req))
+  (define schema (schema-by-id schemas schema-id*))
+  (define current-path (format "/exhibits/~a" schema-id*))
+  (page-xexpr
+   locale
+   current-path
+   (if schema
+       (let* ([catalog-id (schema-id->catalog-id (schema-id schema))]
+              [schema-layouts (schema-layout-items schema layouts)]
+              [artifacts (schema-artifacts schema)])
+         `((section ((class "rime-hero-card rime-exhibit-hero"))
+                    (div ((class "rime-hero-head"))
+                         (div
+                          (a ((class "rime-back-link") (href "/")) ,(t locale 'back))
+                          (h1 ((class "page-title")) ,(schema-name schema))
+                          (p ((class "rime-section-copy rime-hero-copy"))
+                             ,(schema-description schema))))
+                    (div ((class "rime-exhibit-meta"))
+                         (span ((class "rime-family-label")) ,(schema-catalog-label catalog-id))
+                         (span ((class "rime-option-id")) ,(schema-id schema))
+                         ,(artifact-chips locale artifacts)))
+           (section ((class "rime-exhibit-actions"))
+                    ,@(for/list ([artifact (in-list artifacts)])
+                        (artifact-form locale schema artifact)))
+           (section ((class "rime-section rime-exhibit-section"))
+                    (h2 ((class "rime-section-title")) ,(t locale 'layouts))
+                    (p ((class "rime-section-copy")) ,(t locale 'layout-copy))
+                    (div ((class "rime-layout-grid"))
+                         ,@(for/list ([layout (in-list schema-layouts)])
+                             (layout-detail-card layout))))
+           (section ((class "rime-section rime-exhibit-section"))
+                    (h2 ((class "rime-section-title")) ,(t locale 'dependencies))
+                    ,(dependency-list locale (schema-deps schema)))))
+       `((section ((class "rime-hero-card"))
+                  (a ((class "rime-back-link") (href "/")) ,(t locale 'back))
+                  (h1 ((class "page-title")) ,(t locale 'missing)))))))
+
+(define (render-page req schemas layouts #:route [_route 'home])
+  (xexpr->string (catalog-page req schemas layouts)))
+
+(define (render-exhibit-page req schemas layouts schema-id)
+  (xexpr->string (exhibit-page req schemas layouts schema-id)))

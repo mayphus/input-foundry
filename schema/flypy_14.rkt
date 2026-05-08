@@ -2,7 +2,7 @@
 
 (rime-schema flypy_14
   (name "小鶴雙拼-14鍵")
-  (mobile-only)
+  (artifacts yuanshu)
   (deps cangjie6)
   (static-files "rime_ice.dict.yaml")
   (static-dirs "rime_ice_dicts")
@@ -77,10 +77,10 @@
     (version "0.1")
     (description
      "朙月拼音＋小鶴雙拼 14 鍵方案。\n使用 rime-ice 詞庫，適合 Yuanshu iPhone 14 鍵圖示皮膚。"))
-  (mobile-skin flypy_14
+  (keyboard-layout flypy_14
     (meta
       (name "Flypy-14 Key" "小鶴雙拼-14鍵")
-      (summary "A compact Yuanshu skin for the Flypy 14-key layout.")
+      (summary "A compact Yuanshu keyboard layout for the Flypy 14-key layout.")
       (features
         "14-key phone layout"
         "Standard iPad pinyin page and secondary pages"))

@@ -4,18 +4,18 @@
 
 (flypy-family
   (dictionary luna_pinyin)
-  (mobile-skins flypy)
+  (keyboard-layouts flypy)
 
   (variant flypy_ice
     (name "小鶴雙拼-霧凇")
     (dictionary ice)
-    (mobile-only)
-    (mobile-skins flypy))
+    (artifacts yuanshu)
+    (keyboard-layouts flypy))
 
-  (mobile-skin flypy
+  (keyboard-layout flypy
     (meta
       (name "Flypy" "小鶴雙拼")
-      (summary "A Yuanshu skin for Flypy double pinyin with dedicated phone and iPad layouts.")
+      (summary "A Yuanshu keyboard layout for Flypy double pinyin with dedicated phone and iPad layouts.")
       (features
         "Flypy legends on both phone and iPad"
         "Standard numeric and symbolic secondary pages"))
@@ -33,10 +33,10 @@
         [flypy-single 18.5 #:weight bold]
         [flypy-double 13   #:weight bold])))
 
-  (mobile-skin hybrid
+  (keyboard-layout hybrid
     (meta
       (name "QuadHarmonic Keyboard" "四合一鍵盤")
-      (summary "A hybrid Yuanshu skin that combines Flypy, Cangjie 6, ABC, and symbol legends on one phone layout.")
+      (summary "A hybrid Yuanshu keyboard layout that combines Flypy, Cangjie 6, ABC, and symbol legends on one phone layout.")
       (features
         "Flypy and Cangjie 6 legends on shared phone keys"
         "ABC and symbol hints"

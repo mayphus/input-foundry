@@ -6,15 +6,19 @@
          racket/string)
 
 (provide object
+         keyboard-layout-spec
+         keyboard-layout-spec?
          skin-spec
          skin-spec?
          page-spec
          page-spec?
          button-spec
          button-spec?
+         make-keyboard-layout
          make-skin
          make-page
          make-button
+         make-keyboard-layout-files
          make-skin-files
          bundle
          bundle/strict
@@ -35,7 +39,10 @@
 
 (struct button-spec (name kind props) #:transparent)
 (struct page-spec (name base-kind rows buttons variants overrides) #:transparent)
-(struct skin-spec (config-data pages extras) #:transparent)
+(struct keyboard-layout-spec (config-data pages extras) #:transparent)
+
+(define skin-spec keyboard-layout-spec)
+(define skin-spec? keyboard-layout-spec?)
 
 (define (make-button name kind props)
   (button-spec name kind props))
@@ -48,11 +55,13 @@
                    #:overrides [overrides (hash)])
   (page-spec name base-kind rows buttons variants overrides))
 
-(define (make-skin
+(define (make-keyboard-layout
          #:config config-data
          #:pages [pages '()]
          #:extras [extras '()])
-  (skin-spec config-data pages extras))
+  (keyboard-layout-spec config-data pages extras))
+
+(define make-skin make-keyboard-layout)
 
 (struct json-number-val (lexeme) #:transparent)
 (define json-number? json-number-val?)
@@ -131,7 +140,7 @@
     [(hash? group) group]
     [(page-spec? group) (page-spec-overrides group)]
     [else
-     (error 'make-skin-files "expected page hash or page-spec, got ~v" group)]))
+     (error 'make-keyboard-layout-files "expected page hash or page-spec, got ~v" group)]))
 
 (define (json-file path value)
   (hash path (string-append (render-json value) "\n")))
@@ -150,16 +159,18 @@
   (for/list ([key (in-list (sort (hash-keys combined) string<?))])
     (cons key (hash-ref combined key))))
 
-(define (make-skin-files spec)
-  (unless (skin-spec? spec)
-    (error 'make-skin-files "expected skin-spec, got ~v" spec))
+(define (make-keyboard-layout-files spec)
+  (unless (keyboard-layout-spec? spec)
+    (error 'make-keyboard-layout-files "expected keyboard-layout-spec, got ~v" spec))
   (apply bundle
          (append
-          (for/list ([group (in-list (skin-spec-pages spec))])
+          (for/list ([group (in-list (keyboard-layout-spec-pages spec))])
             (page-group->hash group))
-          (for/list ([group (in-list (skin-spec-extras spec))])
+          (for/list ([group (in-list (keyboard-layout-spec-extras spec))])
             (page-group->hash group))
-          (list (json-file "config.yaml" (skin-spec-config-data spec))))))
+          (list (json-file "config.yaml" (keyboard-layout-spec-config-data spec))))))
+
+(define make-skin-files make-keyboard-layout-files)
 
 (define (static-files store paths)
   (for/hash ([path (in-list paths)])

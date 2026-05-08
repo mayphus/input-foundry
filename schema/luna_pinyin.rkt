@@ -28,10 +28,10 @@
    (recognizer
     #:patterns
     (list (pattern 'punct "^/([0-9]0?|[A-Za-z]+)$"))))
-  (mobile-skin luna_pinyin
+  (keyboard-layout luna_pinyin
     (meta
       (name "Luna Pinyin" "朙月拼音")
-      (summary "A Yuanshu skin for standard full-pinyin typing.")
+      (summary "A Yuanshu keyboard layout for standard full-pinyin typing.")
       (features
         "Standard QWERTY pinyin phone layout"
         "Standard iPad pinyin, numeric, and symbolic pages"))

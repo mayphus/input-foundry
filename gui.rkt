@@ -84,21 +84,21 @@
 (define (build-mobile-bundle! schemas)
   (define profile
     (hash 'schemas schemas
-          'desktop? #f))
+          'artifact "yuanshu"))
   (define profile-out (build-path output-dir mobile-output-name))
   (define zip-path (build-path output-dir (string-append app-profile-name "-mobile.zip")))
-  (define-values (built-out built-zip skin-dir)
+  (define-values (built-out built-zip layout-dir)
     (build-bundle! profile
                    app-profile-name
                    profile-out
                    zip-path))
-  (values built-out built-zip skin-dir))
+  (values built-out built-zip layout-dir))
 
-(define (built-skin-ids skin-dir)
-  (if (directory-exists? skin-dir)
+(define (built-keyboard-layout-ids layout-dir)
+  (if (directory-exists? layout-dir)
       (sort
-       (for/list ([entry (in-list (directory-list skin-dir))]
-                  #:when (directory-exists? (build-path skin-dir entry)))
+       (for/list ([entry (in-list (directory-list layout-dir))]
+                  #:when (directory-exists? (build-path layout-dir entry)))
          (path->string entry))
        string<?)
       '()))
@@ -123,15 +123,15 @@
              (reset-log! log-field (format "Selected schemas: ~a" (string-join schemas ", ")))
              (set-status! status "Building mobile bundle...")
              (append-log! log-field "Building mobile bundle...")
-             (define-values (_profile-out zip-path skin-source-dir) (build-mobile-bundle! schemas))
-             (define skins (built-skin-ids skin-source-dir))
+             (define-values (_profile-out zip-path layout-source-dir) (build-mobile-bundle! schemas))
+             (define layouts (built-keyboard-layout-ids layout-source-dir))
              (define message (format "Built ZIP: ~a" (path->string zip-path)))
              (set-status! status message)
              (append-log! log-field message)
              (append-log! log-field
-                          (if (pair? skins)
-                              (format "Built skins for /Skins/: ~a" (string-join skins ", "))
-                              "No skin folders built."))])))))))
+                          (if (pair? layouts)
+                              (format "Built keyboard layouts for /Skins/: ~a" (string-join layouts ", "))
+                              "No keyboard layout folders built."))])))))))
 
 (define (run-push! schema-rows url-field allow-delete include-big-dicts status log-field buttons)
   (thread
@@ -155,13 +155,13 @@
              (reset-log! log-field (format "Selected schemas: ~a" (string-join schemas ", ")))
              (set-status! status "Building mobile bundle...")
              (append-log! log-field "Building mobile bundle...")
-             (define-values (profile-out zip-path skin-source-dir) (build-mobile-bundle! schemas))
-             (define skins (built-skin-ids skin-source-dir))
+             (define-values (profile-out zip-path layout-source-dir) (build-mobile-bundle! schemas))
+             (define layouts (built-keyboard-layout-ids layout-source-dir))
              (append-log! log-field (format "Built ZIP: ~a" (path->string zip-path)))
              (append-log! log-field
-                          (if (pair? skins)
-                              (format "Built skins for /Skins/: ~a" (string-join skins ", "))
-                              "No skin folders built."))
+                          (if (pair? layouts)
+                              (format "Built keyboard layouts for /Skins/: ~a" (string-join layouts ", "))
+                              "No keyboard layout folders built."))
              (set-status! status "Uploading to Yuanshu WiFi transfer...")
              (append-log! log-field
                           (if base-url
@@ -169,11 +169,11 @@
                               "Scanning LAN for Yuanshu WiFi transfer..."))
              (do-upload! profile-out
                          #:base-url base-url
-                         #:skin-source-dir skin-source-dir
+                         #:skin-source-dir layout-source-dir
                          #:allow-delete (send allow-delete get-value)
                          #:include-big-dicts (send include-big-dicts get-value)
                          #:progress (lambda (line) (append-log! log-field line)))
-             (define done "Upload complete. Redeploy schemas and reselect the skin inside Yuanshu.")
+             (define done "Upload complete. Redeploy schemas and reselect the keyboard layout inside Yuanshu.")
              (set-status! status done)
              (append-log! log-field done)])))))))
 

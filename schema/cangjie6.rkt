@@ -2,7 +2,7 @@
 
 (rime-schema cangjie6
   (name "蒼頡六代")
-  (mobile-skins cangjie6)
+  (keyboard-layouts cangjie6)
   (deps flypy)
   (static-files "cangjie6.dict.yaml")
   (custom "cangjie6.custom.yaml"
@@ -14,10 +14,10 @@
                               "reverse_lookup_filter@flypy_reverse_lookup"
                               "uniquifier"))
     (patch "recognizer/patterns/reverse_lookup" "`[a-z]*;?$"))
-  (mobile-skin cangjie6
+  (keyboard-layout cangjie6
     (meta
       (name "Cangjie 6" "倉頡六代")
-      (summary "A Yuanshu skin focused on Cangjie 6 labels across phone and iPad layouts.")
+      (summary "A Yuanshu keyboard layout focused on Cangjie 6 labels across phone and iPad layouts.")
       (features
         "Cangjie-centered legends"
         "Standard numeric and symbolic secondary pages"))

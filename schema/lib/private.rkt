@@ -7,7 +7,7 @@
 ;;
 ;;   (rime-schema flypy_14
 ;;     (name "14鍵")
-;;     (mobile-only)
+;;     (artifacts yuanshu)
 ;;     (deps cangjie6)
 ;;     (static-files "rime_ice.dict.yaml")
 ;;     (static-dirs "rime_ice_dicts")
@@ -24,7 +24,7 @@
 ;;       (version "0.1")
 ;;       (description "...")
 ;;       (patch "recognizer/patterns/reverse_lookup" "`[a-z]*'?$"))
-;;     (mobile-skin flypy_14
+;;     (keyboard-layout flypy_14
 ;;       (meta ...)
 ;;       (phone-layout flypy-14)
 ;;       (ipad-layout standard-18)))
@@ -246,6 +246,21 @@
 	              #,patch-expr)])
         #'(hash)))
 
+  (define (schema-clause-description schema-cl)
+    (and schema-cl
+         (let* ([items (syntax->list schema-cl)]
+                [body (cdr items)]
+                [description-cl (find-clause body 'description)])
+           (and description-cl (cadr (syntax->list description-cl))))))
+
+  (define (custom-clause-description custom-cl)
+    (and custom-cl
+         (syntax-parse custom-cl
+           [(_ filename clause ...)
+            (define clauses (syntax->list #'(clause ...)))
+            (define description-cl (find-clause clauses 'description))
+            (and description-cl (cadr (syntax->list description-cl)))])))
+
   (define (schema-clause-expr stx schema-id schema-name deps schema-cl)
     (if schema-cl
         (let* ([items (syntax->list schema-cl)]
@@ -275,21 +290,23 @@
                    #,@sections))))
         #'#f))
 
-  (define (mobile-skin-clause? clause)
+  (define (keyboard-layout-clause? clause)
     (define lst (syntax->list clause))
-    (and lst (pair? lst) (eq? (syntax-e (car lst)) 'mobile-skin)))
+    (and lst
+         (pair? lst)
+         (memq (syntax-e (car lst)) '(keyboard-layout mobile-skin))))
 
-  (define (mobile-skin-id skin-cl)
-    (define items (syntax->list skin-cl))
+  (define (keyboard-layout-id layout-cl)
+    (define items (syntax->list layout-cl))
     (unless (>= (length items) 2)
-      (raise-syntax-error 'mobile-skin "missing skin id" skin-cl))
+      (raise-syntax-error 'keyboard-layout "missing layout id" layout-cl))
     (id-or-string->string (cadr items)))
 
-  (define (mobile-skin-def skin-cl)
-    (define items (syntax->list skin-cl))
-    (define skin-id (id-or-string->string (cadr items)))
+  (define (keyboard-layout-def layout-cl)
+    (define items (syntax->list layout-cl))
+    (define layout-id (id-or-string->string (cadr items)))
     (define body (map syntax->datum (cddr items)))
-    #`(cons #,(string-expr skin-cl skin-id) '#,body))
+    #`(cons #,(string-expr layout-cl layout-id) '#,body))
 
 )
 
@@ -298,12 +315,17 @@
     [(_ schema-id:id clause ...)
      (define clauses (syntax->list #'(clause ...)))
      (define name-cl (find-clause clauses 'name))
+     (define artifacts-cl
+       (or (find-clause clauses 'artifacts)
+           (find-clause clauses 'artifact)))
      (define mobile-only-cl (find-clause clauses 'mobile-only))
-     (define mobile-skins-cl
-       (or (find-clause clauses 'mobile-skins)
+     (define keyboard-layouts-cl
+       (or (find-clause clauses 'keyboard-layouts)
+           (find-clause clauses 'mobile-skins)
+           (find-clause clauses 'keyboard-layout)
            (find-clause clauses 'mobile-skin)))
-     (define mobile-skin-clauses
-       (filter mobile-skin-clause? clauses))
+     (define keyboard-layout-clauses
+       (filter keyboard-layout-clause? clauses))
      (define deps-cl (find-clause clauses 'deps))
      (define files-cl (find-clause clauses 'static-files))
      (define dirs-cl (find-clause clauses 'static-dirs))
@@ -312,31 +334,36 @@
 
      (unless name-cl
        (raise-syntax-error 'rime-schema "missing (name ...)" stx))
-     (unless (or schema-cl custom-cl mobile-skin-clauses)
-       (raise-syntax-error 'rime-schema "missing (schema ...), (custom ...), or (mobile-skin ...)" stx))
+     (unless (or schema-cl custom-cl keyboard-layout-clauses)
+       (raise-syntax-error 'rime-schema "missing (schema ...), (custom ...), or (keyboard-layout ...)" stx))
 
      (define schema-name (cadr (syntax->list name-cl)))
-     (define mobile-only?
-       (and mobile-only-cl
-            (let ([items (cdr (syntax->list mobile-only-cl))])
-              (if (null? items) #'#t (car items)))))
-     (define explicit-mobile-skins
-       (and mobile-skins-cl
-            (not (mobile-skin-clause? mobile-skins-cl))
-            (clause-items->strings mobile-skins-cl)))
-     (define embedded-mobile-skins
-       (map mobile-skin-id mobile-skin-clauses))
-     (define embedded-mobile-skin-defs
-       (map mobile-skin-def mobile-skin-clauses))
-     (define mobile-skins
-       (if explicit-mobile-skins
-           explicit-mobile-skins
-           embedded-mobile-skins))
+     (define artifacts
+       (cond
+         [artifacts-cl (clause-items->strings artifacts-cl)]
+         [mobile-only-cl '("yuanshu")]
+         [else '("rime" "yuanshu")]))
+     (define explicit-keyboard-layouts
+       (and keyboard-layouts-cl
+            (not (keyboard-layout-clause? keyboard-layouts-cl))
+            (clause-items->strings keyboard-layouts-cl)))
+     (define embedded-keyboard-layouts
+       (map keyboard-layout-id keyboard-layout-clauses))
+     (define embedded-keyboard-layout-defs
+       (map keyboard-layout-def keyboard-layout-clauses))
+     (define keyboard-layouts
+       (if explicit-keyboard-layouts
+           explicit-keyboard-layouts
+           embedded-keyboard-layouts))
      (define deps (clause-items->strings deps-cl))
      (define static-files (clause-items->strings files-cl))
      (define static-dirs (clause-items->strings dirs-cl))
      (define custom-expr (custom-clause-expr custom-cl))
      (define schema-doc (schema-clause-expr stx #'schema-id schema-name deps schema-cl))
+     (define description-expr
+       (or (schema-clause-description schema-cl)
+           (custom-clause-description custom-cl)
+           schema-name))
 	     (define schema-expr
 	       (if schema-cl
 	           #`(yaml-file #,(string-expr stx (string-append (symbol->string (syntax-e #'schema-id)) ".schema.yaml"))
@@ -345,11 +372,16 @@
 
 	     #`(begin
          (define chinese-name #,(string-expr stx (syntax-e schema-name)))
-	         (define mobile-only? #,(or mobile-only? #'#f))
-	         (define mobile-skins (list #,@(for/list ([skin mobile-skins])
-	                                         (string-expr stx skin))))
-         (define mobile-skin-defs
-           (list #,@embedded-mobile-skin-defs))
+         (define schema-summary #,description-expr)
+         (define schema-artifacts (list #,@(for/list ([artifact artifacts])
+                                             (string-expr stx artifact))))
+	         (define keyboard-layouts (list #,@(for/list ([layout keyboard-layouts])
+	                                            (string-expr stx layout))))
+         (define keyboard-layout-defs
+           (list #,@embedded-keyboard-layout-defs))
+         (define mobile-only? (not (member "rime" schema-artifacts)))
+         (define mobile-skins keyboard-layouts)
+         (define mobile-skin-defs keyboard-layout-defs)
 	         (define schema-deps (list #,@(for/list ([dep deps])
 	                                        (string-expr stx dep))))
 	         (define static-dep-files (list #,@(for/list ([file static-files])
@@ -361,6 +393,10 @@
             #,schema-expr
             #,custom-expr))
          (provide config-files
+                  schema-summary
+                  schema-artifacts
+                  keyboard-layouts
+                  keyboard-layout-defs
                   mobile-only?
                   mobile-skins
                   mobile-skin-defs

@@ -16,6 +16,11 @@
            5001
            "127.0.0.1"))
 
+(define (response-location response)
+  (for/first ([header (in-list (response-headers response))]
+              #:when (equal? (header-field header) #"Location"))
+    (bytes->string/utf-8 (header-value header))))
+
 (module+ test
   (test-case "legacy host redirects to canonical rime domain"
     (check-equal? (canonical-redirect-location
@@ -27,14 +32,19 @@
     (check-false (canonical-redirect-location
                   (req "/" "rime.mayphus.org"))))
 
-  (test-case "web skin previews are ready for page image URLs"
-    (check-not-equal? skin-items '())
-    (for ([item (in-list skin-items)])
-      (define skin-id (car item))
-      (define preview-svgs (cadddr item))
+  (test-case "desktop route redirects to museum home"
+    (define response (canonical-dispatch (req "/desktop" "rime.mayphus.org")))
+    (check-equal? (response-code response) 302)
+    (check-equal? (response-location response) "/"))
+
+  (test-case "web keyboard layout previews are ready for page image URLs"
+    (check-not-equal? keyboard-layout-items '())
+    (for ([item (in-list keyboard-layout-items)])
+      (define layout-id (hash-ref item 'id))
+      (define preview-svgs (hash-ref item 'preview-svgs))
       (for ([theme (in-list '(light dark))])
         (define svg (hash-ref preview-svgs theme #f))
         (check-true
          (and (string? svg)
               (regexp-match? #rx"^<svg[^>]+Keyboard preview" svg))
-         (format "~a preview ~a should be an SVG" skin-id theme))))))
+         (format "~a preview ~a should be an SVG" layout-id theme))))))

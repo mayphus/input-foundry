@@ -101,6 +101,12 @@
             schema-ids))
      (define config-file-ids
        (map (lambda (schema-id) (prefixed-id stx schema-id "config-files")) schema-ids))
+     (define schema-artifacts-ids
+       (map (lambda (schema-id) (prefixed-id stx schema-id "schema-artifacts")) schema-ids))
+     (define keyboard-layouts-ids
+       (map (lambda (schema-id) (prefixed-id stx schema-id "keyboard-layouts")) schema-ids))
+     (define keyboard-layout-defs-ids
+       (map (lambda (schema-id) (prefixed-id stx schema-id "keyboard-layout-defs")) schema-ids))
      (define mobile-only-ids
        (map (lambda (schema-id) (prefixed-id stx schema-id "mobile-only?")) schema-ids))
      (define mobile-skins-ids
@@ -115,44 +121,62 @@
        (map (lambda (schema-id) (prefixed-id stx schema-id "static-dep-dirs")) schema-ids))
      (define chinese-name-ids
        (map (lambda (schema-id) (prefixed-id stx schema-id "chinese-name")) schema-ids))
+     (define schema-summary-ids
+       (map (lambda (schema-id) (prefixed-id stx schema-id "schema-summary")) schema-ids))
      (define schema-config-entries
        (append-map list schema-name-stxs config-file-ids))
      (define schema-meta-entries
        (for/list ([schema-name (in-list schema-name-stxs)]
+                  [schema-artifacts-id (in-list schema-artifacts-ids)]
+                  [keyboard-layouts-id (in-list keyboard-layouts-ids)]
+                  [keyboard-layout-defs-id (in-list keyboard-layout-defs-ids)]
                   [mobile-only-id (in-list mobile-only-ids)]
                   [mobile-skins-id (in-list mobile-skins-ids)]
                   [mobile-skin-defs-id (in-list mobile-skin-defs-ids)]
                   [schema-deps-id (in-list schema-deps-ids)]
                   [static-files-id (in-list static-files-ids)]
                   [static-dirs-id (in-list static-dirs-ids)]
-                  [chinese-name-id (in-list chinese-name-ids)])
+                  [chinese-name-id (in-list chinese-name-ids)]
+                  [schema-summary-id (in-list schema-summary-ids)])
          #`(cons #,schema-name
-                 (hash 'mobile-only? #,mobile-only-id
-                       'mobile-skins #,mobile-skins-id
-                       'mobile-skin-defs #,mobile-skin-defs-id
+                 (hash 'schema-artifacts #,schema-artifacts-id
+                       'keyboard-layouts #,keyboard-layouts-id
+                       'keyboard-layout-defs #,keyboard-layout-defs-id
+                       'mobile-only? (not (member "rime" #,schema-artifacts-id))
+                       'mobile-skins #,keyboard-layouts-id
+                       'mobile-skin-defs #,keyboard-layout-defs-id
                        'schema-deps #,schema-deps-id
                        'static-dep-files #,static-files-id
                        'static-dep-dirs #,static-dirs-id
-                       'chinese-name #,chinese-name-id))))
+                       'chinese-name #,chinese-name-id
+                       'schema-summary #,schema-summary-id))))
      (define schema-requires
        (for/list ([schema-id (in-list schema-ids)]
                   [config-files-id (in-list config-file-ids)]
+                  [schema-artifacts-id (in-list schema-artifacts-ids)]
+                  [keyboard-layouts-id (in-list keyboard-layouts-ids)]
+                  [keyboard-layout-defs-id (in-list keyboard-layout-defs-ids)]
                   [mobile-only-id (in-list mobile-only-ids)]
                   [mobile-skins-id (in-list mobile-skins-ids)]
                   [mobile-skin-defs-id (in-list mobile-skin-defs-ids)]
                   [schema-deps-id (in-list schema-deps-ids)]
                   [static-files-id (in-list static-files-ids)]
                   [static-dirs-id (in-list static-dirs-ids)]
-                  [chinese-name-id (in-list chinese-name-ids)])
+                  [chinese-name-id (in-list chinese-name-ids)]
+                  [schema-summary-id (in-list schema-summary-ids)])
          #`(require (rename-in (submod "." #,schema-id)
                                [config-files #,config-files-id]
+                               [schema-artifacts #,schema-artifacts-id]
+                               [keyboard-layouts #,keyboard-layouts-id]
+                               [keyboard-layout-defs #,keyboard-layout-defs-id]
                                [mobile-only? #,mobile-only-id]
                                [mobile-skins #,mobile-skins-id]
                                [mobile-skin-defs #,mobile-skin-defs-id]
                                [schema-deps #,schema-deps-id]
                                [static-dep-files #,static-files-id]
                                [static-dep-dirs #,static-dirs-id]
-                               [chinese-name #,chinese-name-id]))))
+                               [chinese-name #,chinese-name-id]
+                               [schema-summary #,schema-summary-id]))))
      (define lang-path (datum->syntax stx "lib/lang.rkt"))
      (define self-path (datum->syntax stx "lib/flypy.rkt"))
      (with-syntax ([(schema-id ...) schema-ids]
@@ -162,13 +186,14 @@
                    [(schema-meta-entry ...) schema-meta-entries]
                    [(schema-require ...) schema-requires]
                    [(config-files-id ...) config-file-ids]
-                   [base-mobile-only? (car mobile-only-ids)]
-                   [base-mobile-skins (car mobile-skins-ids)]
-                   [base-mobile-skin-defs (car mobile-skin-defs-ids)]
+                   [base-schema-artifacts (car schema-artifacts-ids)]
+                   [base-keyboard-layouts (car keyboard-layouts-ids)]
+                   [base-keyboard-layout-defs (car keyboard-layout-defs-ids)]
                    [base-schema-deps (car schema-deps-ids)]
                    [base-static-dep-files (car static-files-ids)]
                    [base-static-dep-dirs (car static-dirs-ids)]
-                   [base-chinese-name (car chinese-name-ids)])
+                   [base-chinese-name (car chinese-name-ids)]
+                   [base-schema-summary (car schema-summary-ids)])
        #`(begin
            (require racket/hash)
 
@@ -181,13 +206,17 @@
            schema-require
            ...
 
-           (define mobile-only? base-mobile-only?)
-           (define mobile-skins base-mobile-skins)
-           (define mobile-skin-defs base-mobile-skin-defs)
+           (define schema-artifacts base-schema-artifacts)
+           (define keyboard-layouts base-keyboard-layouts)
+           (define keyboard-layout-defs base-keyboard-layout-defs)
+           (define mobile-only? (not (member "rime" schema-artifacts)))
+           (define mobile-skins keyboard-layouts)
+           (define mobile-skin-defs keyboard-layout-defs)
            (define schema-deps base-schema-deps)
            (define static-dep-files base-static-dep-files)
            (define static-dep-dirs base-static-dep-dirs)
            (define chinese-name base-chinese-name)
+           (define schema-summary base-schema-summary)
 
            (define schema-config-files
              (hash schema-config-entry ...))
@@ -201,13 +230,17 @@
            (provide config-files
                     schema-config-files
                     schema-meta
+                    schema-artifacts
+                    keyboard-layouts
+                    keyboard-layout-defs
                     mobile-only?
                     mobile-skins
                     mobile-skin-defs
                     schema-deps
                     static-dep-files
                     static-dep-dirs
-                    chinese-name)))]))
+                    chinese-name
+                    schema-summary)))]))
 
 (define-syntax (flypy-schema stx)
   (syntax-parse stx

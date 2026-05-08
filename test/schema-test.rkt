@@ -63,7 +63,7 @@
     (check-not-false (string-contains? yaml "name: \"小鶴雙拼\""))
     (check-not-false (string-contains? yaml "dictionary: luna_pinyin"))
     (check-not-false (string-contains? yaml "prism: flypy"))
-    (check-equal? flypy:mobile-skins '("flypy")))
+    (check-equal? flypy:keyboard-layouts '("flypy")))
 
   (test-case "flypy ice is a dictionary variant in flypy config"
     (define ice-files (hash-ref flypy:schema-config-files "flypy_ice"))
@@ -79,7 +79,7 @@
     (check-not-false (string-contains? yaml "name: \"朙月拼音\""))
     (check-not-false (string-contains? yaml "dictionary: luna_pinyin"))
     (check-not-false (string-contains? yaml "prism: luna_pinyin"))
-    (check-equal? luna_pinyin:mobile-skins '("luna_pinyin")))
+    (check-equal? luna_pinyin:keyboard-layouts '("luna_pinyin")))
 
   (test-case "terra pinyin emits desktop schema YAML"
     (define yaml (generated-file terra_pinyin:config-files "terra_pinyin.schema.yaml"))
@@ -87,7 +87,7 @@
     (check-not-false (string-contains? yaml "name: \"地球拼音\""))
     (check-not-false (string-contains? yaml "dictionary: terra_pinyin"))
     (check-not-false (string-contains? yaml "prism: terra_pinyin"))
-    (check-equal? terra_pinyin:mobile-skins '("terra_pinyin")))
+    (check-equal? terra_pinyin:keyboard-layouts '("terra_pinyin")))
 
   (test-case "bopomofo shares er with an instead of adding a fourth-row key"
     (define page (generated-json bopomofo-pinyin-files "light/pinyinPortrait.yaml"))
@@ -166,7 +166,7 @@
                     '("zx14Button" "cv14Button" "bn14Button" "m14Button"
                       "backspaceButton"))))
 
-  (test-case "full pinyin 14-key skin leaves bottom detail labels blank"
+  (test-case "full pinyin 14-key keyboard layout leaves bottom detail labels blank"
     (define page (generated-json pinyin14-layout:pinyin-14-iphone-pinyin-files
                                  "light/pinyinPortrait.yaml"))
     (define flypy-page (generated-json flypy14-layout:flypy-14-iphone-pinyin-files

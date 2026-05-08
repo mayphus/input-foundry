@@ -5,13 +5,13 @@
          racket/system
          "../build.rkt")
 
-(define (check-upload-skin-files tmp skin)
-  (check-true (file-exists? (build-path tmp skin "config.yaml")))
-  (check-true (file-exists? (build-path tmp skin "README.md")))
-  (check-true (file-exists? (build-path tmp skin "demo.png")))
-  (check-false (file-exists? (build-path tmp skin "demo.svg")))
-  (check-true (file-exists? (build-path tmp skin "light" "pinyinPortrait.yaml")))
-  (check-true (file-exists? (build-path tmp skin "dark" "pinyinPortrait.yaml"))))
+(define (check-upload-layout-files tmp layout)
+  (check-true (file-exists? (build-path tmp layout "config.yaml")))
+  (check-true (file-exists? (build-path tmp layout "README.md")))
+  (check-true (file-exists? (build-path tmp layout "demo.png")))
+  (check-false (file-exists? (build-path tmp layout "demo.svg")))
+  (check-true (file-exists? (build-path tmp layout "light" "pinyinPortrait.yaml")))
+  (check-true (file-exists? (build-path tmp layout "dark" "pinyinPortrait.yaml"))))
 
 (define (check-cskin-doc-files tmp profile-out skin)
   (define unzip-exe (find-executable-path "unzip"))
@@ -47,21 +47,21 @@
   (check-true (file-exists? (apply build-path extract-dir rel-parts))))
 
 (module+ test
-  (test-case "bundle shares unpacked skin directory and packaged cskin"
+  (test-case "yuanshu artifact shares unpacked layout directory and packaged cskin"
     (define tmp (make-temporary-file "rime-config-bundle-~a" 'directory))
     (dynamic-wind
       void
       (lambda ()
         (define profile-out (build-path tmp "profile"))
         (define zip-path (build-path tmp "profile.zip"))
-        (define-values (_built-out _built-zip skin-dir)
+        (define-values (_built-out _built-zip layout-dir)
           (build-bundle!
-           (hash 'schemas (list "flypy") 'desktop? #f)
+           (hash 'schemas (list "flypy") 'artifact "yuanshu")
            "test"
            profile-out
            zip-path))
-        (define skins (map path->string (directory-list skin-dir)))
-        (check-equal? skins '("flypy"))
+        (define layouts (map path->string (directory-list layout-dir)))
+        (check-equal? layouts '("flypy"))
         (check-true (file-exists? zip-path))
         (define extract-profile (build-path tmp "extract-profile"))
         (unzip! zip-path extract-profile)
@@ -72,25 +72,65 @@
         (check-zip-file extract-profile "profile" "skins" "flypy.cskin")
         (check-false (directory-exists? (build-path extract-profile "Skins")))
         (check-downloaded-cskin-doc-files tmp extract-profile "flypy")
-        (check-upload-skin-files skin-dir "flypy")
+        (check-upload-layout-files layout-dir "flypy")
         (check-cskin-doc-files tmp profile-out "flypy"))
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f))))
 
-  (test-case "all generated upload skins include demo assets"
+  (test-case "all generated upload keyboard layouts include demo assets"
     (define tmp (make-temporary-file "rime-config-all-skins-~a" 'directory))
     (dynamic-wind
       void
       (lambda ()
-        (define-values (_built-out _built-zip skin-dir)
+        (define-values (_built-out _built-zip layout-dir)
           (build-bundle!
-           (hash 'schemas "all" 'desktop? #f 'skip-default-custom #t)
+           (hash 'schemas "all" 'artifact "yuanshu" 'skip-default-custom #t)
            "test-all"
            (build-path tmp "profile")
            (build-path tmp "profile.zip")))
-        (define skins (map path->string (directory-list skin-dir)))
-        (check-not-equal? skins '())
-        (for ([skin (in-list skins)])
-          (check-upload-skin-files skin-dir skin)))
+        (define layouts (map path->string (directory-list layout-dir)))
+        (check-not-equal? layouts '())
+        (for ([layout (in-list layouts)])
+          (check-upload-layout-files layout-dir layout)))
+      (lambda ()
+        (delete-directory/files tmp #:must-exist? #f))))
+
+  (test-case "rime artifact excludes keyboard layout packages and yuanshu-only schemas"
+    (define tmp (make-temporary-file "rime-config-rime-artifact-~a" 'directory))
+    (dynamic-wind
+      void
+      (lambda ()
+        (define profile-out (build-path tmp "profile"))
+        (define zip-path (build-path tmp "profile.zip"))
+        (define-values (_built-out _built-zip _layout-dir)
+          (build-bundle!
+           (hash 'schemas (list "pinyin_14" "flypy")
+                 'artifact "rime"
+                 'extra-src-files '("squirrel.custom.yaml"))
+           "test-rime"
+           profile-out
+           zip-path))
+        (check-false (file-exists? (build-path profile-out "pinyin_14.schema.yaml")))
+        (check-false (directory-exists? (build-path profile-out "skins")))
+        (define extract-profile (build-path tmp "extract-rime-profile"))
+        (unzip! zip-path extract-profile)
+        (check-false (file-exists? (build-path extract-profile "profile" "pinyin_14.schema.yaml")))
+        (check-false (directory-exists? (build-path extract-profile "profile" "skins"))))
+      (lambda ()
+        (delete-directory/files tmp #:must-exist? #f))))
+
+  (test-case "legacy desktop flag still maps to yuanshu artifact behavior"
+    (define tmp (make-temporary-file "rime-config-legacy-artifact-~a" 'directory))
+    (dynamic-wind
+      void
+      (lambda ()
+        (define-values (_built-out _built-zip layout-dir)
+          (build-bundle!
+           (hash 'schemas (list "flypy") 'desktop? #f)
+           "legacy-yuanshu"
+           (build-path tmp "profile")
+           (build-path tmp "profile.zip")))
+        (check-true (directory-exists? layout-dir))
+        (check-true (file-exists? (build-path tmp "profile" "skins" "flypy.cskin"))))
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f)))))

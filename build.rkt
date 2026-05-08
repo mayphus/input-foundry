@@ -20,20 +20,29 @@
          output-dir
          generated-config-ids
          schema-module-ref
+         keyboard-layout-module-ref
          skin-module-ref
          read-schema-deps
+         read-schema-artifacts
+         read-schema-keyboard-layouts
          read-schema-mobile-skins
+         schema-keyboard-layout-module-path
          schema-mobile-skin-module-path
+         list-keyboard-layout-items
          list-mobile-skin-items
          read-schema-name-from-yaml
+         read-schema-description
+         profile-artifact
          build-profile!
          build-profile-from-hash!
+         build-profile-keyboard-layout-directories!
          build-profile-skin-directories!
          build-bundle!
          zip-profile-path!
          zip-profile!
          do-upload!
          deploy-desktop!
+         build-preview-keyboard-layouts!
          build-preview-skins!)
 
 ;; ---- Paths -----------------------------------------------------------------
@@ -47,37 +56,48 @@
 
 (define zip-exe (find-executable-path "zip"))
 
-(struct skin-module (schema skin body) #:transparent)
+(struct keyboard-layout-module (schema layout body) #:transparent)
 
-(define skin-module-namespace (make-base-namespace))
-(define declared-skin-modules (mutable-set))
+(define keyboard-layout-module-namespace (make-base-namespace))
+(define declared-keyboard-layout-modules (mutable-set))
 
-(define (skin-runtime-module-name schema skin)
-  (string->symbol (format "rime-config-skin-~a-~a" schema skin)))
+(define (keyboard-layout-runtime-module-name schema layout)
+  (string->symbol (format "rime-config-keyboard-layout-~a-~a" schema layout)))
 
-(define (declare-skin-module! mod ns)
-  (define name (skin-runtime-module-name (skin-module-schema mod) (skin-module-skin mod)))
-  (unless (and (eq? ns skin-module-namespace)
-               (set-member? declared-skin-modules name))
+(define (declare-keyboard-layout-module! mod ns)
+  (define name
+    (keyboard-layout-runtime-module-name
+     (keyboard-layout-module-schema mod)
+     (keyboard-layout-module-layout mod)))
+  (unless (and (eq? ns keyboard-layout-module-namespace)
+               (set-member? declared-keyboard-layout-modules name))
     (parameterize ([current-namespace ns])
       (eval `(module ,name
                (file ,(path->string mobile-lang-path))
-               (skin ,(string->symbol (skin-module-skin mod))
-                 (triggers ,(string->symbol (skin-module-schema mod)))
-                 ,@(skin-module-body mod)))))
-    (when (eq? ns skin-module-namespace)
-      (set-add! declared-skin-modules name))))
+               (keyboard-layout ,(string->symbol (keyboard-layout-module-layout mod))
+                 (triggers ,(string->symbol (keyboard-layout-module-schema mod)))
+                 ,@(keyboard-layout-module-body mod)))))
+    (when (eq? ns keyboard-layout-module-namespace)
+      (set-add! declared-keyboard-layout-modules name))))
 
-(define (skin-module-ref mod export-sym [default-thunk #f] #:fresh? [fresh? #f])
-  (define ns (if fresh? (make-base-namespace) skin-module-namespace))
-  (declare-skin-module! mod ns)
+(define (keyboard-layout-module-ref mod export-sym [default-thunk #f] #:fresh? [fresh? #f])
+  (define ns (if fresh? (make-base-namespace) keyboard-layout-module-namespace))
+  (declare-keyboard-layout-module! mod ns)
   (parameterize ([current-namespace ns])
     (if default-thunk
-        (dynamic-require `',(skin-runtime-module-name (skin-module-schema mod) (skin-module-skin mod))
-                         export-sym
-                         default-thunk)
-        (dynamic-require `',(skin-runtime-module-name (skin-module-schema mod) (skin-module-skin mod))
-                         export-sym))))
+        (dynamic-require
+         `',(keyboard-layout-runtime-module-name
+             (keyboard-layout-module-schema mod)
+             (keyboard-layout-module-layout mod))
+         export-sym
+         default-thunk)
+        (dynamic-require
+         `',(keyboard-layout-runtime-module-name
+             (keyboard-layout-module-schema mod)
+             (keyboard-layout-module-layout mod))
+         export-sym))))
+
+(define skin-module-ref keyboard-layout-module-ref)
 
 ;; ---- Schema module helpers -------------------------------------------------
 
@@ -98,30 +118,42 @@
                 default)))
       default))
 
-(define (schema-mobile-skin-body schema skin)
-  (define skin-defs (schema-module-ref schema 'mobile-skin-defs '()))
+(define (schema-keyboard-layout-body schema layout)
+  (define layout-defs (schema-module-ref schema 'keyboard-layout-defs
+                                         (schema-module-ref schema 'mobile-skin-defs '())))
   (cond
-    [(assoc skin skin-defs) => cdr]
+    [(assoc layout layout-defs) => cdr]
     [else #f]))
 
-(define (schema-mobile-skin-module schema skin body)
-  (skin-module schema skin body))
+(define (schema-mobile-skin-body schema skin)
+  (schema-keyboard-layout-body schema skin))
 
-(define (schema-mobile-skin-module-path skin schemas)
+(define (schema-keyboard-layout-module schema layout body)
+  (keyboard-layout-module schema layout body))
+
+(define (schema-mobile-skin-module schema skin body)
+  (schema-keyboard-layout-module schema skin body))
+
+(define (schema-keyboard-layout-module-path layout schemas)
   (define search-schemas
     (remove-duplicates (append schemas generated-config-ids extra-schema-ids-with-mobile)))
   (for/or ([schema (in-list search-schemas)])
-    (define body (schema-mobile-skin-body schema skin))
-    (and body (schema-mobile-skin-module schema skin body))))
+    (define body (schema-keyboard-layout-body schema layout))
+    (and body (schema-keyboard-layout-module schema layout body))))
 
-(define (list-mobile-skin-items schemas)
+(define (schema-mobile-skin-module-path skin schemas)
+  (schema-keyboard-layout-module-path skin schemas))
+
+(define (list-keyboard-layout-items schemas)
   (define search-schemas
     (remove-duplicates (append schemas generated-config-ids extra-schema-ids-with-mobile)))
   (for*/list ([schema (in-list search-schemas)]
-              [skin (in-list (read-schema-mobile-skins schema))]
-              #:do [(define body (schema-mobile-skin-body schema skin))]
+              [layout (in-list (read-schema-keyboard-layouts schema))]
+              #:do [(define body (schema-keyboard-layout-body schema layout))]
               #:when body)
-    (list schema skin (schema-mobile-skin-module schema skin body))))
+    (list schema layout (schema-keyboard-layout-module schema layout body))))
+
+(define list-mobile-skin-items list-keyboard-layout-items)
 
 ;; ---- Utilities -------------------------------------------------------------
 
@@ -164,6 +196,7 @@
 
 (define all-mobile-profile
   (hash 'schemas "all"
+        'artifact "yuanshu"
         'skip-default-custom #t))
 
 (define (find-profile-path name)
@@ -190,18 +223,45 @@
 (define (read-schema-name-from-yaml schema)
   (static-schema-name schema))
 
+(define (read-schema-description schema)
+  (schema-module-ref schema 'schema-summary
+                     (static-schema-description schema)))
+
 ;; For generated schemas, read deps from the module; fall back to registry
 ;; metadata for static imported schemas.
 (define (read-schema-deps schema)
   (schema-module-ref schema 'schema-deps
                      (static-schema-deps schema)))
 
-(define (read-schema-mobile-skins schema)
-  (define skins (schema-module-ref schema 'mobile-skins '()))
+(define (read-schema-artifacts schema)
+  (define artifacts (schema-module-ref schema 'schema-artifacts
+                                       (static-schema-artifacts schema)))
   (cond
-    [(not skins) '()]
-    [(list? skins) skins]
-    [else (list skins)]))
+    [(not artifacts) '()]
+    [(list? artifacts) artifacts]
+    [else (list artifacts)]))
+
+(define (read-schema-keyboard-layouts schema)
+  (define layouts (schema-module-ref schema 'keyboard-layouts
+                                     (schema-module-ref schema 'mobile-skins '())))
+  (cond
+    [(not layouts) '()]
+    [(list? layouts) layouts]
+    [else (list layouts)]))
+
+(define read-schema-mobile-skins read-schema-keyboard-layouts)
+
+(define (schema-supports-artifact? schema artifact)
+  (member artifact (read-schema-artifacts schema)))
+
+(define (profile-artifact profile)
+  (define artifact (hash-ref profile 'artifact #f))
+  (cond
+    [(or (equal? artifact "rime") (equal? artifact 'rime)) "rime"]
+    [(or (equal? artifact "yuanshu") (equal? artifact 'yuanshu)) "yuanshu"]
+    [(hash-has-key? profile 'desktop?)
+     (if (hash-ref profile 'desktop? #f) "rime" "yuanshu")]
+    [else "rime"]))
 
 (define (list-static-schema-ids)
   (filter-map
@@ -247,11 +307,9 @@
 
   (define expanded (expand-schema-deps raw))
 
-  (define desktop? (hash-ref profile 'desktop? #f))
+  (define artifact (profile-artifact profile))
   (define filtered
-    (if desktop?
-        (filter (lambda (s) (not (schema-module-ref s 'mobile-only? #f))) expanded)
-        expanded))
+    (filter (lambda (s) (schema-supports-artifact? s artifact)) expanded))
 
   (remove-duplicates filtered))
 
@@ -259,22 +317,24 @@
 ;; Returns: gen-yaml (built by build-configs!, already in profile-out)
 ;;          rime-yaml (static files to copy from rime-dir)
 ;;          rime-dirs (static dirs to copy from rime-dir)
-;;          skins
+;;          keyboard layouts
 
 (define (compute-assets schemas profile)
   (define extra-rime  (hash-ref profile 'extra-src-files  '()))
-  (define selected-mobile-skins
-    (append-map read-schema-mobile-skins (profile-schema-list profile)))
+  (define selected-keyboard-layouts
+    (append-map read-schema-keyboard-layouts (profile-schema-list profile)))
+  (define artifact (profile-artifact profile))
 
   (define gen-yaml  '())
   (define rime-yaml '())
   (define rime-dirs '())
-  (define skins     '())
+  (define keyboard-layouts '())
 
   (define (add-gen!       f) (set! gen-yaml  (cons f gen-yaml)))
   (define (add-rime-yaml! f) (set! rime-yaml (cons f rime-yaml)))
   (define (add-rime-dir!  d) (set! rime-dirs (cons d rime-dirs)))
-  (define (add-skin!      s) (set! skins     (cons s skins)))
+  (define (add-keyboard-layout! layout)
+    (set! keyboard-layouts (cons layout keyboard-layouts)))
 
   ;; Per-schema: schema file + custom file
   (for ([schema schemas])
@@ -300,20 +360,20 @@
   ;; Extra static files from profile (e.g. squirrel.custom.yaml)
   (for ([f extra-rime]) (add-rime-yaml! f))
 
-  ;; Mobile skins are schema metadata, so profiles only need schema config.
-  (unless (hash-ref profile 'desktop? #f)
-    (for ([s selected-mobile-skins]) (add-skin! s)))
+  ;; Yuanshu keyboard layouts are schema metadata, so profiles only need schema config.
+  (when (equal? artifact "yuanshu")
+    (for ([layout selected-keyboard-layouts]) (add-keyboard-layout! layout)))
 
   (values (remove-duplicates (reverse gen-yaml))
           (remove-duplicates (reverse rime-yaml))
           (remove-duplicates (reverse rime-dirs))
-          (remove-duplicates (reverse skins))))
+          (remove-duplicates (reverse keyboard-layouts))))
 
 ;; ---- Write files from a module's exported hash ----------------------------
 
 (define (module-export-ref rkt-path export-sym #:fresh? [fresh? #f])
-  (if (skin-module? rkt-path)
-      (skin-module-ref rkt-path export-sym #:fresh? fresh?)
+  (if (keyboard-layout-module? rkt-path)
+      (keyboard-layout-module-ref rkt-path export-sym #:fresh? fresh?)
       (if fresh?
           (parameterize ([current-namespace (make-base-namespace)])
             (dynamic-require rkt-path export-sym))
@@ -381,60 +441,77 @@
                                content)])))))
         (write-module-files! f profile-out 'config-files))))
 
-;; ---- Build skins -----------------------------------------------------------
+;; ---- Build keyboard layouts ------------------------------------------------
+
+(define (keyboard-layout-module-path! layout schemas)
+  (or (schema-keyboard-layout-module-path layout schemas)
+      (error 'build-one-keyboard-layout!
+             "No keyboard layout definition for ~a"
+             layout)))
 
 (define (skin-module-path! skin schemas)
-  (define skin-rkt
-    (or (schema-mobile-skin-module-path skin schemas)
-        (error 'build-one-skin! "No mobile skin definition for ~a" skin)))
-  skin-rkt)
+  (keyboard-layout-module-path! skin schemas))
 
-(define (write-unpacked-skin! skin-rkt out-dir #:with-docs? [with-docs? #f])
+(define (write-unpacked-keyboard-layout! layout-rkt out-dir #:with-docs? [with-docs? #f])
   (make-directory* out-dir)
-  (write-module-files! skin-rkt
+  (write-module-files! layout-rkt
                        out-dir
-                       (if with-docs? 'skin-files-with-docs 'skin-files)
+                       (if with-docs?
+                           'keyboard-layout-files-with-docs
+                           'keyboard-layout-files)
                        #:fresh? with-docs?))
 
-(define (build-one-skin! skin schemas profile-out skin-root)
-  (define skin-rkt (skin-module-path! skin schemas))
-  (define skin-out  (build-path skin-root skin))
-  (define cskin    (build-path profile-out "skins" (string-append skin ".cskin")))
-  (printf "Building skin: ~a\n" skin)
-  (delete-directory/files skin-out #:must-exist? #f)
-  (write-unpacked-skin! skin-rkt skin-out #:with-docs? #t)
+(define (write-unpacked-skin! skin-rkt out-dir #:with-docs? [with-docs? #f])
+  (write-unpacked-keyboard-layout! skin-rkt out-dir #:with-docs? with-docs?))
+
+(define (build-one-keyboard-layout! layout schemas profile-out layout-root)
+  (define layout-rkt (keyboard-layout-module-path! layout schemas))
+  (define layout-out (build-path layout-root layout))
+  ;; The profile ZIP keeps Yuanshu's required `skins/*.cskin` package contract.
+  (define cskin (build-path profile-out "skins" (string-append layout ".cskin")))
+  (printf "Building keyboard layout: ~a\n" layout)
+  (delete-directory/files layout-out #:must-exist? #f)
+  (write-unpacked-keyboard-layout! layout-rkt layout-out #:with-docs? #t)
   (delete-file* cskin)
   (make-directory* (path-only cskin))
-  (parameterize ([current-directory skin-root])
-    (run! zip-exe "-qr" (path->string cskin) skin))
-  skin-out)
+  (parameterize ([current-directory layout-root])
+    (run! zip-exe "-qr" (path->string cskin) layout))
+  layout-out)
 
-(define (build-skins! skins schemas profile-out skin-root)
-  (unless (null? skins)
+(define (build-one-skin! skin schemas profile-out skin-root)
+  (build-one-keyboard-layout! skin schemas profile-out skin-root))
+
+(define (build-keyboard-layouts! layouts schemas profile-out layout-root)
+  (unless (null? layouts)
     (make-directory* (build-path profile-out "skins"))
-    (delete-directory/files skin-root #:must-exist? #f)
-    (make-directory* skin-root)
-    (for ([skin skins])
-      (build-one-skin! skin schemas profile-out skin-root))))
+    (delete-directory/files layout-root #:must-exist? #f)
+    (make-directory* layout-root)
+    (for ([layout layouts])
+      (build-one-keyboard-layout! layout schemas profile-out layout-root))))
 
-(define (build-profile-skin-directories! profile profile-name out-dir)
-  (define tmp-dir (make-temporary-file "rime-skin-profile-~a" 'directory))
+(define build-skins! build-keyboard-layouts!)
+
+(define (build-profile-keyboard-layout-directories! profile profile-name out-dir)
+  (define tmp-dir (make-temporary-file "rime-layout-profile-~a" 'directory))
   (dynamic-wind
     void
     (lambda ()
       (build-profile-from-hash! profile
                                 profile-name
                                 (build-path tmp-dir profile-name)
-                                #:skin-dir out-dir))
+                                #:keyboard-layout-dir out-dir))
     (lambda ()
       (delete-directory/files tmp-dir #:must-exist? #f)))
-  (define-values (_gen-yaml _rime-yaml _rime-dirs skins)
+  (define-values (_gen-yaml _rime-yaml _rime-dirs layouts)
     (compute-assets (resolve-schemas profile) profile))
-  skins)
+  layouts)
+
+(define build-profile-skin-directories! build-profile-keyboard-layout-directories!)
 
 ;; ---- Build one bundle ------------------------------------------------------
 
 (define (build-profile-from-hash! profile profile-name profile-out
+                                  #:keyboard-layout-dir [keyboard-layout-dir #f]
                                   #:skin-dir [skin-dir #f])
   (delete-directory/files profile-out #:must-exist? #f)
   (make-directory* profile-out)
@@ -444,7 +521,7 @@
 
   (build-schemas! schemas profile-out)
 
-  (define-values (_gen-yaml rime-yaml rime-dirs skins)
+  (define-values (_gen-yaml rime-yaml rime-dirs keyboard-layouts)
     (compute-assets schemas profile))
 
   ;; Copy static YAML files from rime-dir
@@ -463,11 +540,16 @@
   (define default-custom (build-path profile-out "default.custom.yaml"))
   (if (not (hash-ref profile 'skip-default-custom #f))
       (let* ([raw (hash-ref profile 'schemas '())]
+             [raw-list (if (list? raw) raw (list raw))]
              [display-schemas
               (if (or (equal? raw "all")
                       (and (list? raw) (member "all" raw)))
                   schemas
-                  (if (list? raw) raw (list raw)))])
+                  (let ([filtered
+                         (filter (lambda (s)
+                                   (member s schemas))
+                                 raw-list)])
+                    (if (null? filtered) schemas filtered)))])
         (call-with-output-file default-custom #:exists 'truncate/replace
           (lambda (out)
             (displayln "patch:" out)
@@ -476,32 +558,39 @@
               (fprintf out "    - schema: ~a\n" s)))))
       (delete-file* default-custom))
 
-  (define tmp-skin-dir #f)
-  (define skin-root
-    (or skin-dir
-        (and (pair? skins)
+  (define tmp-layout-dir #f)
+  (define layout-root
+    (or keyboard-layout-dir
+        skin-dir
+        (and (pair? keyboard-layouts)
              (begin
-               (set! tmp-skin-dir (make-temporary-file "rime-skins-~a" 'directory))
-               tmp-skin-dir))))
-  (when skin-root
-    (build-skins! skins schemas profile-out skin-root))
-  (when tmp-skin-dir
-    (delete-directory/files tmp-skin-dir #:must-exist? #f)))
+               (set! tmp-layout-dir (make-temporary-file "rime-layouts-~a" 'directory))
+               tmp-layout-dir))))
+  (when layout-root
+    (build-keyboard-layouts! keyboard-layouts schemas profile-out layout-root))
+  (when tmp-layout-dir
+    (delete-directory/files tmp-layout-dir #:must-exist? #f)))
 
 (define (build-bundle! profile
                        profile-name
                        profile-out
                        zip-path
+                       #:keyboard-layout-dir [keyboard-layout-dir 'auto]
                        #:skin-dir [skin-dir 'auto])
-  (define final-skin-dir
+  (define requested-layout-dir
+    (if (eq? keyboard-layout-dir 'auto) skin-dir keyboard-layout-dir))
+  (define final-layout-dir
     (cond
-      [(eq? skin-dir 'auto)
+      [(eq? requested-layout-dir 'auto)
        (build-path (path-only profile-out)
-                   (string-append (path->string (file-name-from-path profile-out)) "-skins"))]
-      [else skin-dir]))
-  (build-profile-from-hash! profile profile-name profile-out #:skin-dir final-skin-dir)
+                   (string-append (path->string (file-name-from-path profile-out)) "-layouts"))]
+      [else requested-layout-dir]))
+  (build-profile-from-hash! profile
+                            profile-name
+                            profile-out
+                            #:keyboard-layout-dir final-layout-dir)
   (zip-profile-path! profile-name profile-out zip-path)
-  (values profile-out zip-path final-skin-dir))
+  (values profile-out zip-path final-layout-dir))
 
 (define (build-profile! profile-name)
   (define profile     (named-rime-profile profile-name))
@@ -619,18 +708,22 @@
 
   (when rime-deploy? (rime-deploy!)))
 
-;; ---- Standalone skin previews ----------------------------------------------
+;; ---- Standalone keyboard layout previews -----------------------------------
 
-(define (build-preview-skins! #:render-docs? [render-docs? #f])
+(define (build-preview-keyboard-layouts! #:render-docs? [render-docs? #f])
   (define schemas (remove-duplicates (append generated-config-ids (list-static-schema-ids))))
-  (for ([item (in-list (list-mobile-skin-items schemas))])
-    (define skin (cadr item))
-    (define skin-file (caddr item))
-    (define out  (build-path output-dir "compiled-skins" skin))
-    (printf "Building preview skin: ~a~a\n" skin (if render-docs? " (with docs)" ""))
+  (for ([item (in-list (list-keyboard-layout-items schemas))])
+    (define layout (cadr item))
+    (define layout-file (caddr item))
+    (define out (build-path output-dir "compiled-keyboard-layouts" layout))
+    (printf "Building preview keyboard layout: ~a~a\n" layout (if render-docs? " (with docs)" ""))
     (delete-directory/files out #:must-exist? #f)
     (make-directory* out)
-    (write-module-files! skin-file
+    (write-module-files! layout-file
                          out
-                         (if render-docs? 'skin-files-with-docs 'skin-files)
+                         (if render-docs?
+                             'keyboard-layout-files-with-docs
+                             'keyboard-layout-files)
                          #:fresh? render-docs?)))
+
+(define build-preview-skins! build-preview-keyboard-layouts!)

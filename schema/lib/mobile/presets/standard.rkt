@@ -7,6 +7,7 @@
 
 (provide standard-config-data
          standard-secondary-files
+         make-standard-keyboard-layout-files
          make-standard-skin-files)
 
 (define pinyin-portrait-file-name "pinyinPortrait")
@@ -62,8 +63,10 @@
    symbolic-files
    standard-ipad-numeric-files))
 
-(define (make-standard-skin-files . page-groups)
+(define (make-standard-keyboard-layout-files . page-groups)
   (apply bundle
          (append page-groups
                  (list standard-secondary-files
                        (json-file "config.yaml" standard-config-data)))))
+
+(define make-standard-skin-files make-standard-keyboard-layout-files)
