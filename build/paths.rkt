@@ -13,7 +13,7 @@
 
 (define-runtime-path root-dir "..")
 (define schema-dir   (build-path root-dir "schema"))
-(define rime-dir     (build-path root-dir "rime"))
+(define rime-dir     (build-path root-dir "assets" "rime"))
 (define profiles-dir (build-path root-dir "profiles"))
 (define output-dir   (build-path root-dir "output" "rime"))
 (define-runtime-path yuanshu-skin-lang-path "../yuanshu/skin/lang.rkt")

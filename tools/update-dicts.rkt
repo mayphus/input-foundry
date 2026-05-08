@@ -13,7 +13,7 @@
 
 (define-runtime-path tools-dir ".")
 (define root-dir (simplify-path (build-path tools-dir "..")))
-(define rime-dir (build-path root-dir "rime"))
+(define rime-dir (build-path root-dir "assets" "rime"))
 
 (struct dict-source (upstream local local-name upstream-name) #:transparent)
 
