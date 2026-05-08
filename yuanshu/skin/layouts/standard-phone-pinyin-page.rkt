@@ -65,6 +65,15 @@
         "middleRowRightSpacer"
         (object ["size" middle-row-spacer-size])))
 
+(define third-row-spacer-size
+  (object ["width" (model-width 1/2)]))
+
+(define third-row-spacer-entries
+  (hash "thirdRowLeftSpacer"
+        (object ["size" third-row-spacer-size])
+        "thirdRowRightSpacer"
+        (object ["size" third-row-spacer-size])))
+
 (define hint-size
   (object ["height" 50]
           ["width" 50]))
@@ -87,7 +96,9 @@
      (define letter-ids (map letter-id row))
      (define ids
        (case row-index
-         [(2) (append (list "shiftButton") letter-ids (list "backspaceButton"))]
+         [(2) (append (list "shiftButton" "thirdRowLeftSpacer")
+                      letter-ids
+                      (list "thirdRowRightSpacer" "backspaceButton"))]
          [else
           (append
            (if (and (number? offset) (positive? offset))
@@ -140,6 +151,7 @@
   (define combined
     (hash-union (base-page dark? portrait?)
                 middle-row-spacer-entries
+                third-row-spacer-entries
                 (hash-set (letter-builder dark?) "keyboardLayout" standard-phone-keyboard-layout)
                 #:combine/key (lambda (_ left _right) left)))
   (auto-ordered-page combined))

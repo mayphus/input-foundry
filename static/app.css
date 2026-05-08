@@ -460,7 +460,7 @@ select {
 }
 
 .rime-exhibit-download .rime-artifact-form {
-  grid-template-columns: minmax(16rem, 23rem) minmax(0, 1fr);
+  grid-template-columns: minmax(16rem, 23rem) minmax(18rem, 28rem);
   gap: 0.65rem 1.4rem;
   align-items: end;
 }
@@ -469,6 +469,8 @@ select {
   grid-column: 2;
   grid-row: 1 / 3;
   align-self: start;
+  justify-self: end;
+  width: min(100%, 28rem);
 }
 
 .rime-exhibit-download .rime-artifact-buttons {

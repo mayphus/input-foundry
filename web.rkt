@@ -52,8 +52,7 @@
     (define (render theme)
       (define preview (preview-for-theme theme))
       (and (hash? preview)
-           (keyboard-preview-svg (hash-set preview 'visible-keys 'all)
-                                 #:geometry 'skin-proportional)))
+           (keyboard-skin-preview-svg preview)))
     (for/hash ([theme (in-list '(light dark))]
                #:do [(define svg (render theme))]
                #:when svg)

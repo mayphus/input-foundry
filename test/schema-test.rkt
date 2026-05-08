@@ -80,16 +80,16 @@
   (length (regexp-match* #rx"<rect[^>]+rx=\"6.00\"" svg)))
 
 (define (layout-item-width layout key-id)
-  (for*/first ([row (in-list layout)]
-               [item (in-list row)]
-               #:when (equal? (hash-ref (hash-ref item 'key) 'id) key-id))
-    (hash-ref item 'width)))
+  (hash-ref (layout-item layout key-id) 'width))
 
 (define (layout-item-height layout key-id)
+  (hash-ref (layout-item layout key-id) 'height))
+
+(define (layout-item layout key-id)
   (for*/first ([row (in-list layout)]
                [item (in-list row)]
                #:when (equal? (hash-ref (hash-ref item 'key) 'id) key-id))
-    (hash-ref item 'height)))
+    item))
 
 (module+ test
   (test-case "schema catalog ids are unique"
@@ -201,9 +201,9 @@
   (test-case "shuffle_17 phone space gives width to symbol keys"
     (define page (generated-json shuffle-17-pinyin-files "light/pinyinPortrait.yaml"))
     (check-equal? (button-width page "strokeHButton") "113.5/1125")
-    (check-equal? (button-height page "strokeHButton") "113.5/1125")
+    (check-false (button-height page "strokeHButton"))
     (check-equal? (button-width page "strokeZButton") "113.5/1125")
-    (check-equal? (button-height page "strokeZButton") "113.5/1125")
+    (check-false (button-height page "strokeZButton"))
     (check-equal? (button-width page "spaceButton") "267.5/1125"))
 
   (test-case "shuffle_17 preview hides punctuation control row"
@@ -262,7 +262,7 @@
                                   "cv14Button" "bn14Button" "m14Button"
                                   "backspaceButton"))])
         (check-equal? (button-width page button-id) "225/1125")
-        (check-equal? (button-height page button-id) "225/1125"))
+        (check-false (button-height page button-id)))
       (define preview (preview-spec-from-files files))
       (check-equal? (visible-preview-row-ids preview 2)
                     '("zx14Button" "cv14Button" "bn14Button" "m14Button"))))
@@ -316,7 +316,7 @@
     (check-equal? (registry:static-schema-keyboard-layouts "quick5") '("cangjie6"))
     (check-equal? (registry:static-schema-keyboard-layouts "cangjie5") '("cangjie6")))
 
-  (test-case "standard phone middle row keeps real key widths"
+  (test-case "standard phone middle and z rows keep real key widths"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define page (generated-json files "light/pinyinPortrait.yaml"))
     (check-equal? (layout-row-cell-ids page 1)
@@ -324,16 +324,24 @@
                     "aButton" "sButton" "dButton" "fButton" "gButton"
                     "hButton" "jButton" "kButton" "lButton"
                     "middleRowRightSpacer"))
+    (check-equal? (layout-row-cell-ids page 2)
+                  '("shiftButton" "thirdRowLeftSpacer"
+                    "zButton" "xButton" "cButton" "vButton"
+                    "bButton" "nButton" "mButton"
+                    "thirdRowRightSpacer" "backspaceButton"))
     (check-equal? (button-width page "qButton") "112.5/1125")
-    (check-equal? (button-height page "qButton") "112.5/1125")
+    (check-false (button-height page "qButton"))
     (check-equal? (button-width page "aButton") "112.5/1125")
-    (check-equal? (button-height page "aButton") "112.5/1125")
+    (check-false (button-height page "aButton"))
     (check-equal? (button-width page "lButton") "112.5/1125")
-    (check-equal? (button-height page "lButton") "112.5/1125")
+    (check-false (button-height page "lButton"))
+    (check-equal? (button-width page "spaceButton") "475/1125")
     (check-false (hash-ref (page-button page "aButton") 'bounds #f))
     (check-false (hash-ref (page-button page "lButton") 'bounds #f))
     (check-equal? (button-width page "middleRowLeftSpacer") "56.25/1125")
-    (check-equal? (button-width page "middleRowRightSpacer") "56.25/1125"))
+    (check-equal? (button-width page "middleRowRightSpacer") "56.25/1125")
+    (check-equal? (button-width page "thirdRowLeftSpacer") "56.25/1125")
+    (check-equal? (button-width page "thirdRowRightSpacer") "56.25/1125"))
 
   (test-case "phone skin keeps compact square typing geometry available"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
@@ -366,15 +374,17 @@
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define preview (preview-spec-from-files files))
     (define web-svg (hash-ref (preview-spec->svgs preview) 'light))
+    (define skin-svg (keyboard-skin-preview-svg preview))
     (define demo-svg (demo-preview-svg "Flypy" preview))
     (define skin-layout (preview-layout preview #:geometry 'skin-proportional))
     (check-equal? (svg-height web-svg)
                   (svg-height (keyboard-preview-svg preview)))
-    (check-equal? (layout-item-height skin-layout "qButton")
-                  (layout-item-width skin-layout "qButton"))
+    (check-true (> (layout-item-height skin-layout "qButton")
+                   (layout-item-width skin-layout "qButton")))
     (check-false (svg-text? web-svg "space"))
     (check-false (svg-text? web-svg "123"))
     (check-true (svg-text? demo-svg "123"))
+    (check-true (string-contains? demo-svg skin-svg))
     (check-true (> (svg-key-rect-count demo-svg)
                    (svg-key-rect-count web-svg)))
     (check-true (> (svg-height demo-svg)
@@ -389,6 +399,14 @@
                   (layout-item-width web-layout "numericButton"))
     (check-true (> (layout-item-width skin-layout "spaceButton")
                    (layout-item-width skin-layout "numericButton")))
+    (check-true (< (layout-item-width skin-layout "spaceButton")
+                   (* 5 (layout-item-width skin-layout "qButton"))))
+    (define last-row (last skin-layout))
+    (check-= (hash-ref (first last-row) 'x) 8 0.001)
+    (check-= (+ (hash-ref (last last-row) 'x)
+                (hash-ref (last last-row) 'width))
+             367
+             0.001)
     (check-true (> (layout-item-width skin-layout "backspaceButton")
                    (layout-item-width skin-layout "zButton"))))
 
@@ -407,18 +425,21 @@
     (check-equal? (hash-ref (hash-ref (hash-ref flypy-page 'qButtonFlypyBottomForegroundStyle)
                                       'center)
                             'y)
-                  0.76)
+                  0.68)
     (check-equal? (hash-ref (hash-ref (hash-ref luna-page 'qButtonAbcForegroundStyle)
                                       'center)
                             'y)
                   0.5))
 
-  (test-case "phone preview hides middle row layout spacers"
+  (test-case "phone preview hides layout spacers"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define preview (preview-spec-from-files files))
     (check-equal? (visible-preview-row-ids preview 1)
                   '("aButton" "sButton" "dButton" "fButton" "gButton"
-                    "hButton" "jButton" "kButton" "lButton")))
+                    "hButton" "jButton" "kButton" "lButton"))
+    (check-equal? (visible-preview-row-ids preview 2)
+                  '("zButton" "xButton" "cButton" "vButton"
+                    "bButton" "nButton" "mButton")))
 
   (test-case "custom patch DSL emits direct Rime patch fields"
     (define yaml (generated-file jyut6ping3:config-files "jyut6ping3.custom.yaml"))

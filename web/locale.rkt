@@ -14,8 +14,8 @@
          request-locale
          remember-locale-headers)
 
-(define app-css-href "/app.css?v=20260508-compactselector")
-(define preview-svg-version "20260508-skinrender")
+(define app-css-href "/app.css?v=20260509-zrowgap")
+(define preview-svg-version "20260509-zrowgap")
 
 (define copy
   (hash

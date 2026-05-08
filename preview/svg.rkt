@@ -6,6 +6,7 @@
          "spec.rkt")
 
 (provide keyboard-preview-svg
+         keyboard-skin-preview-svg
          demo-preview-svg
          preview-spec->svgs)
 
@@ -415,8 +416,14 @@
           (attr-escape (hash-ref colors 'background))
           (keyboard-diagram-body-svg layout colors y-offset)))
 
+(define (skin-preview-spec preview)
+  (hash-set preview 'visible-keys 'all))
+
+(define (keyboard-skin-preview-svg preview)
+  (keyboard-preview-svg (skin-preview-spec preview)
+                        #:geometry 'skin-proportional))
+
 (define (demo-preview-svg title preview)
-  (define demo-preview (hash-set preview 'visible-keys 'all))
   (define panel-x 92)
   (define panel-y 150)
   (define panel-width 812)
@@ -425,6 +432,7 @@
   (define keyboard-y (+ panel-y 84))
   (define keyboard-width (- panel-width 68))
   (define keyboard-height (- panel-height 116))
+  (define demo-preview (skin-preview-spec preview))
   (define size (hash-get demo-preview 'size (hash)))
   (define logical-width (numberish (hash-get size 'width 375) 375))
   (define-values (_compact-width logical-height _y-offset _layout)
@@ -452,7 +460,7 @@
           (real->decimal-string offset-x 2)
           (real->decimal-string offset-y 2)
           (real->decimal-string scale 4)
-          (keyboard-preview-svg demo-preview #:geometry 'skin-proportional)))
+          (keyboard-skin-preview-svg preview)))
 
 (define (preview-spec->svgs preview-spec)
   (cond

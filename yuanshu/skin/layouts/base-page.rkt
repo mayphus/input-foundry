@@ -321,6 +321,7 @@
            ["backgroundStyle" "alphabeticButtonBackgroundStyle"]
            ["foregroundStyle" "spaceButtonForegroundStyle"]
            ["notification" (array "preeditChangedForSpaceButtonNotification")]
+           ["size" (object ["width" "475/1125"])]
            ["swipeUpAction" (object ["shortcut" "#次选上屏"])])
    "spaceButtonForegroundStyle"
    (system-image-style dark? "space")))
