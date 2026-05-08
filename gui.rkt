@@ -67,7 +67,7 @@
 (define (set-status! label text)
   (queue-callback
    (lambda ()
-     (send label set-label text))))
+     (send label set-value text))))
 
 (define (append-log! log-field text)
   (queue-callback
@@ -227,49 +227,44 @@
   (define frame
     (new frame%
          [label "Rime Config"]
-         [width 900]
-         [height 460]))
+         [width 560]
+         [height 400]))
   (define root
     (new vertical-panel%
          [parent frame]
          [alignment '(left top)]
-         [spacing 6]
-         [border 10]))
+         [spacing 3]
+         [border 4]))
 
-  (define upload-row
+  (define connection-row
     (new horizontal-panel%
          [parent root]
          [alignment '(left center)]
-         [spacing 8]
+         [spacing 4]
          [stretchable-width #t]
          [stretchable-height #f]))
-  (new message% [parent upload-row] [label "WiFi"])
+  (new message% [parent connection-row] [label "Host"])
   (define url-field
     (new text-field%
          [label #f]
-         [parent upload-row]
+         [parent connection-row]
          [init-value default-wifi-transfer-host]
-         [min-width 170]))
-
-  (define actions
-    (new horizontal-panel%
-         [parent upload-row]
-         [spacing 6]
-         [stretchable-height #f]))
+         [min-width 130]
+         [stretchable-width #f]))
   (define build-button #f)
   (define push-button #f)
   (define action-buttons '())
   (set! build-button
         (new button%
-             [label "Build ZIP"]
-             [parent actions]
+             [label "Build"]
+             [parent connection-row]
              [callback
               (lambda (_button _event)
                 (run-build! schema-rows status log-field action-buttons))]))
   (set! push-button
         (new button%
-             [label "Push to iPhone"]
-             [parent actions]
+             [label "Push"]
+             [parent connection-row]
              [callback
               (lambda (_button _event)
                 (run-push! schema-rows
@@ -279,23 +274,16 @@
                            status
                            log-field
                            action-buttons))]))
-
   (define allow-delete
     (new check-box%
-         [label "Delete extras"]
-         [parent upload-row]
+         [label "Clean"]
+         [parent connection-row]
          [value #f]))
   (define include-big-dicts
     (new check-box%
-         [label "Big dicts"]
-         [parent upload-row]
+         [label "Dicts"]
+         [parent connection-row]
          [value #t]))
-
-  (define status
-    (new message%
-         [parent upload-row]
-         [label "Ready."]
-         [stretchable-width #t]))
 
   (define log-field
     (new text-field%
@@ -303,23 +291,32 @@
          [parent root]
          [init-value "Ready."]
          [style '(multiple)]
-         [min-height 58]
+         [min-height 34]
          [stretchable-width #t]
          [stretchable-height #f]))
+  (define status log-field)
 
   (define schema-actions
     (new horizontal-panel%
          [parent root]
          [alignment '(left center)]
-         [spacing 6]
+         [spacing 4]
+         [stretchable-width #t]
          [stretchable-height #f]))
-  (new message% [parent schema-actions] [label "Schemas"])
+  (new button%
+       [label "All"]
+       [parent schema-actions]
+       [callback (lambda (_button _event) (set-row-values! schema-rows #t))])
+  (new button%
+       [label "Clear"]
+       [parent schema-actions]
+       [callback (lambda (_button _event) (set-row-values! schema-rows #f))])
 
   (define schema-grid
     (new horizontal-panel%
          [parent root]
          [alignment '(left top)]
-         [spacing 18]
+         [spacing 0]
          [stretchable-width #t]
          [stretchable-height #t]))
   (define schema-columns
@@ -327,8 +324,8 @@
       (new vertical-panel%
            [parent schema-grid]
            [alignment '(left top)]
-           [spacing 2]
-           [min-width 250]
+           [spacing 1]
+           [min-width 170]
            [stretchable-width #t]
            [stretchable-height #t])))
 
@@ -342,23 +339,6 @@
         (for/list ([catalog (in-list catalogs)])
           (make-section column (car catalog) (cdr catalog) default-schema-ids))))))
 
-  (new button%
-       [label "All"]
-       [parent schema-actions]
-       [callback (lambda (_button _event) (set-row-values! schema-rows #t))])
-  (new button%
-       [label "Clear"]
-       [parent schema-actions]
-       [callback (lambda (_button _event) (set-row-values! schema-rows #f))])
-  (new button%
-       [label "Flypy"]
-       [parent schema-actions]
-       [callback
-        (lambda (_button _event)
-          (set-row-values! schema-rows #f)
-          (for ([row (in-list schema-rows)])
-            (when (member (option-id (car row)) default-schema-ids)
-              (send (cdr row) set-value #t))))])
   (set! action-buttons (list build-button push-button))
 
   (send frame center)
