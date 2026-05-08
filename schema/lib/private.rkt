@@ -24,7 +24,7 @@
 ;;       (version "0.1")
 ;;       (description "...")
 ;;       (patch "recognizer/patterns/reverse_lookup" "`[a-z]*'?$"))
-;;     (keyboard-layout flypy_14
+;;     (yuanshu-skin flypy_14
 ;;       (meta ...)
 ;;       (phone-layout flypy-14)
 ;;       (ipad-layout standard-18)))
@@ -294,7 +294,7 @@
     (define lst (syntax->list clause))
     (and lst
          (pair? lst)
-         (memq (syntax-e (car lst)) '(keyboard-layout mobile-skin))))
+         (memq (syntax-e (car lst)) '(keyboard-layout mobile-skin yuanshu-skin skin))))
 
   (define (keyboard-layout-id layout-cl)
     (define items (syntax->list layout-cl))
@@ -323,7 +323,9 @@
        (or (find-clause clauses 'keyboard-layouts)
            (find-clause clauses 'mobile-skins)
            (find-clause clauses 'keyboard-layout)
-           (find-clause clauses 'mobile-skin)))
+           (find-clause clauses 'mobile-skin)
+           (find-clause clauses 'yuanshu-skin)
+           (find-clause clauses 'skin)))
      (define keyboard-layout-clauses
        (filter keyboard-layout-clause? clauses))
      (define deps-cl (find-clause clauses 'deps))

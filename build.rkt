@@ -52,7 +52,7 @@
 (define rime-dir     (build-path root-dir "rime"))
 (define profiles-dir (build-path root-dir "profiles"))
 (define output-dir   (build-path root-dir "output" "rime"))
-(define-runtime-path mobile-lang-path "schema/lib/mobile/lang.rkt")
+(define-runtime-path yuanshu-skin-lang-path "yuanshu/skin/lang.rkt")
 
 (define zip-exe (find-executable-path "zip"))
 
@@ -72,9 +72,9 @@
   (unless (and (eq? ns keyboard-layout-module-namespace)
                (set-member? declared-keyboard-layout-modules name))
     (parameterize ([current-namespace ns])
-      (eval `(module ,name
-               (file ,(path->string mobile-lang-path))
-               (keyboard-layout ,(string->symbol (keyboard-layout-module-layout mod))
+	      (eval `(module ,name
+               (file ,(path->string yuanshu-skin-lang-path))
+               (yuanshu-skin ,(string->symbol (keyboard-layout-module-layout mod))
                  (triggers ,(string->symbol (keyboard-layout-module-schema mod)))
                  ,@(keyboard-layout-module-body mod)))))
     (when (eq? ns keyboard-layout-module-namespace)

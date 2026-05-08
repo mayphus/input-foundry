@@ -12,12 +12,14 @@ Chinese input museum and Rime/Yuanshu package builder, served by one Racket app.
 - `rime/` holds native Rime YAML and dictionaries; `schema/` holds this project's DSL source.
 - `schema/lib/lang.rkt` is the public schema DSL language.
 - `schema/lib/yaml/` contains the internal YAML renderer.
-- `schema/lib/mobile/` is the internal Yuanshu keyboard layout compiler used by schema modules.
+- `yuanshu/skin/` is the Yuanshu skin compiler and preview renderer.
 - `tools/` contains maintenance scripts.
 - `k8s/` is ignored generated deploy output from `k8s.rkt`.
 
 Generated schema modules use `#lang s-exp "lib/lang.rkt"` and declare their
-artifact support and keyboard layout shape in the schema itself:
+artifact support in the schema itself. Inline `(keyboard-layout ...)` clauses
+are now treated as custom Yuanshu skin definitions; default layouts should move
+to a root keyboard catalog instead of living in schema modules:
 
 ```racket
 (rime-schema flypy_14
@@ -41,7 +43,7 @@ artifact support and keyboard layout shape in the schema itself:
     (version "0.1")
     (description "適合 Yuanshu iPhone 14 鍵圖示鍵盤佈局。")
     (patch "recognizer/patterns/reverse_lookup" "`[a-z]*'?$"))
-  (keyboard-layout flypy_14
+  (yuanshu-skin flypy_14
     (meta
       (name "Flypy 14" "小鶴十四鍵")
       (summary "A compact Yuanshu keyboard layout for the Flypy 14-key layout."))

@@ -1,11 +1,11 @@
 #lang racket/base
 
-;; Yuanshu keyboard-layout DSL language module
+;; Yuanshu skin DSL language module
 ;;
-;; Usage in keyboard layout files:
-;;   #lang s-exp "lib/lang.rkt"
+;; Usage in generated Yuanshu skin modules:
+;;   #lang s-exp "yuanshu/skin/lang.rkt"
 ;;
-;;   (keyboard-layout <slug>
+;;   (yuanshu-skin <slug>
 ;;     (triggers <schema-id> ... | default)
 ;;     (meta
 ;;       (name "<english>" "<chinese>")
@@ -100,7 +100,7 @@
                      syntax/parse))
 
 ;; Re-export racket/base (minus #%module-begin which we replace) and all
-;; keyboard layout library bindings, so generated layout modules get everything
+;; Yuanshu skin library bindings, so generated skin modules get everything
 ;; automatically.
 (provide (except-out (all-from-out racket/base) #%module-begin)
          #%datum
@@ -127,11 +127,12 @@
                        "layouts/bopomofo-page.rkt"
                        "layouts/soft46-page.rkt")
          (rename-out [yuanshu-module-begin #%module-begin])
+         yuanshu-skin
          keyboard-layout
          skin)
 
 ;;; ============================================================
-;;; #%module-begin — thin wrapper; all real work is in `keyboard-layout`
+;;; #%module-begin — thin wrapper; all real work is in `yuanshu-skin`
 ;;; ============================================================
 
 (define-syntax (yuanshu-module-begin stx)
@@ -408,10 +409,10 @@
 ) ; end begin-for-syntax
 
 ;;; ============================================================
-;;; keyboard-layout — top-level form; emits all defines + provide
+;;; yuanshu-skin — top-level form; emits all defines + provide
 ;;; ============================================================
 
-(define-syntax (keyboard-layout stx)
+(define-syntax (yuanshu-skin stx)
   (syntax-parse stx
     [(_ slug:id clause ...)
      (define clauses  (syntax->list #'(clause ...)))
@@ -506,7 +507,12 @@
                   chinese-name
                   english-name))]))
 
+(define-syntax (keyboard-layout stx)
+  (syntax-parse stx
+    [(_ slug:id clause ...)
+     #'(yuanshu-skin slug clause ...)]))
+
 (define-syntax (skin stx)
   (syntax-parse stx
     [(_ slug:id clause ...)
-     #'(keyboard-layout slug clause ...)]))
+     #'(yuanshu-skin slug clause ...)]))
