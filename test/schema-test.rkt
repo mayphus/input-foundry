@@ -11,6 +11,7 @@
          (prefix-in jyut6ping3: "../schema/jyut6ping3.rkt")
          "../build.rkt"
          "../schema/lib/mobile/core/preview.rkt"
+         "../schema/lib/mobile/core/preview-svg.rkt"
          "../schema/lib/mobile/layouts/bopomofo-page.rkt"
          (prefix-in flypy14-layout: "../schema/lib/mobile/layouts/flypy-14-page.rkt")
          (prefix-in flypy18-layout: "../schema/lib/mobile/layouts/flypy-18-page.rkt")
@@ -56,6 +57,10 @@
   (for/list ([key (in-list row)]
              #:when (preview-key-visible? key))
     (hash-ref key 'id)))
+
+(define (svg-height svg)
+  (define match (regexp-match #rx"<svg[^>]+height=\"([0-9.]+)\"" svg))
+  (and match (string->number (cadr match))))
 
 (module+ test
   (test-case "flypy shared config emits desktop schema YAML"
@@ -210,6 +215,7 @@
     (define preview (preview-spec-from-files files))
     (define standard-key-side
       (hash-ref (first (first (preview-layout preview))) 'width))
+    (define standard-svg-height (svg-height (keyboard-preview-svg preview)))
     (check-equal? (hash-ref preview 'source) 'dsl)
     (check-equal? (hash-ref preview 'key-shape) 'square)
     (check-equal? (hash-ref preview 'visible-keys) 'typing)
@@ -220,12 +226,15 @@
            [item (in-list row)])
       (check-equal? (hash-ref item 'width)
                     (hash-ref item 'height)))
+    (check-true (< standard-svg-height 216))
     (for ([compact-preview
            (in-list (list (preview-spec-from-files flypy14-layout:flypy-14-iphone-pinyin-files)
                           (preview-spec-from-files flypy18-layout:flypy-18-iphone-pinyin-files)
                           (preview-spec-from-files shuffle-17-pinyin-files)))])
       (check-equal? (hash-ref (first (first (preview-layout compact-preview))) 'width)
-                    standard-key-side)))
+                    standard-key-side)
+      (check-equal? (svg-height (keyboard-preview-svg compact-preview))
+                    standard-svg-height)))
 
   (test-case "DSL note positions expand to square-key regions"
     (define flypy-page (generated-json (make-flypy-phone-files standard-phone-base-for-test)

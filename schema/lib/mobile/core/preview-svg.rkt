@@ -346,41 +346,63 @@
            (attr-escape (hash-ref colors 'stroke)))
    (diagram-label-svg key x y width height colors)))
 
-(define (keyboard-body-svg preview)
+(define (keyboard-layout-items preview)
+  (preview-layout preview
+                  #:pad keyboard-pad
+                  #:key-gap key-gap
+                  #:row-gap row-gap))
+
+(define (layout-y-bounds layout)
+  (for*/fold ([min-y +inf.0]
+              [max-y 0])
+             ([row (in-list layout)]
+              [item (in-list row)])
+    (define y (hash-get item 'y 0))
+    (define height (hash-get item 'height 0))
+    (values (min min-y y)
+            (max max-y (+ y height)))))
+
+(define (compact-layout-metrics preview)
+  (define size (hash-get preview 'size (hash)))
+  (define width (numberish (hash-get size 'width 375) 375))
+  (define source-height (numberish (hash-get size 'height 216) 216))
+  (define layout (keyboard-layout-items preview))
+  (cond
+    [(null? layout)
+     (values width source-height 0 layout)]
+    [else
+     (define-values (min-y max-y) (layout-y-bounds layout))
+     (define compact-height (+ (* 2 keyboard-pad) (- max-y min-y)))
+     (values width compact-height (- keyboard-pad min-y) layout)]))
+
+(define (keyboard-body-svg layout y-offset)
   (apply
    string-append
-   (for*/list ([row (in-list (preview-layout preview
-                                             #:pad keyboard-pad
-                                             #:key-gap key-gap
-                                             #:row-gap row-gap))]
+   (for*/list ([row (in-list layout)]
                [item (in-list row)]
                #:when (preview-key-visible? (hash-get item 'key #f)))
      (key-svg (hash-get item 'key (hash))
               (hash-get item 'x 0)
-              (hash-get item 'y 0)
+              (+ (hash-get item 'y 0) y-offset)
               (hash-get item 'width 0)
               (hash-get item 'height 0)))))
 
-(define (keyboard-diagram-body-svg preview colors)
+(define (keyboard-diagram-body-svg layout colors y-offset)
   (apply
    string-append
-   (for*/list ([row (in-list (preview-layout preview
-                                             #:pad keyboard-pad
-                                             #:key-gap key-gap
-                                             #:row-gap row-gap))]
+   (for*/list ([row (in-list layout)]
                [item (in-list row)]
                #:when (preview-key-visible? (hash-get item 'key #f)))
      (diagram-key-svg (hash-get item 'key (hash))
                       (hash-get item 'x 0)
-                      (hash-get item 'y 0)
+                      (+ (hash-get item 'y 0) y-offset)
                       (hash-get item 'width 0)
                       (hash-get item 'height 0)
                       colors))))
 
 (define (keyboard-preview-svg preview)
-  (define size (hash-get preview 'size (hash)))
-  (define width (numberish (hash-get size 'width 375) 375))
-  (define height (numberish (hash-get size 'height 216) 216))
+  (define-values (width height y-offset layout)
+    (compact-layout-metrics preview))
   (define colors (diagram-colors preview))
   (format "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"~a\" height=\"~a\" viewBox=\"0 0 ~a ~a\" role=\"img\" aria-label=\"Keyboard preview\"><rect width=\"~a\" height=\"~a\" rx=\"12\" fill=\"~a\"/>~a</svg>"
           (real->decimal-string width 2)
@@ -390,7 +412,7 @@
           (real->decimal-string width 2)
           (real->decimal-string height 2)
           (attr-escape (hash-ref colors 'background))
-          (keyboard-diagram-body-svg preview colors)))
+          (keyboard-diagram-body-svg layout colors y-offset)))
 
 (define (demo-preview-svg title preview)
   (define panel-x 92)
@@ -403,7 +425,8 @@
   (define keyboard-height (- panel-height 116))
   (define size (hash-get preview 'size (hash)))
   (define logical-width (numberish (hash-get size 'width 375) 375))
-  (define logical-height (numberish (hash-get size 'height 216) 216))
+  (define-values (_compact-width logical-height _y-offset _layout)
+    (compact-layout-metrics preview))
   (define scale (* demo-keyboard-scale
                    (min (/ keyboard-width logical-width)
                         (/ keyboard-height logical-height))))

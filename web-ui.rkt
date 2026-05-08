@@ -15,7 +15,7 @@
          form-request?)
 
 (define app-css-href "/app.css?v=20260508-variants")
-(define preview-svg-version "20260508-noteplaces")
+(define preview-svg-version "20260508-compactheight")
 
 (define copy
   (hash
