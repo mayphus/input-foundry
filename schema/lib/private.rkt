@@ -29,14 +29,16 @@
 ;;       (phone-layout flypy-14)
 ;;       (ipad-layout standard-18)))
 
-(require "shared.rkt"
+(require "../common.rkt"
+         "../../yuanshu/patches.rkt"
          "../../lib/yaml/dsl.rkt"
          (for-syntax racket/base
                      syntax/parse))
 
 (provide (except-out (all-from-out racket/base) #%module-begin)
          #%datum
-         (all-from-out "shared.rkt")
+         (all-from-out "../common.rkt")
+         (all-from-out "../../yuanshu/patches.rkt")
          (rename-out [rime-schema-module-begin #%module-begin])
          rime-schema
          include-ref

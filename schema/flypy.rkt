@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "lib/flypy.rkt")
+(require "families/flypy.rkt")
 
 (flypy-family
   (dictionary luna_pinyin)

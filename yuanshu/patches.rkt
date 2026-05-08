@@ -1,40 +1,13 @@
 #lang racket/base
 
 (require racket/format
-         "../../lib/yaml/dsl.rkt")
+         "../lib/yaml/dsl.rkt")
 
-(provide common-schema-processors
-         common-schema-segmentors
-         common-schema-filters
-         yuanshu-common-patch
+(provide yuanshu-common-patch
          yuanshu-script-patch
          yuanshu-reverse-lookup-patch
          make-shared-config-files
          make-mobile-custom-file)
-
-(define common-schema-processors
-  (sequence
-   "ascii_composer"
-   "recognizer"
-   "key_binder"
-   "speller"
-   "punctuator"
-   "selector"
-   "navigator"
-   "express_editor"))
-
-(define common-schema-segmentors
-  (sequence
-   "ascii_segmentor"
-   "matcher"
-   "abc_segmentor"
-   "punct_segmentor"
-   "fallback_segmentor"))
-
-(define common-schema-filters
-  (sequence
-   "simplifier"
-   "uniquifier"))
 
 (define yuanshu-common-patch
   (mapping

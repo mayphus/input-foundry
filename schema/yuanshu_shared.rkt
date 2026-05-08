@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "lib/shared.rkt")
+(require "../yuanshu/patches.rkt")
 
 (provide config-files)
 
