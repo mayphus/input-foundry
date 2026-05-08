@@ -17,6 +17,7 @@
          build-profile-from-hash!
          build-profile-keyboard-layout-directories!
          build-profile-skin-directories!
+         build-output!
          build-bundle!
          zip-profile-path!
          zip-profile!
@@ -78,26 +79,23 @@
                            'keyboard-layout-files)
                        #:fresh? with-docs?))
 
-(define (build-one-keyboard-layout! layout schemas profile-out layout-root)
-  (define layout-rkt (keyboard-layout-module-path! layout schemas))
-  (define layout-out (build-path layout-root layout))
-  (define cskin (build-path profile-out "skins" (string-append layout ".cskin")))
-  (printf "Building keyboard layout: ~a\n" layout)
-  (delete-directory/files layout-out #:must-exist? #f)
-  (write-unpacked-keyboard-layout! layout-rkt layout-out #:with-docs? #t)
-  (delete-file* cskin)
-  (make-directory* (path-only cskin))
-  (parameterize ([current-directory layout-root])
-    (run! zip-exe "-qr" (path->string cskin) layout))
-  layout-out)
-
-(define (build-keyboard-layouts! layouts schemas profile-out layout-root)
+(define (build-keyboard-layouts! layouts schemas profile-out layout-root
+                                 #:render-docs? [render-docs? #t])
   (unless (null? layouts)
     (make-directory* (build-path profile-out "skins"))
     (delete-directory/files layout-root #:must-exist? #f)
     (make-directory* layout-root)
     (for ([layout layouts])
-      (build-one-keyboard-layout! layout schemas profile-out layout-root))))
+      (define layout-rkt (keyboard-layout-module-path! layout schemas))
+      (define layout-out (build-path layout-root layout))
+      (define cskin (build-path profile-out "skins" (string-append layout ".cskin")))
+      (printf "Building keyboard layout: ~a\n" layout)
+      (delete-directory/files layout-out #:must-exist? #f)
+      (write-unpacked-keyboard-layout! layout-rkt layout-out #:with-docs? render-docs?)
+      (delete-file* cskin)
+      (make-directory* (path-only cskin))
+      (parameterize ([current-directory layout-root])
+        (run! zip-exe "-qr" (path->string cskin) layout)))))
 
 (define (build-profile-keyboard-layout-directories! profile profile-name out-dir)
   (define tmp-dir (make-temporary-file "rime-layout-profile-~a" 'directory))
@@ -118,7 +116,8 @@
 
 (define (build-profile-from-hash! profile profile-name profile-out
                                   #:keyboard-layout-dir [keyboard-layout-dir #f]
-                                  #:skin-dir [skin-dir #f])
+                                  #:skin-dir [skin-dir #f]
+                                  #:render-docs? [render-docs? #t])
   (delete-directory/files profile-out #:must-exist? #f)
   (make-directory* profile-out)
 
@@ -170,9 +169,42 @@
                (set! tmp-layout-dir (make-temporary-file "rime-layouts-~a" 'directory))
                tmp-layout-dir))))
   (when layout-root
-    (build-keyboard-layouts! keyboard-layouts schemas profile-out layout-root))
+    (build-keyboard-layouts! keyboard-layouts
+                             schemas
+                             profile-out
+                             layout-root
+                             #:render-docs? render-docs?))
   (when tmp-layout-dir
     (delete-directory/files tmp-layout-dir #:must-exist? #f)))
+
+(define (build-output! #:schemas [schemas "all"]
+                       #:artifact [artifact "yuanshu"]
+                       #:out-dir [out-dir output-dir]
+                       #:profile-name [profile-name "rime"]
+                       #:zip-path [zip-path #f]
+                       #:keyboard-layout-dir [keyboard-layout-dir #f]
+                       #:skin-dir [skin-dir #f]
+                       #:extra-src-files [extra-src-files '()]
+                       #:skip-default-custom? [skip-default-custom? #t]
+                       #:render-docs? [render-docs? #t])
+  (define profile
+    (let ([base (hash 'schemas schemas
+                      'artifact artifact
+                      'skip-default-custom skip-default-custom?)])
+      (if (null? extra-src-files)
+          base
+          (hash-set base 'extra-src-files extra-src-files))))
+  (build-profile-from-hash! profile
+                            profile-name
+                            out-dir
+                            #:keyboard-layout-dir keyboard-layout-dir
+                            #:skin-dir skin-dir
+                            #:render-docs? render-docs?)
+  (when zip-path
+    (zip-profile-path! profile-name out-dir zip-path))
+  (define-values (_gen-yaml _rime-yaml _rime-dirs layouts)
+    (compute-assets (resolve-schemas profile) profile))
+  (values out-dir zip-path (or keyboard-layout-dir skin-dir) layouts))
 
 (define (build-bundle! profile
                        profile-name
@@ -188,17 +220,27 @@
        (build-path (path-only profile-out)
                    (string-append (path->string (file-name-from-path profile-out)) "-layouts"))]
       [else requested-layout-dir]))
-  (build-profile-from-hash! profile
-                            profile-name
-                            profile-out
-                            #:keyboard-layout-dir final-layout-dir)
-  (zip-profile-path! profile-name profile-out zip-path)
-  (values profile-out zip-path final-layout-dir))
+  (define-values (built-out built-zip built-layout-dir _layouts)
+    (build-output! #:schemas (hash-ref profile 'schemas '())
+                   #:artifact (profile-artifact profile)
+                   #:out-dir profile-out
+                   #:profile-name profile-name
+                   #:zip-path zip-path
+                   #:keyboard-layout-dir final-layout-dir
+                   #:extra-src-files (hash-ref profile 'extra-src-files '())
+                   #:skip-default-custom? (hash-ref profile 'skip-default-custom #f)))
+  (values built-out built-zip built-layout-dir))
 
 (define (build-profile! profile-name)
   (define profile     (named-rime-profile profile-name))
   (define profile-out (build-path output-dir profile-name))
-  (build-profile-from-hash! profile profile-name profile-out))
+  (build-output! #:schemas (hash-ref profile 'schemas '())
+                 #:artifact (profile-artifact profile)
+                 #:out-dir profile-out
+                 #:profile-name profile-name
+                 #:extra-src-files (hash-ref profile 'extra-src-files '())
+                 #:skip-default-custom? (hash-ref profile 'skip-default-custom #f))
+  (void))
 
 (define (zip-profile-path! profile-name profile-out zip-path)
   (delete-file* zip-path)
@@ -215,19 +257,11 @@
   (zip-profile-path! profile-name profile-out zip-path))
 
 (define (build-preview-keyboard-layouts! #:render-docs? [render-docs? #f])
-  (define schemas (remove-duplicates (append generated-config-ids (list-static-schema-ids))))
-  (for ([item (in-list (list-keyboard-layout-items schemas))])
-    (define layout (cadr item))
-    (define layout-file (caddr item))
-    (define out (build-path output-dir "compiled-keyboard-layouts" layout))
-    (printf "Building preview keyboard layout: ~a~a\n" layout (if render-docs? " (with docs)" ""))
-    (delete-directory/files out #:must-exist? #f)
-    (make-directory* out)
-    (write-module-files! layout-file
-                         out
-                         (if render-docs?
-                             'keyboard-layout-files-with-docs
-                             'keyboard-layout-files)
-                         #:fresh? render-docs?)))
+  (build-output! #:schemas "all"
+                 #:artifact "yuanshu"
+                 #:out-dir output-dir
+                 #:profile-name "rime"
+                 #:skip-default-custom? #t
+                 #:render-docs? render-docs?))
 
 (define build-preview-skins! build-preview-keyboard-layouts!)

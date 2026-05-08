@@ -30,6 +30,7 @@
          build-profile-from-hash!
          build-profile-keyboard-layout-directories!
          build-profile-skin-directories!
+         build-output!
          build-bundle!
          zip-profile-path!
          zip-profile!

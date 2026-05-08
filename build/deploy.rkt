@@ -62,11 +62,21 @@
                 (normalize-path target-dir))
     (error 'deploy "target is the same as the repo root - aborting"))
 
-  (define build-out (build-path output-dir "desktop"))
-  (build-profile-from-hash! default-desktop-profile "desktop" build-out)
+  (define build-out (make-temporary-file "rime-desktop-~a" 'directory))
+  (dynamic-wind
+    void
+    (lambda ()
+      (build-output! #:schemas (hash-ref default-desktop-profile 'schemas '())
+                     #:artifact "rime"
+                     #:out-dir build-out
+                     #:profile-name "desktop"
+                     #:extra-src-files (hash-ref default-desktop-profile 'extra-src-files '())
+                     #:skip-default-custom? #f)
 
-  (make-directory* target-dir)
-  (sync-to-dir! build-out target-dir)
-  (printf "Deployed to ~a\n" (path->string target-dir))
+      (make-directory* target-dir)
+      (sync-to-dir! build-out target-dir)
+      (printf "Deployed to ~a\n" (path->string target-dir))
 
-  (when rime-deploy? (rime-deploy!)))
+      (when rime-deploy? (rime-deploy!)))
+    (lambda ()
+      (delete-directory/files build-out #:must-exist? #f))))

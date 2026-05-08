@@ -48,6 +48,30 @@
   (check-true (file-exists? (apply build-path extract-dir rel-parts))))
 
 (module+ test
+  (test-case "unified output writes one rime root with schema files and skins"
+    (define tmp (make-temporary-file "rime-config-output-~a" 'directory))
+    (dynamic-wind
+      void
+      (lambda ()
+        (define out (build-path tmp "rime"))
+        (define-values (built-out built-zip skin-dir layouts)
+          (build-output! #:schemas (list "flypy")
+                         #:artifact "yuanshu"
+                         #:out-dir out
+                         #:profile-name "rime"
+                         #:skip-default-custom? #t))
+        (check-equal? built-out out)
+        (check-false built-zip)
+        (check-false skin-dir)
+        (check-equal? layouts '("flypy"))
+        (check-true (file-exists? (build-path out "flypy.schema.yaml")))
+        (check-true (file-exists? (build-path out "flypy.custom.yaml")))
+        (check-true (file-exists? (build-path out "skins" "flypy.cskin")))
+        (check-false (directory-exists? (build-path out "compiled-keyboard-layouts")))
+        (check-false (directory-exists? (build-path out "compiled-skins"))))
+      (lambda ()
+        (delete-directory/files tmp #:must-exist? #f))))
+
   (test-case "yuanshu artifact shares unpacked layout directory and packaged cskin"
     (define tmp (make-temporary-file "rime-config-bundle-~a" 'directory))
     (dynamic-wind

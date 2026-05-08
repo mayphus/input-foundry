@@ -92,16 +92,17 @@
       (set-buttons-enabled! buttons #t))))
 
 (define (build-mobile-bundle! schemas)
-  (define profile
-    (hash 'schemas schemas
-          'artifact "yuanshu"))
   (define profile-out (build-path output-dir mobile-output-name))
   (define zip-path (build-path output-dir (string-append app-profile-name "-mobile.zip")))
-  (define-values (built-out built-zip layout-dir)
-    (build-bundle! profile
-                   app-profile-name
-                   profile-out
-                   zip-path))
+  (define skin-dir (build-path output-dir (string-append mobile-output-name "-skins")))
+  (define-values (built-out built-zip layout-dir _layouts)
+    (build-output! #:schemas schemas
+                   #:artifact "yuanshu"
+                   #:out-dir profile-out
+                   #:profile-name app-profile-name
+                   #:zip-path zip-path
+                   #:skin-dir skin-dir
+                   #:skip-default-custom? #f))
   (values built-out built-zip layout-dir))
 
 (define (built-keyboard-layout-ids layout-dir)

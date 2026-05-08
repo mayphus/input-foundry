@@ -7,6 +7,7 @@
          racket/list
          racket/runtime-path
          racket/string
+         racket/system
          net/url
          json
          "preview/svg.rkt"
@@ -30,11 +31,22 @@
 (define (valid-id? s)
   (and (string? s) (regexp-match? #rx"^[a-zA-Z0-9_-]+$" s)))
 
-(define (keyboard-layout-demo-path layout-id)
-  (define primary (build-path output-dir "compiled-keyboard-layouts" layout-id "demo.png"))
-  (if (file-exists? primary)
-      primary
-      (build-path output-dir "compiled-skins" layout-id "demo.png")))
+(define unzip-exe (find-executable-path "unzip"))
+
+(define (keyboard-layout-demo-bytes layout-id)
+  (define cskin (build-path output-dir "skins" (string-append layout-id ".cskin")))
+  (and unzip-exe
+       (file-exists? cskin)
+       (let ([out (open-output-bytes)]
+             [err (open-output-string)])
+         (and
+          (parameterize ([current-output-port out]
+                         [current-error-port err])
+            (system* unzip-exe
+                     "-p"
+                     (path->string cskin)
+                     (string-append layout-id "/demo.png")))
+          (get-output-bytes out)))))
 
 (define (keyboard-layout-preview-svgs layout-module)
   (with-handlers ([exn:fail? (lambda (_) (hash))])
@@ -219,12 +231,12 @@
     [(not (valid-id? layout-id))
      (json-error "Invalid keyboard layout id")]
     [else
-     (define demo-path (keyboard-layout-demo-path layout-id))
-     (if (file-exists? demo-path)
+     (define demo-bytes (keyboard-layout-demo-bytes layout-id))
+     (if demo-bytes
          (response/full
           200 #"OK" (current-seconds) #"image/png"
           (list (make-header #"Cache-Control" #"public, max-age=300"))
-          (list (file->bytes demo-path)))
+          (list demo-bytes))
          (response/full
           404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
          (list #"Preview image not found")))]))
@@ -283,7 +295,13 @@
      (dynamic-wind
       void
       (lambda ()
-        (build-bundle! final-profile profile-name profile-out zip-path)
+        (build-output! #:schemas schemas
+                       #:artifact artifact
+                       #:out-dir profile-out
+                       #:profile-name profile-name
+                       #:zip-path zip-path
+                       #:extra-src-files (hash-ref final-profile 'extra-src-files '())
+                       #:skip-default-custom? #f)
         (define zip-bytes (file->bytes zip-path))
         (response/full
          200 #"OK" (current-seconds) #"application/zip"

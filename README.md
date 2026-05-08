@@ -105,19 +105,18 @@ is split under `build/`:
 
 The build flow is:
 
-1. A profile says which schemas to build and which artifact to produce:
-   `rime` or `yuanshu`. Legacy `desktop?` values still map to those artifacts.
-2. `resolve-schemas` expands dependencies and filters schemas by artifact
+1. `build-output!` is the single filesystem writer. By default it writes
+   `output/rime/`.
+2. Parameters choose the schema set, artifact (`rime` or `yuanshu`), optional
+   zip path, and optional unpacked skin directory for Yuanshu upload.
+3. `resolve-schemas` expands dependencies and filters schemas by artifact
    support, so Yuanshu-only schemas stay out of Rime packages.
-3. `compute-assets` decides the generated YAML, static Rime files, static
+4. `compute-assets` decides the generated YAML, static Rime files, static
    directories, and keyboard layouts needed by the resolved schemas.
-4. `build-profile-from-hash!` writes the profile directory: generated YAML,
-   copied static assets, `default.custom.yaml`, and `.cskin` packages.
-5. `build-bundle!` is the common web/GUI entry point: build the profile
-   directory, zip it, and optionally build unpacked `/Skins/<layout>/` upload
-   folders.
-6. `do-upload!` syncs the built profile to Yuanshu `RimeUserData/rime/`; when a
-   keyboard layout directory is provided, it also refreshes only those selected
+5. The normal generated output is one Rime profile directory containing schema
+   YAML plus `skins/*.cskin` for Yuanshu keyboard layouts.
+6. `do-upload!` syncs the built profile to Yuanshu `RimeUserData/rime/`; when an
+   unpacked skin directory is provided, it also refreshes only those selected
    `/Skins/` folders.
 
 Regenerate Kubernetes manifests after changing deploy settings:
