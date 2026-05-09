@@ -8,10 +8,21 @@
      (name "Jyutping" "粵拼")
      (summary "A Yuanshu keyboard layout for Jyutping Cantonese input.")
      (features
-      "Standard QWERTY Jyutping phone layout"
-      "Standard iPad pinyin, numeric, and symbolic pages"))
-    (print abc center #:font-size 25 #:role primary #:weight bold)
-    (ipad standard-18))
+      "Jyutping vowel clusters and Cantonese digraph initials"
+      "Q/R/V/X marked as unused in Jyutping spelling"))
+    (print abc top #:font-size 10 #:role secondary)
+    (print jyutping center #:font-size 12 #:role primary)
+    (ipad
+     (raw
+      (ipad-layout
+       (layers abc jyutping)
+       (size "1.1/16")
+       (positions
+        (abc      top)
+        (jyutping center))
+       (fonts
+        (abc      11 #:secondary)
+        (jyutping 14 #:primary))))))
   (static-files "jyut6ping3.dict.yaml" "symbols_cantonese.yaml")
   (static-dirs "jyut6ping3_dicts")
   (custom "jyut6ping3.custom.yaml"

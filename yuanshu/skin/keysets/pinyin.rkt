@@ -46,7 +46,8 @@
                           'abc-dp (hash-ref* abc-dp-legends 'letter)
                           'mspy (hash-ref* mspy-legends 'letter)
                           'pyjj (hash-ref* pyjj-legends 'letter)
-                          'st (hash-ref* st-legends 'letter))
+                          'st (hash-ref* st-legends 'letter)
+                          'jyutping (hash-ref* jyutping-legends 'letter))
                     swipe-up
                     maybe.swipe-down)
           ...))]))
@@ -65,6 +66,7 @@
         'mspy (key-note-position 'center)
         'pyjj (key-note-position 'center)
         'st (key-note-position 'center)
+        'jyutping (key-note-position 'center)
         'flypy-single (key-note-position 'bottom)
         'flypy-top (key-note-position 'center)
         'flypy-bottom (key-note-position 'bottom)))
@@ -120,6 +122,14 @@
         'h "uang" 'j "ian" 'k "iao" 'l "in"
         'z "un" 'x "v/uai" 'c "uan" 'v "ui/ue" 'b "ia/ua"
         'n "iu" 'm "ie"))
+
+(define jyutping-legends
+  (hash 'q "—" 'w "w" 'e "e/eo" 'r "—" 't "t" 'y "yu"
+        'u "u/yun" 'i "i" 'o "o/oe" 'p "p"
+        'a "aa/a" 's "s" 'd "d" 'f "f" 'g "g/gw"
+        'h "h" 'j "j" 'k "k/kw" 'l "l"
+        'z "z" 'x "—" 'c "c" 'v "—" 'b "b"
+        'n "n/ng" 'm "m/ng"))
 
 (define-letter-specs hybrid-letter-specs
   [q #:cangjie "手" #:flypy "iu" #:symbol "1" #:swipe-up (char-action "1")]

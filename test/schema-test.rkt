@@ -344,6 +344,20 @@
     (check-equal? (hash-ref (hash-ref abc-page 'aButtonabcdpForegroundStyle) 'text)
                   "zh"))
 
+  (test-case "jyutping keyboard layout includes Cantonese spelling legends"
+    (define jyutping-layout-module
+      (schema-keyboard-layout-module-path "jyut6ping3" '("jyut6ping3")))
+    (define page
+      (generated-json (keyboard-layout-module-ref jyutping-layout-module
+                                                  'keyboard-layout-files)
+                      "light/pinyinPortrait.yaml"))
+    (check-equal? (hash-ref (hash-ref page 'aButtonjyutpingForegroundStyle) 'text)
+                  "aa/a")
+    (check-equal? (hash-ref (hash-ref page 'gButtonjyutpingForegroundStyle) 'text)
+                  "g/gw")
+    (check-equal? (hash-ref (hash-ref page 'qButtonjyutpingForegroundStyle) 'text)
+                  "—"))
+
   (test-case "standard phone middle and z rows keep real key widths"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define page (generated-json files "light/pinyinPortrait.yaml"))
