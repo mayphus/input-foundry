@@ -51,7 +51,12 @@
     [(flypy-top) (string-append prefix "FlypyTopForegroundStyle")]
     [(flypy-bottom) (string-append prefix "FlypyBottomForegroundStyle")]
     [(symbol) (string-append prefix "SymbolForegroundStyle")]
-    [else (error 'style-name "unsupported layer ~v" layer)]))
+    [else
+     (string-append prefix
+                    (regexp-replace* #rx"[^A-Za-z0-9]"
+                                     (symbol->string layer)
+                                     "")
+                    "ForegroundStyle")]))
 
 (define (layers->style-array prefix layers)
   (list->vector
@@ -69,6 +74,31 @@
 
 (define (layer-font-weight config key [default #f])
   (config-ref config key default))
+
+(define (layer-config-key layer suffix)
+  (string->symbol (format "~a-~a" layer suffix)))
+
+(define (layer-font-size config layer [default 14])
+  (config-ref config (layer-config-key layer "font-size") default))
+
+(define (layer-secondary? config layer [default #f])
+  (config-ref config (layer-config-key layer "secondary?") default))
+
+(define (layer-weight config layer [default #f])
+  (config-ref config (layer-config-key layer "font-weight") default))
+
+(define (plain-text-layer? layer)
+  (not (member layer '(abc cangjie flypy symbol))))
+
+(define (plain-text-layer-entry dark? spec config layer)
+  (define text (key-spec-layer-text spec layer))
+  (cons (style-name (button-name (key-spec-letter spec)) layer)
+        (text-style dark?
+                    #:text text
+                    #:center (center-ref config layer)
+                    #:font-size (layer-font-size config layer)
+                    #:font-weight (layer-weight config layer)
+                    #:secondary? (layer-secondary? config layer))))
 
 (define (make-letter-entry-hash dark? specs config)
   (define size-for (hash-ref config 'size-for))
@@ -91,17 +121,20 @@
     (define-values (size bounds hint-extra) (size-for spec))
     (define-values (flypy-top flypy-bottom) (split-flypy (key-spec-flypy spec)))
     (define primary (theme-primary dark?))
+    (define plain-layers (filter plain-text-layer? layers))
     (define foreground-layers
       (append
        (if (member 'abc layers) '(abc) '())
        (if (member 'cangjie layers) '(cangjie) '())
        (if (member 'flypy layers) '(flypy-top flypy-bottom) '())
+       plain-layers
        (if (member 'symbol layers) '(symbol) '())))
     (define uppercase-layers
       (append
        (if (member 'abc layers) '(abc-uppercase) '())
        (if (member 'cangjie layers) '(cangjie) '())
        (if (member 'flypy layers) '(flypy-top flypy-bottom) '())
+       plain-layers
        (if (member 'symbol layers) '(symbol) '())))
     (define entries
       (append
@@ -199,6 +232,9 @@
                       ["fontSize" standard-uppercase-font-size]
                       ["highlightColor" primary]
                       ["normalColor" primary]
-                      ["text" (letter-upper (key-spec-letter spec))])))))
+                      ["text" (letter-upper (key-spec-letter spec))])))
+       (map (lambda (layer)
+              (plain-text-layer-entry dark? spec config layer))
+            plain-layers)))
     (for/fold ([inner acc]) ([entry (in-list (filter values entries))])
       (hash-set inner (car entry) (cdr entry)))))

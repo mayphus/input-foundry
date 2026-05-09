@@ -208,11 +208,16 @@
         (delete-directory/files tmp #:must-exist? #f))))
 
   (test-case "static upstream schemas reuse preview keyboard layouts"
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin") '("luna_pinyin"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin") '("double_pinyin_zrm"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin_abc") '("double_pinyin_abc"))
     (check-equal? (read-schema-keyboard-layouts "double_pinyin_flypy") '("flypy"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin_mspy") '("double_pinyin_mspy"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin_pyjj") '("double_pinyin_pyjj"))
+    (check-equal? (read-schema-keyboard-layouts "double_pinyin_st") '("double_pinyin_st"))
     (check-equal? (read-schema-keyboard-layouts "cangjie5") '("cangjie6"))
     (check-equal? (read-schema-keyboard-layouts "quick5") '("cangjie6"))
-    (check-equal? (read-schema-keyboard-layouts "wubi86") '("luna_pinyin")))
+    (check-equal? (read-schema-keyboard-layouts "wubi86") '("wubi86"))
+    (check-equal? (read-schema-keyboard-layouts "stroke") '("stroke")))
 
   (test-case "legacy desktop flag still maps to yuanshu artifact behavior"
     (define tmp (make-temporary-file "input-foundry-legacy-artifact-~a" 'directory))

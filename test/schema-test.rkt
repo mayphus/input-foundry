@@ -325,6 +325,25 @@
     (check-equal? (registry:static-schema-keyboard-layouts "quick5") '("cangjie6"))
     (check-equal? (registry:static-schema-keyboard-layouts "cangjie5") '("cangjie6")))
 
+  (test-case "static upstream schemas resolve dedicated legend keyboard layouts"
+    (define (layout-page schema layout)
+      (define module (schema-keyboard-layout-module-path layout (list schema)))
+      (check-not-false module)
+      (generated-json (keyboard-layout-module-ref module 'keyboard-layout-files)
+                      "light/pinyinPortrait.yaml"))
+    (define wubi-page (layout-page "wubi86" "wubi86"))
+    (define stroke-page (layout-page "stroke" "stroke"))
+    (define zrm-page (layout-page "double_pinyin" "double_pinyin_zrm"))
+    (define abc-page (layout-page "double_pinyin_abc" "double_pinyin_abc"))
+    (check-equal? (hash-ref (hash-ref wubi-page 'qButtonwubiForegroundStyle) 'text)
+                  "金/勹")
+    (check-equal? (hash-ref (hash-ref stroke-page 'hButtonstrokeForegroundStyle) 'text)
+                  "一")
+    (check-equal? (hash-ref (hash-ref zrm-page 'qButtonzrmForegroundStyle) 'text)
+                  "iu")
+    (check-equal? (hash-ref (hash-ref abc-page 'aButtonabcdpForegroundStyle) 'text)
+                  "zh"))
+
   (test-case "standard phone middle and z rows keep real key widths"
     (define files (make-flypy-phone-files standard-phone-base-for-test))
     (define page (generated-json files "light/pinyinPortrait.yaml"))

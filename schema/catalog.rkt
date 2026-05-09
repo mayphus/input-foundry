@@ -126,7 +126,7 @@
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("double_pinyin_zrm")
            #:en-name "Double Pinyin ZRM"
            #:zh-name "自然碼雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Ziranma layout."
@@ -135,7 +135,7 @@
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("double_pinyin_abc")
            #:en-name "Double Pinyin ABC"
            #:zh-name "智能ABC雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Intelligent ABC layout."
@@ -153,7 +153,7 @@
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("double_pinyin_mspy")
            #:en-name "Double Pinyin MSPY"
            #:zh-name "微軟雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Microsoft layout."
@@ -162,7 +162,7 @@
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("double_pinyin_pyjj")
            #:en-name "Double Pinyin PYJJ"
            #:zh-name "拼音加加雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Pinyin Jiajia layout."
@@ -171,7 +171,7 @@
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("double_pinyin_st")
            #:en-name "Double Pinyin ST"
            #:zh-name "四通雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Stone layout."
@@ -210,7 +210,7 @@
            #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("wubi86")
            #:en-name "Wubi 86"
            #:zh-name "五筆86"
            #:en-description "Upstream Rime Wubi 86 shape input."
@@ -220,7 +220,7 @@
            #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("wubi86")
            #:en-name "Wubi Pinyin"
            #:zh-name "五筆·拼音"
            #:en-description "Upstream Rime Wubi schema with pinyin mixed input."
@@ -230,7 +230,7 @@
            #:artifacts mobile-rime-artifacts
            #:deps '("pinyin_simp")
            #:static-files '("wubi86.dict.yaml")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("wubi86")
            #:en-name "Wubi Traditional"
            #:zh-name "五筆·簡入繁出"
            #:en-description "Upstream Rime Wubi schema for simplified input with traditional output."
@@ -250,7 +250,7 @@
            #:artifacts mobile-rime-artifacts
            #:deps '("luna_pinyin")
            #:static-files '("stroke.dict.yaml")
-           #:keyboard-layouts '("luna_pinyin")
+           #:keyboard-layouts '("stroke")
            #:en-name "Stroke"
            #:zh-name "五筆畫"
            #:en-description "Supporting five-stroke lookup schema used by upstream double-pinyin and Wubi packages."
