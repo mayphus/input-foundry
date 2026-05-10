@@ -12,6 +12,7 @@
          static-schema-extra-files
          static-schema-extra-dirs
          static-schema-keyboard-layouts
+         schema-slug
          static-schema-name
          static-schema-description
          static-schema-artifacts
@@ -54,6 +55,12 @@
 (define (static-schema-keyboard-layouts schema)
   (define definition (schema-ref schema))
   (if definition (schema-definition-keyboard-layouts definition) '()))
+
+(define (schema-slug schema)
+  (define definition (schema-ref schema))
+  (if definition
+      (schema-definition-slug definition)
+      schema))
 
 (define (static-schema-name schema)
   (localized-schema-value (schema-display-names schema) 'zh-Hant))

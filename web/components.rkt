@@ -2,14 +2,16 @@
 
 (require racket/list
          racket/string
-         "../input-method/registry.rkt"
+         (except-in "../input-method/registry.rkt" schema-slug)
          "locale.rkt")
 
 (provide schema-id
+         schema-slug
          schema-name
          schema-description
          schema-artifacts
          schema-by-id
+         schema-by-slug
          schema-layout-items
          schema-detail-preview
          cataloged-schemas
@@ -20,6 +22,12 @@
 
 (define (schema-id schema)
   (hash-ref schema 'id))
+
+(define (schema-slug schema)
+  (hash-ref schema 'slug (schema-id schema)))
+
+(define (schema-public-ref schema)
+  (schema-slug schema))
 
 (define (schema-name locale schema)
   (localized-value (hash-ref schema 'names
@@ -41,6 +49,11 @@
 (define (schema-by-id schemas id)
   (for/first ([schema (in-list schemas)]
               #:when (equal? id (schema-id schema)))
+    schema))
+
+(define (schema-by-slug schemas slug)
+  (for/first ([schema (in-list schemas)]
+              #:when (equal? slug (schema-slug schema)))
     schema))
 
 (define (layout-id layout)
@@ -112,35 +125,35 @@
   (define has-yuanshu? (member "yuanshu" artifacts))
   (cond
     [(equal? platform "desktop")
-     (preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
-                    (format "/schemas/~a/preview-dark.svg" (schema-id schema))
+     (preview-image (format "/schemas/~a/preview.svg" (schema-public-ref schema))
+                    (format "/schemas/~a/preview-dark.svg" (schema-public-ref schema))
                     name)]
     [(equal? platform "mobile")
-     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
-                    (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-public-ref schema))
+                    (format "/schemas/~a/skin-preview-dark.svg" (schema-public-ref schema))
                     name)]
     [has-yuanshu?
-     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
-                    (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-public-ref schema))
+                    (format "/schemas/~a/skin-preview-dark.svg" (schema-public-ref schema))
                     name)]
     [else
-     (preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
-                    (format "/schemas/~a/preview-dark.svg" (schema-id schema))
+     (preview-image (format "/schemas/~a/preview.svg" (schema-public-ref schema))
+                    (format "/schemas/~a/preview-dark.svg" (schema-public-ref schema))
                     name)]))
 
 (define (schema-detail-preview locale schema layouts)
   (define preview-layouts (schema-layout-items schema layouts))
   (and (pair? preview-layouts)
        `(div ((class "rime-detail-preview"))
-             ,(preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
-                             (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+             ,(preview-image (format "/schemas/~a/skin-preview.svg" (schema-public-ref schema))
+                             (format "/schemas/~a/skin-preview-dark.svg" (schema-public-ref schema))
                              (schema-name locale schema)))))
 
 (define (schema-card locale schema layouts #:platform [platform #f])
   (define preview-layouts (schema-layout-items schema layouts))
   `(a ((class "rime-exhibit-card")
        (href ,(format "/exhibits/~a~a"
-                      (schema-id schema)
+                      (schema-public-ref schema)
                       (if platform (format "?platform=~a" platform) ""))))
       (div ((class "rime-option-head"))
            (div ((class "rime-option-copy"))

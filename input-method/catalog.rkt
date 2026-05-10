@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require racket/list
+         racket/string
          "model.rkt"
          "recipes.rkt")
 
@@ -20,6 +21,7 @@
 
 (define (schema id
                 #:source-id [source-id id]
+                #:slug [slug (string-replace id "_" "-")]
                 #:kind [kind 'static]
                 #:catalog [catalog "other"]
                 #:artifacts [artifacts '("rime" "yuanshu")]
@@ -34,6 +36,7 @@
   (make-schema-definition
    #:id id
    #:source-id source-id
+   #:slug slug
    #:kind kind
    #:catalog catalog
    #:artifacts artifacts
@@ -87,21 +90,21 @@
    (schema "flypy_14"
            #:kind 'generated
            #:catalog "double-pinyin"
-           #:en-name "Flypy 14-Key"
+           #:en-name "Flypy 14"
            #:zh-name "小鶴-14鍵"
            #:en-description "A 14-key Flypy double pinyin schema for Yuanshu, grouping adjacent QWERTY keys."
            #:zh-description "14 鍵小鶴元書方案，按相鄰 QWERTY 鍵位分組。")
    (schema "flypy_18"
            #:kind 'generated
            #:catalog "double-pinyin"
-           #:en-name "Flypy 18-Key"
+           #:en-name "Flypy 18"
            #:zh-name "小鶴-18鍵"
            #:en-description "An 18-key Flypy double pinyin schema for Yuanshu, adapted from a compact phone layout."
            #:zh-description "18 鍵小鶴元書方案，改編自緊湊手機鍵盤佈局。")
    (schema "shuffle_17"
            #:kind 'generated
            #:catalog "double-pinyin"
-           #:en-name "Flypy Shuffle 17-Key"
+           #:en-name "Flypy Shuffle 17"
            #:zh-name "小鶴-亂序17鍵"
            #:en-description "An experimental 17-key shuffled Flypy schema for Yuanshu."
            #:zh-description "實驗性的 17 鍵亂序小鶴元書方案。")
@@ -127,56 +130,62 @@
            #:en-description "A 14-key full-pinyin Yuanshu schema using adjacent QWERTY groups."
            #:zh-description "14 鍵全拼元書方案，使用相鄰 QWERTY 分組。")
    (schema "double_pinyin"
+           #:slug "double-pinyin-zrm"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("double_pinyin_zrm")
-           #:en-name "Double Pinyin ZRM"
+           #:en-name "Double Pinyin: ZRM"
            #:zh-name "自然碼雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Ziranma layout."
            #:zh-description "上游 Rime 自然碼雙拼方案。")
    (schema "double_pinyin_abc"
+           #:slug "double-pinyin-abc"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("double_pinyin_abc")
-           #:en-name "Double Pinyin ABC"
+           #:en-name "Double Pinyin: ABC"
            #:zh-name "智能ABC雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Intelligent ABC layout."
            #:zh-description "上游 Rime 智能 ABC 雙拼方案。")
    (schema "double_pinyin_flypy"
+           #:slug "double-pinyin-flypy"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("flypy")
-           #:en-name "Double Pinyin Flypy"
+           #:en-name "Double Pinyin: Flypy"
            #:zh-name "小鶴雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Flypy layout."
            #:zh-description "上游 Rime 小鶴雙拼方案。")
    (schema "double_pinyin_mspy"
+           #:slug "double-pinyin-mspy"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("double_pinyin_mspy")
-           #:en-name "Double Pinyin MSPY"
+           #:en-name "Double Pinyin: MSPY"
            #:zh-name "微軟雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Microsoft layout."
            #:zh-description "上游 Rime 微軟雙拼方案。")
    (schema "double_pinyin_pyjj"
+           #:slug "double-pinyin-pyjj"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("double_pinyin_pyjj")
-           #:en-name "Double Pinyin PYJJ"
+           #:en-name "Double Pinyin: PYJJ"
            #:zh-name "拼音加加雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Pinyin Jiajia layout."
            #:zh-description "上游 Rime 拼音加加雙拼方案。")
    (schema "double_pinyin_st"
+           #:slug "double-pinyin-st"
            #:catalog "double-pinyin"
            #:artifacts mobile-rime-artifacts
            #:deps '("stroke")
            #:keyboard-layouts '("double_pinyin_st")
-           #:en-name "Double Pinyin ST"
+           #:en-name "Double Pinyin: ST"
            #:zh-name "四通雙拼"
            #:en-description "Upstream Rime double-pinyin schema using the Stone layout."
            #:zh-description "上游 Rime 四通雙拼方案。")

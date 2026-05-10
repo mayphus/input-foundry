@@ -5,6 +5,7 @@
          web-server/http
          racket/file
          racket/list
+         racket/match
          racket/runtime-path
          racket/string
          racket/system
@@ -84,9 +85,7 @@
 
 (define (schema-preview-svg schema-id [theme 'light] #:skin? [skin? #f])
   (define schema
-    (for/first ([item (in-list schema-items)]
-                #:when (equal? schema-id (hash-ref item 'id)))
-      item))
+    (schema-item-by-ref schema-id))
   (define artifacts (and schema (hash-ref schema 'artifacts '())))
   (define mobile-only?
     (and (member "yuanshu" artifacts)
@@ -169,6 +168,7 @@
     (define zh-name (schema-module-ref s 'chinese-name (read-schema-name-from-yaml s)))
     (define description (or (read-schema-description s) ""))
     (hash 'id s
+          'slug (schema-slug s)
           'name (or zh-name s)
           'names (or (schema-display-names s)
                      (hash 'en (or zh-name s)
@@ -180,6 +180,34 @@
           'deps deps
           'artifacts artifacts
           'keyboard-layouts keyboard-layouts)))
+
+(define (schema-item-by-ref ref)
+  (for/first ([item (in-list schema-items)]
+              #:when (or (equal? ref (hash-ref item 'id))
+                         (equal? ref (hash-ref item 'slug))))
+    item))
+
+(define (schema-item-by-id id)
+  (for/first ([item (in-list schema-items)]
+              #:when (equal? id (hash-ref item 'id)))
+    item))
+
+(define (schema-public-ref schema)
+  (hash-ref schema 'slug (hash-ref schema 'id)))
+
+(define (request-query-suffix req)
+  (define uri (url->string (request-uri req)))
+  (match (regexp-match #rx"\\?.*$" uri)
+    [(list query) query]
+    [_ ""]))
+
+(define (exhibit-location schema req)
+  (string-append "/exhibits/"
+                 (schema-public-ref schema)
+                 (request-query-suffix req)))
+
+(define (schema-asset-location schema filename)
+  (format "/schemas/~a/~a" (schema-public-ref schema) filename))
 
 ;; ---- Handlers --------------------------------------------------------------
 
@@ -214,8 +242,13 @@
     [(not (valid-id? schema-id))
      (json-error "Invalid schema id")]
     [else
-     (html-response (render-exhibit-page req schema-items keyboard-layout-items schema-id)
-                    (remember-locale-headers req))]))
+     (define schema (schema-item-by-ref schema-id))
+     (cond
+       [(and schema (not (equal? schema-id (schema-public-ref schema))))
+        (redirect-response (exhibit-location schema req) 301)]
+       [else
+        (html-response (render-exhibit-page req schema-items keyboard-layout-items schema-id)
+                       (remember-locale-headers req))])]))
 
 (define (handle-metadata req)
   (response/full
@@ -301,24 +334,44 @@
     [(not (valid-id? schema-id))
      (json-error "Invalid schema id")]
     [else
-     (define svg (schema-preview-svg schema-id theme))
-     (if svg
-         (svg-response svg)
-         (response/full
-          404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
-          (list #"Preview SVG not found")))]))
+     (define schema (schema-item-by-ref schema-id))
+     (cond
+       [(and schema (not (equal? schema-id (schema-public-ref schema))))
+        (redirect-response
+         (schema-asset-location schema
+                                (if (eq? theme 'dark)
+                                    "preview-dark.svg"
+                                    "preview.svg"))
+         301)]
+       [else
+        (define svg (schema-preview-svg schema-id theme))
+        (if svg
+            (svg-response svg)
+            (response/full
+             404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
+             (list #"Preview SVG not found")))])]))
 
 (define (handle-schema-skin-preview-svg req schema-id [theme 'light])
   (cond
     [(not (valid-id? schema-id))
      (json-error "Invalid schema id")]
     [else
-     (define svg (schema-preview-svg schema-id theme #:skin? #t))
-     (if svg
-         (svg-response svg)
-         (response/full
-          404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
-          (list #"Preview SVG not found")))]))
+     (define schema (schema-item-by-ref schema-id))
+     (cond
+       [(and schema (not (equal? schema-id (schema-public-ref schema))))
+        (redirect-response
+         (schema-asset-location schema
+                                (if (eq? theme 'dark)
+                                    "skin-preview-dark.svg"
+                                    "skin-preview.svg"))
+         301)]
+       [else
+        (define svg (schema-preview-svg schema-id theme #:skin? #t))
+        (if svg
+            (svg-response svg)
+            (response/full
+             404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
+             (list #"Preview SVG not found")))])]))
 
 (define (handle-build req)
   (define body-bytes (request-post-data/raw req))

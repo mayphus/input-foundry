@@ -42,10 +42,22 @@
     (check-equal? (response-code response) 302)
     (check-equal? (response-location response) "/"))
 
-  (test-case "schema variant detail routes render directly"
-    (define response (canonical-dispatch (req "/exhibits/flypy_ice" "rime.mayphus.org")))
+  (test-case "schema variant detail routes use public hyphen slugs"
+    (define response (canonical-dispatch (req "/exhibits/flypy-ice" "rime.mayphus.org")))
     (check-equal? (response-code response) 200)
     (check-true (regexp-match? #rx"Flypy Ice" (response-body response))))
+
+  (test-case "legacy underscore exhibit routes redirect to hyphen slugs"
+    (define response
+      (canonical-dispatch (req "/exhibits/flypy_ice?platform=desktop" "rime.mayphus.org")))
+    (check-equal? (response-code response) 301)
+    (check-equal? (response-location response) "/exhibits/flypy-ice?platform=desktop"))
+
+  (test-case "legacy underscore schema preview routes redirect to hyphen slugs"
+    (define response
+      (canonical-dispatch (req "/schemas/flypy_14/skin-preview.svg" "rime.mayphus.org")))
+    (check-equal? (response-code response) 301)
+    (check-equal? (response-location response) "/schemas/flypy-14/skin-preview.svg"))
 
   (test-case "museum catalog renders localized exhibit metadata"
     (define en-html (response-body (canonical-dispatch (req "/" "rime.mayphus.org"))))
@@ -101,11 +113,11 @@
 
   (test-case "schema preview routes preserve schema identity over shared layouts"
     (define flypy-ice-svg
-      (response-body (canonical-dispatch (req "/schemas/flypy_ice/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/flypy-ice/preview.svg" "rime.mayphus.org"))))
     (define mobile-only-svg
-      (response-body (canonical-dispatch (req "/schemas/flypy_14/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/flypy-14/preview.svg" "rime.mayphus.org"))))
     (define quanpin-skin-svg
-      (response-body (canonical-dispatch (req "/schemas/luna_quanpin/skin-preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/luna-quanpin/skin-preview.svg" "rime.mayphus.org"))))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" flypy-ice-svg))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" mobile-only-svg))
     (check-true (regexp-match? #rx">123<" mobile-only-svg))

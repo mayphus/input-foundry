@@ -20,16 +20,17 @@
           ,@(for/list ([catalog (in-list (cataloged-schemas schemas))])
               (catalog-section locale layouts catalog))))))
 
-(define (exhibit-page req schemas layouts schema-id*)
+(define (exhibit-page req schemas layouts schema-ref)
   (define locale (request-locale req))
-  (define requested-schema (schema-by-id schemas schema-id*))
+  (define requested-schema (or (schema-by-slug schemas schema-ref)
+                               (schema-by-id schemas schema-ref)))
   (define schema requested-schema)
   (define platform (request-value req "platform" "mobile"))
   (define artifact
     (cond
       [(equal? platform "desktop") "rime"]
       [else "yuanshu"]))
-  (define current-path (format "/exhibits/~a" (if schema (schema-id schema) schema-id*)))
+  (define current-path (format "/exhibits/~a" (if schema (schema-slug schema) schema-ref)))
   (page-xexpr
    locale
    current-path

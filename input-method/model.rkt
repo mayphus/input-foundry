@@ -10,6 +10,7 @@
          input-method-definition-deps
          input-method-definition-static-files
          input-method-definition-static-dirs
+         input-method-definition-slug
          input-method-definition-names
          input-method-definition-descriptions
          input-method-definition-keyboard-layouts
@@ -25,6 +26,7 @@
    deps
    static-files
    static-dirs
+   slug
    names
    descriptions
    keyboard-layouts)
@@ -38,6 +40,7 @@
                                 #:deps [deps '()]
                                 #:static-files [static-files '()]
                                 #:static-dirs [static-dirs '()]
+                                #:slug [slug id]
                                 #:names [names #f]
                                 #:descriptions [descriptions #f]
                                 #:keyboard-layouts [keyboard-layouts '()])
@@ -49,6 +52,7 @@
                      deps
                      static-files
                      static-dirs
+                     slug
                      names
                      descriptions
                      keyboard-layouts))
@@ -62,6 +66,7 @@
 (define input-method-definition-deps schema-definition-deps)
 (define input-method-definition-static-files schema-definition-static-files)
 (define input-method-definition-static-dirs schema-definition-static-dirs)
+(define input-method-definition-slug schema-definition-slug)
 (define input-method-definition-names schema-definition-names)
 (define input-method-definition-descriptions schema-definition-descriptions)
 (define input-method-definition-keyboard-layouts schema-definition-keyboard-layouts)

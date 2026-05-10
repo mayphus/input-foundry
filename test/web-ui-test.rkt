@@ -9,6 +9,7 @@
 
 (define schemas
   (list (hash 'id "flypy"
+              'slug "flypy"
               'name "小鶴"
               'names (hash 'en "Flypy" 'zh-Hant "小鶴")
               'description "Flypy double pinyin exhibit."
@@ -18,8 +19,9 @@
               'artifacts '("rime" "yuanshu")
               'keyboard-layouts '("flypy"))
         (hash 'id "flypy_14"
+              'slug "flypy-14"
               'name "小鶴十四鍵"
-              'names (hash 'en "Flypy 14-Key" 'zh-Hant "小鶴十四鍵")
+              'names (hash 'en "Flypy 14" 'zh-Hant "小鶴十四鍵")
               'description "A compact Yuanshu-only 14-key exhibit."
               'descriptions (hash 'en "A compact Yuanshu-only 14-key exhibit."
                                   'zh-Hant "緊湊的元書十四鍵展品。")
@@ -27,6 +29,7 @@
               'artifacts '("yuanshu")
               'keyboard-layouts '("flypy_14"))
         (hash 'id "flypy_ice"
+              'slug "flypy-ice"
               'name "小鶴霧凇"
               'names (hash 'en "Flypy Ice" 'zh-Hant "小鶴霧凇")
               'description "Flypy with rime-ice dictionaries."
@@ -70,9 +73,9 @@
     (check-false (regexp-match? #rx"Explore Chinese input methods from history to hands-on interaction" html))
     (check-true (regexp-match? #rx"href=\"/exhibits/flypy\\?platform=desktop\"" html))
     (check-true (regexp-match? #rx"href=\"/exhibits/flypy\\?platform=mobile\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy_14\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy_ice\\?platform=desktop\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy_ice\\?platform=mobile\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-14\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=desktop\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=mobile\"" html))
     (check-false (regexp-match? #rx"id=\"filter-desktop\"" html))
     (check-false (regexp-match? #rx"id=\"filter-mobile\"" html))
     (check-false (regexp-match? #rx"rime-catalog-filter" html))
@@ -82,9 +85,10 @@
     (check-true (regexp-match? #rx"/schemas/flypy/preview.svg" html))
     (check-true (regexp-match? #rx"/schemas/flypy/skin-preview.svg" html))
     (check-false (regexp-match? #rx"/schemas/flypy_14/preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy_14/skin-preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy_ice/preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy_ice/skin-preview.svg" html))
+    (check-false (regexp-match? #rx"/schemas/flypy_14/skin-preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/flypy-14/skin-preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/flypy-ice/preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/flypy-ice/skin-preview.svg" html))
     (check-false (regexp-match? #rx"rime-schema-preview--desktop" html))
     (check-false (regexp-match? #rx"rime-schema-preview--mobile" html))
     (check-false (regexp-match? #rx"rime-platform-chip" html))
