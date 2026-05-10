@@ -42,7 +42,7 @@
                          (h1 ((class "page-title")) ,(schema-name locale schema))
                          (p ((class "rime-section-copy rime-hero-copy"))
                             ,(schema-description locale schema)))
-                    ,@(let ([preview (schema-detail-preview locale schema layouts)])
+                    ,@(let ([preview (schema-detail-preview locale schema layouts #:platform platform)])
                         (if preview (list preview) '()))
                     (div ((class "rime-exhibit-download"))
                          ,(artifact-form locale
@@ -51,7 +51,8 @@
                                          (if (member artifact artifacts)
                                              (list artifact)
                                              artifacts)
-                                         layouts)))))
+                                         layouts))
+                    ,(schema-definition-panel schema))))
        `((section ((class "rime-hero-card"))
                   (a ((class "rime-back-link") (href "/")) ,(t locale 'back))
                   (h1 ((class "page-title")) ,(t locale 'missing)))))))

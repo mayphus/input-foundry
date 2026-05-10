@@ -113,6 +113,28 @@
 (define schema-ids
   (map input-method-recipe-id input-method-recipes))
 
+(define (lisp-atom value)
+  (cond
+    [(string? value) (format "~s" value)]
+    [(symbol? value) (format "'~a" value)]
+    [(list? value) (format "'~s" value)]
+    [else (format "~s" value)]))
+
+(define (recipe-definition-lisp recipe)
+  (string-join
+   (list
+    "(define-input-method"
+    (format "  ~a" (lisp-atom (input-method-recipe-id recipe)))
+    (format "  #:schema ~a" (lisp-atom (input-method-recipe-schema recipe)))
+    (format "  #:keymap ~a" (lisp-atom (input-method-recipe-keymap recipe)))
+    (format "  #:keyboard ~a" (lisp-atom (input-method-recipe-keyboard recipe)))
+    (format "  #:layout ~a" (lisp-atom (car (input-method-recipe-keyboard-layouts recipe))))
+    (format "  #:placement ~a" (lisp-atom (input-method-recipe-placement recipe)))
+    (format "  #:skeleton ~a" (lisp-atom (input-method-recipe-skeleton recipe)))
+    (format "  #:projection ~a" (lisp-atom (input-method-recipe-projection recipe)))
+    (format "  #:interactions ~a)" (lisp-atom (input-method-recipe-interactions recipe))))
+   "\n"))
+
 (define legacy-host "rime-config.mayphus.org")
 (define canonical-host "rime.mayphus.org")
 
@@ -173,6 +195,11 @@
     (define description (or (read-schema-description s) ""))
     (hash 'id s
           'schema-id base-schema-id
+          'keymap (input-method-recipe-keymap recipe)
+          'keyboard (input-method-recipe-keyboard recipe)
+          'layout (car (input-method-recipe-keyboard-layouts recipe))
+          'placement (input-method-recipe-placement recipe)
+          'definition-lisp (recipe-definition-lisp recipe)
           'slug (schema-slug s)
           'name (or zh-name s)
           'names (or (input-method-recipe-names recipe)

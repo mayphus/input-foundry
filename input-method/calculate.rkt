@@ -16,6 +16,7 @@
   (id
    schema
    keymap
+   keyboard
    skeleton
    projection
    legends
@@ -201,6 +202,7 @@
    (input-method-keyboard-recipe-id method-keyboard)
    (input-method-dimension-schema method-dimension)
    (input-method-dimension-keymap method-dimension)
+   (input-method-keyboard-keyboard-id method-keyboard)
    (keyboard-dimension-skeleton keyboard-dimension)
    (keyboard-dimension-projection keyboard-dimension)
    (input-method-dimension-legends method-dimension)

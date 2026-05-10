@@ -16,6 +16,11 @@
               'descriptions (hash 'en "Flypy double pinyin exhibit."
                                   'zh-Hant "小鶴展品。")
               'input-method? #t
+              'schema-id "double-pinyin-flypy"
+              'keymap 'flypy
+              'keyboard 'standard-26
+              'layout "flypy"
+              'definition-lisp "(define-input-method\n  \"double-pinyin-flypy\"\n  #:schema \"double-pinyin-flypy\"\n  #:keymap 'flypy\n  #:keyboard 'standard-26\n  #:layout \"flypy\")"
               'deps '("cangjie6")
               'artifacts '("rime" "yuanshu")
               'keyboard-layouts '("double-pinyin-flypy"))
@@ -27,6 +32,11 @@
               'descriptions (hash 'en "A compact Yuanshu-only 14-key exhibit."
                                   'zh-Hant "緊湊的元書十四鍵展品。")
               'input-method? #t
+              'schema-id "double-pinyin-flypy"
+              'keymap 'flypy
+              'keyboard 'compact-14
+              'layout "flypy_14"
+              'definition-lisp "(define-input-method\n  \"double-pinyin-flypy-14\"\n  #:schema \"double-pinyin-flypy\"\n  #:keymap 'flypy\n  #:keyboard 'compact-14\n  #:layout \"flypy_14\")"
               'deps '("cangjie6")
               'artifacts '("yuanshu")
               'keyboard-layouts '("double-pinyin-flypy-14"))))
@@ -124,6 +134,11 @@
     (check-false (regexp-match? #rx"/schemas/double-pinyin-flypy/preview.svg" html))
     (check-true (regexp-match? #rx"/schemas/double-pinyin-flypy/skin-preview.svg" html))
     (check-equal? (match-count #rx"/schemas/double-pinyin-flypy/skin-preview.svg" html) 1)
+    (check-true (regexp-match? #rx"rime-definition-panel" html))
+    (check-true (regexp-match? #rx"define-input-method" html))
+    (check-true (regexp-match? #rx"#:schema" html))
+    (check-true (regexp-match? #rx"double-pinyin-flypy" html))
+    (check-true (regexp-match? #rx"#:keyboard 'standard-26" html))
     (check-false (regexp-match? #rx"rime-exhibit-meta" html))
     (check-false (regexp-match? #rx"rime-layout-title" html))
     (check-false (regexp-match? #rx"<span class=\"rime-option-id\">flypy" html)))
@@ -137,7 +152,10 @@
   (test-case "yuanshu-only exhibit omits Rime download"
     (define html (render-exhibit-page (req "/exhibits/double-pinyin-flypy-14") schemas layouts "double-pinyin-flypy-14"))
     (check-false (regexp-match? #rx"name=\"artifact\" value=\"rime\"" html))
-    (check-true (regexp-match? #rx"name=\"artifact\" value=\"yuanshu\"" html)))
+    (check-true (regexp-match? #rx"name=\"artifact\" value=\"yuanshu\"" html))
+    (check-true (regexp-match? #rx"#:keyboard 'compact-14" html))
+    (check-true (regexp-match? #rx"#:layout" html))
+    (check-true (regexp-match? #rx"flypy_14" html)))
 
   (test-case "locale is remembered from cookie"
     (define html

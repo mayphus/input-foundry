@@ -14,6 +14,7 @@
          schema-by-slug
          schema-layout-items
          schema-detail-preview
+         schema-definition-panel
          categorized-schemas
          page-xexpr
          schema-category-section
@@ -147,13 +148,34 @@
                     (format "/schemas/~a/preview-dark.svg" (schema-public-ref schema))
                     name)]))
 
-(define (schema-detail-preview locale schema layouts)
+(define (schema-detail-preview locale schema layouts #:platform [platform #f])
   (define preview-layouts (schema-layout-items schema layouts))
   (and (pair? preview-layouts)
        `(div ((class "rime-detail-preview"))
-             ,(preview-image (format "/schemas/~a/skin-preview.svg" (schema-public-ref schema))
-                             (format "/schemas/~a/skin-preview-dark.svg" (schema-public-ref schema))
-                             (schema-name locale schema)))))
+             ,(cond
+                [(equal? platform "desktop")
+                 (preview-image (format "/schemas/~a/preview.svg" (schema-public-ref schema))
+                                (format "/schemas/~a/preview-dark.svg" (schema-public-ref schema))
+                                (schema-name locale schema))]
+                [else
+                 (preview-image (format "/schemas/~a/skin-preview.svg" (schema-public-ref schema))
+                                (format "/schemas/~a/skin-preview-dark.svg" (schema-public-ref schema))
+                                (schema-name locale schema))]))))
+
+(define (schema-definition-panel schema)
+  (define (meta label key)
+    `(div ((class "rime-definition-meta-item"))
+          (span ((class "rime-definition-meta-label")) ,label)
+          (code ,(format "~a" (hash-ref schema key "")))))
+  `(section ((class "rime-definition-panel"))
+            (h2 ((class "rime-section-title rime-definition-title")) "Definition")
+            (div ((class "rime-definition-meta"))
+                 ,(meta "schema" 'schema-id)
+                 ,(meta "keymap" 'keymap)
+                 ,(meta "keyboard" 'keyboard)
+                 ,(meta "layout" 'layout))
+            (pre ((class "rime-definition-code"))
+                 (code ,(hash-ref schema 'definition-lisp "")))))
 
 (define (schema-card locale schema layouts #:platform [platform #f])
   (define preview-layouts (schema-layout-items schema layouts))
