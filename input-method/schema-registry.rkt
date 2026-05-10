@@ -25,7 +25,6 @@
     "pinyin-14.rkt"
     "double-pinyin.rkt"
     "double-pinyin-abc.rkt"
-    "double-pinyin-flypy-upstream.rkt"
     "double-pinyin-mspy.rkt"
     "double-pinyin-pyjj.rkt"
     "double-pinyin-st.rkt"

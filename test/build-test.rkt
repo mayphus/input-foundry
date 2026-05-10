@@ -210,7 +210,6 @@
   (test-case "static upstream schemas reuse preview keyboard layouts"
     (check-equal? (read-schema-keyboard-layouts "double-pinyin") '("double_pinyin_zrm"))
     (check-equal? (read-schema-keyboard-layouts "double-pinyin-abc") '("double_pinyin_abc"))
-    (check-equal? (read-schema-keyboard-layouts "double-pinyin-flypy-upstream") '("flypy"))
     (check-equal? (read-schema-keyboard-layouts "double-pinyin-mspy") '("double_pinyin_mspy"))
     (check-equal? (read-schema-keyboard-layouts "double-pinyin-pyjj") '("double_pinyin_pyjj"))
     (check-equal? (read-schema-keyboard-layouts "double-pinyin-st") '("double_pinyin_st"))

@@ -103,7 +103,6 @@
     (check-equal? (schema-index:input-method-schema-entry-ids) recipe-ids)
     (check-not-false (member "double-pinyin-flypy" (schema-index:input-method-schema-entry-ids)))
     (check-false (member "flypy-ice" (schema-index:input-method-schema-entry-ids)))
-    (check-false (member "double-pinyin-flypy-upstream" (schema-index:input-method-schema-entry-ids)))
     (for ([id (in-list (schema-index:input-method-schema-entry-ids))])
       (check-true (model:input-method-schema-entry?
                    (schema-index:input-method-schema-entry-ref id))

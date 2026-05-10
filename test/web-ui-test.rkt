@@ -40,17 +40,6 @@
               'input-method? #f
               'deps '("cangjie6")
               'artifacts '("rime" "yuanshu")
-              'keyboard-layouts '("double-pinyin-flypy"))
-        (hash 'id "double-pinyin-flypy-upstream"
-              'slug "double-pinyin-flypy"
-              'name "小鶴雙拼"
-              'names (hash 'en "Double Pinyin: Flypy" 'zh-Hant "小鶴雙拼")
-              'description "Static upstream Flypy schema."
-              'descriptions (hash 'en "Static upstream Flypy schema."
-                                  'zh-Hant "上游小鶴雙拼方案。")
-              'input-method? #f
-              'deps '("stroke")
-              'artifacts '("rime" "yuanshu")
               'keyboard-layouts '("double-pinyin-flypy"))))
 
 (define layouts

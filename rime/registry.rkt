@@ -55,8 +55,6 @@
           #:keyboard-layouts '("double_pinyin_zrm"))
    (entry "double-pinyin-abc" #:source-id "double_pinyin_abc" #:deps '("stroke")
           #:keyboard-layouts '("double_pinyin_abc"))
-   (entry "double-pinyin-flypy-upstream" #:source-id "double_pinyin_flypy" #:deps '("stroke")
-          #:keyboard-layouts '("flypy"))
    (entry "double-pinyin-mspy" #:source-id "double_pinyin_mspy" #:deps '("stroke")
           #:keyboard-layouts '("double_pinyin_mspy"))
    (entry "double-pinyin-pyjj" #:source-id "double_pinyin_pyjj" #:deps '("stroke")
