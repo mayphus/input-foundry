@@ -87,12 +87,16 @@
     (for/first ([item (in-list schema-items)]
                 #:when (equal? schema-id (hash-ref item 'id)))
       item))
+  (define artifacts (and schema (hash-ref schema 'artifacts '())))
+  (define mobile-only?
+    (and (member "yuanshu" artifacts)
+         (not (member "rime" artifacts))))
   (define layout-id
     (and schema
          (let ([layouts (hash-ref schema 'keyboard-layouts '())])
            (and (pair? layouts) (car layouts)))))
   (and layout-id
-       (if skin?
+       (if (or skin? mobile-only?)
            (or (keyboard-layout-skin-preview-svg layout-id theme)
                (keyboard-layout-skin-preview-svg layout-id 'light))
            (or (keyboard-layout-preview-svg layout-id theme)

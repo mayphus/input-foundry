@@ -89,8 +89,11 @@
                  (format "/~a/~a/preview-dark.svg" base-path (layout-id layout))
                  (layout-name locale layout)))
 
-(define (preview-image light-path dark-path alt-text)
-  `(div ((class "rime-layout-preview keyboard-preview keyboard-preview-svg-wrap"))
+(define (preview-image light-path dark-path alt-text #:class [extra-class #f])
+  `(div ((class ,(classes "rime-layout-preview"
+                          extra-class
+                          "keyboard-preview"
+                          "keyboard-preview-svg-wrap")))
         (picture
          (source ((media "(prefers-color-scheme: dark)")
                   (srcset ,(format "~a?v=~a" dark-path preview-svg-version))))
@@ -105,6 +108,39 @@
           (list (and (member "rime" artifacts) "desktop")
                 (and (member "yuanshu" artifacts) "mobile"))))
 
+(define (schema-card-preview locale schema #:platform [platform #f])
+  (define name (schema-name locale schema))
+  (define artifacts (schema-artifacts schema))
+  (define has-rime? (member "rime" artifacts))
+  (define has-yuanshu? (member "yuanshu" artifacts))
+  (cond
+    [(equal? platform "desktop")
+     (preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
+                    (format "/schemas/~a/preview-dark.svg" (schema-id schema))
+                    name)]
+    [(equal? platform "mobile")
+     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
+                    (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+                    name)]
+    [(and has-rime? has-yuanshu?)
+     `(div ((class "rime-schema-preview-set"))
+           ,(preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
+                           (format "/schemas/~a/preview-dark.svg" (schema-id schema))
+                           name
+                           #:class "rime-schema-preview--desktop")
+           ,(preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
+                           (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+                           name
+                           #:class "rime-schema-preview--mobile"))]
+    [has-yuanshu?
+     (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
+                    (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
+                    name)]
+    [else
+     (preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
+                    (format "/schemas/~a/preview-dark.svg" (schema-id schema))
+                    name)]))
+
 (define (schema-detail-preview locale schema layouts)
   (define preview-layouts (schema-layout-items schema layouts))
   (and (pair? preview-layouts)
@@ -113,22 +149,31 @@
                              (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
                              (schema-name locale schema)))))
 
-(define (schema-card locale schema layouts)
+(define (schema-card locale schema layouts #:platform [platform #f])
   (define preview-layouts (schema-layout-items schema layouts))
+  (define platforms (if platform (list platform) (schema-platforms schema)))
   `(a ((class "rime-exhibit-card")
-       (data-platforms ,(string-join (schema-platforms schema) " "))
+       (data-platforms ,(string-join platforms " "))
        (data-href ,(format "/exhibits/~a" (schema-id schema)))
-       (href ,(format "/exhibits/~a" (schema-id schema))))
+       ,@(if platform `((data-card-platform ,platform)) '())
+       (href ,(format "/exhibits/~a~a"
+                      (schema-id schema)
+                      (if platform (format "?platform=~a" platform) ""))))
       (div ((class "rime-option-head"))
            (div ((class "rime-option-copy"))
                 (div ((class "rime-option-title-row"))
                      (span ((class "rime-option-title")) ,(schema-name locale schema)))))
       ,@(if (pair? preview-layouts)
             `((div ((class "rime-schema-previews"))
-                   ,(preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
-                                   (format "/schemas/~a/preview-dark.svg" (schema-id schema))
-                                   (schema-name locale schema))))
+                   ,(schema-card-preview locale schema #:platform platform)))
             '())))
+
+(define (schema-cards locale schema layouts)
+  (define platforms (schema-platforms schema))
+  (if (> (length platforms) 1)
+      (for/list ([platform (in-list platforms)])
+        (schema-card locale schema layouts #:platform platform))
+      (list (schema-card locale schema layouts))))
 
 (define (catalog-filter locale)
   `((input ((class "rime-filter-input")
@@ -157,8 +202,9 @@
                  (h2 ((class "rime-schema-catalog-title"))
                      ,(schema-catalog-label catalog-id locale)))
             (div ((class "rime-option-grid"))
-                 ,@(for/list ([schema (in-list schemas)])
-                     (schema-card locale schema layouts)))))
+                 ,@(append-map (lambda (schema)
+                                  (schema-cards locale schema layouts))
+                                schemas))))
 
 (define (footer locale current-path)
   `(footer ((class "rime-footer"))
@@ -199,14 +245,15 @@ function selectedPlatform(){
 function syncLinks(){
   const platform=selectedPlatform();
   cards.forEach((card)=>{
-    card.href=`${card.dataset.href}?platform=${encodeURIComponent(platform)}`;
+    const targetPlatform=card.dataset.cardPlatform || platform;
+    card.href=`${card.dataset.href}?platform=${encodeURIComponent(targetPlatform)}`;
   });
 }
 filters.forEach((input)=>{
   input.addEventListener('click',(event)=>{
     if(input.checked) return;
     const activeCount=filters.filter((item)=>item.checked).length;
-    if(activeCount===1) event.preventDefault();
+    if(activeCount===0) event.preventDefault();
   });
 });
 filters.forEach((input)=>input.addEventListener('change', syncLinks));

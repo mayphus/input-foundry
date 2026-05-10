@@ -695,6 +695,19 @@ select {
   width: 100%;
 }
 
+.rime-schema-preview-set {
+  display: grid;
+  gap: 0.45rem;
+}
+
+#filter-mobile:checked ~ #filter-desktop:not(:checked) ~ .rime-schema-catalogs .rime-schema-preview--desktop {
+  display: none;
+}
+
+#filter-mobile:not(:checked) ~ #filter-desktop:checked ~ .rime-schema-catalogs .rime-schema-preview--mobile {
+  display: none;
+}
+
 .keyboard-preview-svg {
   display: block;
   width: 100%;

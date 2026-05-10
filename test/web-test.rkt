@@ -102,8 +102,12 @@
   (test-case "schema preview routes preserve schema identity over shared layouts"
     (define flypy-ice-svg
       (response-body (canonical-dispatch (req "/schemas/flypy_ice/preview.svg" "rime.mayphus.org"))))
+    (define mobile-only-svg
+      (response-body (canonical-dispatch (req "/schemas/flypy_14/preview.svg" "rime.mayphus.org"))))
     (define quanpin-skin-svg
       (response-body (canonical-dispatch (req "/schemas/luna_quanpin/skin-preview.svg" "rime.mayphus.org"))))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" flypy-ice-svg))
+    (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" mobile-only-svg))
+    (check-true (regexp-match? #rx">123<" mobile-only-svg))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" quanpin-skin-svg))
     (check-true (regexp-match? #rx">123<" quanpin-skin-svg)))
