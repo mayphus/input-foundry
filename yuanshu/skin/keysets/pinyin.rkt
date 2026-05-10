@@ -2,7 +2,7 @@
 
 (require (for-syntax racket/base
                      syntax/parse)
-         "../../../input-method/keyboard/legends.rkt"
+         "../../../keyboard/legends.rkt"
          "../core/dsl.rkt"
          "../core/visual-policy.rkt"
          "actions.rkt")

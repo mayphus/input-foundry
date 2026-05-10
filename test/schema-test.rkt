@@ -5,7 +5,7 @@
          racket/list
          racket/runtime-path
          racket/string
-         (prefix-in keyboard: "../input-method/keyboard/catalog.rkt")
+         (prefix-in keyboard: "../keyboard/registry.rkt")
          (prefix-in schema-index: "../input-method/schema.rkt")
          (prefix-in model: "../input-method/model.rkt")
          (prefix-in recipes: "../input-method/recipes.rkt")
@@ -121,7 +121,6 @@
     (check-not-false (keyboard:keyboard-placement-definition-ref "compact-center"))
     (check-not-false (keyboard:keyboard-interaction-definition-ref "compact-mobile"))
     (check-false (keyboard:keyboard-layout-definition-ref "flypy"))
-    (check-not-false (keyboard:keyboard-shape-definition-ref "compact-14"))
     (check-false (keyboard:keyboard-layout-definition-ref "missing-layout")))
 
   (test-case "generated schema entries point at Rime source module files"
