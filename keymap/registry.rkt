@@ -16,94 +16,62 @@
 (define (keyboard-legends . layers)
   (make-immutable-hash layers))
 
-(define keyboard-legend-definitions
-  (keyboard-legends
-   (legend-layer 'abc
-    (legend-entry 'q "q") (legend-entry 'w "w") (legend-entry 'e "e") (legend-entry 'r "r") (legend-entry 't "t")
-    (legend-entry 'y "y") (legend-entry 'u "u") (legend-entry 'i "i") (legend-entry 'o "o") (legend-entry 'p "p")
-    (legend-entry 'a "a") (legend-entry 's "s") (legend-entry 'd "d") (legend-entry 'f "f") (legend-entry 'g "g")
-    (legend-entry 'h "h") (legend-entry 'j "j") (legend-entry 'k "k") (legend-entry 'l "l")
-    (legend-entry 'z "z") (legend-entry 'x "x") (legend-entry 'c "c") (legend-entry 'v "v") (legend-entry 'b "b")
-    (legend-entry 'n "n") (legend-entry 'm "m"))
-   (legend-layer 'flypy
-    (legend-entry 'q "iu") (legend-entry 'w "ei") (legend-entry 'e "e") (legend-entry 'r "uan") (legend-entry 't "ue/ve")
-    (legend-entry 'y "un") (legend-entry 'u "sh") (legend-entry 'i "ch") (legend-entry 'o "uo") (legend-entry 'p "ie")
-    (legend-entry 'a "a") (legend-entry 's "ong/iong") (legend-entry 'd "ai") (legend-entry 'f "en") (legend-entry 'g "eng")
-    (legend-entry 'h "ang") (legend-entry 'j "an") (legend-entry 'k "ing/uai") (legend-entry 'l "iang/uang")
-    (legend-entry 'z "ou") (legend-entry 'x "ia/ua") (legend-entry 'c "ao") (legend-entry 'v "zh/ui") (legend-entry 'b "in")
-    (legend-entry 'n "iao") (legend-entry 'm "ian"))
-   (legend-layer 'cangjie
-    (legend-entry 'q "手") (legend-entry 'w "田") (legend-entry 'e "水") (legend-entry 'r "口") (legend-entry 't "廿")
-    (legend-entry 'y "卜") (legend-entry 'u "山") (legend-entry 'i "戈") (legend-entry 'o "人") (legend-entry 'p "心")
-    (legend-entry 'a "日") (legend-entry 's "尸") (legend-entry 'd "木") (legend-entry 'f "火") (legend-entry 'g "土")
-    (legend-entry 'h "的") (legend-entry 'j "十") (legend-entry 'k "大") (legend-entry 'l "中")
-    (legend-entry 'z "片") (legend-entry 'x "止") (legend-entry 'c "金") (legend-entry 'v "女") (legend-entry 'b "月")
-    (legend-entry 'n "弓") (legend-entry 'm "一"))
-   (legend-layer 'zhuyin
-    (legend-entry 'bo "ㄅ") (legend-entry 'po "ㄆ") (legend-entry 'mo "ㄇ") (legend-entry 'fo "ㄈ")
-    (legend-entry 'de "ㄉ") (legend-entry 'te "ㄊ") (legend-entry 'ne "ㄋ") (legend-entry 'le "ㄌ")
-    (legend-entry 'ge "ㄍ") (legend-entry 'ke "ㄎ") (legend-entry 'he "ㄏ")
-    (legend-entry 'ji "ㄐ") (legend-entry 'qi "ㄑ") (legend-entry 'xi "ㄒ")
-    (legend-entry 'zhi "ㄓ") (legend-entry 'chi "ㄔ") (legend-entry 'shi "ㄕ") (legend-entry 'ri "ㄖ")
-    (legend-entry 'zi "ㄗ") (legend-entry 'ci "ㄘ") (legend-entry 'si "ㄙ")
-    (legend-entry 'yi "ㄧ") (legend-entry 'wu "ㄨ") (legend-entry 'yu "ㄩ")
-    (legend-entry 'a "ㄚ") (legend-entry 'o "ㄛ") (legend-entry 'e "ㄜ") (legend-entry 'eh "ㄝ")
-    (legend-entry 'ai "ㄞ") (legend-entry 'ei "ㄟ") (legend-entry 'ao "ㄠ") (legend-entry 'ou "ㄡ")
-    (legend-entry 'an "ㄢ") (legend-entry 'en "ㄣ") (legend-entry 'ang "ㄤ") (legend-entry 'eng "ㄥ")
-    (legend-entry 'er "ㄦ") (legend-entry 'second-tone "ˊ") (legend-entry 'third-tone "ˇ")
-    (legend-entry 'fourth-tone "ˋ") (legend-entry 'light-tone "˙"))
-   (legend-layer 'wubi
-    (legend-entry 'q "金/勹") (legend-entry 'w "人/八") (legend-entry 'e "月/彡") (legend-entry 'r "白/手") (legend-entry 't "禾/竹")
-    (legend-entry 'y "言/文") (legend-entry 'u "立/辛") (legend-entry 'i "水/小") (legend-entry 'o "火/米") (legend-entry 'p "之/宀")
-    (legend-entry 'a "工/戈") (legend-entry 's "木/丁") (legend-entry 'd "大/犬") (legend-entry 'f "土/十") (legend-entry 'g "王/一")
-    (legend-entry 'h "目/止") (legend-entry 'j "日/虫") (legend-entry 'k "口/川") (legend-entry 'l "田/力")
-    (legend-entry 'z "拼音") (legend-entry 'x "纟/弓") (legend-entry 'c "又/巴") (legend-entry 'v "女/刀") (legend-entry 'b "子/耳")
-    (legend-entry 'n "已/心") (legend-entry 'm "山/贝"))
-   (legend-layer 'stroke
-    (legend-entry 'h "一") (legend-entry 's "丨") (legend-entry 'p "丿") (legend-entry 'n "丶") (legend-entry 'z "乙")
-    (legend-entry 'j "一") (legend-entry 'k "丨") (legend-entry 'l "丿") (legend-entry 'u "丶") (legend-entry 'i "乙"))
-   (legend-layer 'zrm
-    (legend-entry 'q "iu") (legend-entry 'w "ia/ua") (legend-entry 'e "e") (legend-entry 'r "uan") (legend-entry 't "ue/ve")
-    (legend-entry 'y "ing/uai") (legend-entry 'u "sh") (legend-entry 'i "ch") (legend-entry 'o "uo") (legend-entry 'p "un")
-    (legend-entry 'a "a") (legend-entry 's "ong") (legend-entry 'd "uang") (legend-entry 'f "en") (legend-entry 'g "eng")
-    (legend-entry 'h "ang") (legend-entry 'j "an") (legend-entry 'k "ao") (legend-entry 'l "ai")
-    (legend-entry 'z "ei") (legend-entry 'x "ie") (legend-entry 'c "iao") (legend-entry 'v "zh/ui") (legend-entry 'b "ou")
-    (legend-entry 'n "in") (legend-entry 'm "ian"))
-   (legend-layer 'abc-dp
-    (legend-entry 'q "ei") (legend-entry 'w "ian") (legend-entry 'e "ch") (legend-entry 'r "er/iu") (legend-entry 't "iang")
-    (legend-entry 'y "ing") (legend-entry 'u "u") (legend-entry 'i "i") (legend-entry 'o "uo/零") (legend-entry 'p "uan")
-    (legend-entry 'a "zh") (legend-entry 's "ong") (legend-entry 'd "ia/ua") (legend-entry 'f "en") (legend-entry 'g "eng")
-    (legend-entry 'h "ang") (legend-entry 'j "an") (legend-entry 'k "ao") (legend-entry 'l "ai")
-    (legend-entry 'z "iao") (legend-entry 'x "ie") (legend-entry 'c "in/uai") (legend-entry 'v "sh") (legend-entry 'b "ou")
-    (legend-entry 'n "un") (legend-entry 'm "ui/ue"))
-   (legend-layer 'mspy
-    (legend-entry 'q "iu") (legend-entry 'w "ia/ua") (legend-entry 'e "e") (legend-entry 'r "er/uan") (legend-entry 't "ue/ve")
-    (legend-entry 'y "v/uai") (legend-entry 'u "sh") (legend-entry 'i "ch") (legend-entry 'o "uo") (legend-entry 'p "un")
-    (legend-entry 'a "a") (legend-entry 's "ong") (legend-entry 'd "uang") (legend-entry 'f "en") (legend-entry 'g "eng")
-    (legend-entry 'h "ang") (legend-entry 'j "an") (legend-entry 'k "ao") (legend-entry 'l "ai")
-    (legend-entry 'z "ei") (legend-entry 'x "ie") (legend-entry 'c "iao") (legend-entry 'v "zh/ui") (legend-entry 'b "ou")
-    (legend-entry 'n "in") (legend-entry 'm "ian"))
-   (legend-layer 'pyjj
-    (legend-entry 'q "er/ing") (legend-entry 'w "ei") (legend-entry 'e "e") (legend-entry 'r "en") (legend-entry 't "eng")
-    (legend-entry 'y "ong") (legend-entry 'u "ch") (legend-entry 'i "sh") (legend-entry 'o "uo") (legend-entry 'p "ou")
-    (legend-entry 'a "a") (legend-entry 's "ai") (legend-entry 'd "ao") (legend-entry 'f "an") (legend-entry 'g "ang")
-    (legend-entry 'h "uang") (legend-entry 'j "ian") (legend-entry 'k "iao") (legend-entry 'l "in")
-    (legend-entry 'z "un") (legend-entry 'x "ve/uai") (legend-entry 'c "uan") (legend-entry 'v "zh/ui") (legend-entry 'b "ia/ua")
-    (legend-entry 'n "iu") (legend-entry 'm "ie"))
-   (legend-layer 'st
-    (legend-entry 'q "er") (legend-entry 'w "ei") (legend-entry 'e "e") (legend-entry 'r "en") (legend-entry 't "eng")
-    (legend-entry 'y "ong") (legend-entry 'u "ch") (legend-entry 'i "sh") (legend-entry 'o "uo") (legend-entry 'p "ou")
-    (legend-entry 'a "zh") (legend-entry 's "ai") (legend-entry 'd "ao") (legend-entry 'f "an") (legend-entry 'g "ang")
-    (legend-entry 'h "uang") (legend-entry 'j "ian") (legend-entry 'k "iao") (legend-entry 'l "in")
-    (legend-entry 'z "un") (legend-entry 'x "v/uai") (legend-entry 'c "uan") (legend-entry 'v "ui/ue") (legend-entry 'b "ia/ua")
-    (legend-entry 'n "iu") (legend-entry 'm "ie"))
-   (legend-layer 'jyutping
-    (legend-entry 'q "—") (legend-entry 'w "w") (legend-entry 'e "e/eo") (legend-entry 'r "—") (legend-entry 't "t") (legend-entry 'y "yu")
-    (legend-entry 'u "u/yun") (legend-entry 'i "i") (legend-entry 'o "o/oe") (legend-entry 'p "p")
-    (legend-entry 'a "aa/a") (legend-entry 's "s") (legend-entry 'd "d") (legend-entry 'f "f") (legend-entry 'g "g/gw")
-    (legend-entry 'h "h") (legend-entry 'j "j") (legend-entry 'k "k/kw") (legend-entry 'l "l")
-    (legend-entry 'z "z") (legend-entry 'x "—") (legend-entry 'c "c") (legend-entry 'v "—") (legend-entry 'b "b")
-    (legend-entry 'n "n/ng") (legend-entry 'm "m/ng"))))
+(define-syntax-rule (define-keymaps name [layer [key text] ...] ...)
+  (define name
+    (keyboard-legends
+     (legend-layer 'layer
+       (legend-entry 'key text) ...)
+     ...)))
+
+(define-keymaps keyboard-legend-definitions
+  [abc
+   [q "q"] [w "w"] [e "e"] [r "r"] [t "t"] [y "y"] [u "u"] [i "i"] [o "o"] [p "p"]
+   [a "a"] [s "s"] [d "d"] [f "f"] [g "g"] [h "h"] [j "j"] [k "k"] [l "l"]
+   [z "z"] [x "x"] [c "c"] [v "v"] [b "b"] [n "n"] [m "m"]]
+  [flypy
+   [q "iu"] [w "ei"] [e "e"] [r "uan"] [t "ue/ve"] [y "un"] [u "sh"] [i "ch"] [o "uo"] [p "ie"]
+   [a "a"] [s "ong/iong"] [d "ai"] [f "en"] [g "eng"] [h "ang"] [j "an"] [k "ing/uai"] [l "iang/uang"]
+   [z "ou"] [x "ia/ua"] [c "ao"] [v "zh/ui"] [b "in"] [n "iao"] [m "ian"]]
+  [cangjie
+   [q "手"] [w "田"] [e "水"] [r "口"] [t "廿"] [y "卜"] [u "山"] [i "戈"] [o "人"] [p "心"]
+   [a "日"] [s "尸"] [d "木"] [f "火"] [g "土"] [h "的"] [j "十"] [k "大"] [l "中"]
+   [z "片"] [x "止"] [c "金"] [v "女"] [b "月"] [n "弓"] [m "一"]]
+  [zhuyin
+   [bo "ㄅ"] [po "ㄆ"] [mo "ㄇ"] [fo "ㄈ"] [de "ㄉ"] [te "ㄊ"] [ne "ㄋ"] [le "ㄌ"] [ge "ㄍ"] [ke "ㄎ"] [he "ㄏ"]
+   [ji "ㄐ"] [qi "ㄑ"] [xi "ㄒ"] [zhi "ㄓ"] [chi "ㄔ"] [shi "ㄕ"] [ri "ㄖ"] [zi "ㄗ"] [ci "ㄘ"] [si "ㄙ"]
+   [yi "ㄧ"] [wu "ㄨ"] [yu "ㄩ"] [a "ㄚ"] [o "ㄛ"] [e "ㄜ"] [eh "ㄝ"] [ai "ㄞ"] [ei "ㄟ"] [ao "ㄠ"] [ou "ㄡ"]
+   [an "ㄢ"] [en "ㄣ"] [ang "ㄤ"] [eng "ㄥ"] [er "ㄦ"] [second-tone "ˊ"] [third-tone "ˇ"] [fourth-tone "ˋ"] [light-tone "˙"]]
+  [wubi
+   [q "金/勹"] [w "人/八"] [e "月/彡"] [r "白/手"] [t "禾/竹"] [y "言/文"] [u "立/辛"] [i "水/小"] [o "火/米"] [p "之/宀"]
+   [a "工/戈"] [s "木/丁"] [d "大/犬"] [f "土/十"] [g "王/一"] [h "目/止"] [j "日/虫"] [k "口/川"] [l "田/力"]
+   [z "拼音"] [x "纟/弓"] [c "又/巴"] [v "女/刀"] [b "子/耳"] [n "已/心"] [m "山/贝"]]
+  [stroke
+   [h "一"] [s "丨"] [p "丿"] [n "丶"] [z "乙"]
+   [j "一"] [k "丨"] [l "丿"] [u "丶"] [i "乙"]]
+  [zrm
+   [q "iu"] [w "ia/ua"] [e "e"] [r "uan"] [t "ue/ve"] [y "ing/uai"] [u "sh"] [i "ch"] [o "uo"] [p "un"]
+   [a "a"] [s "ong"] [d "uang"] [f "en"] [g "eng"] [h "ang"] [j "an"] [k "ao"] [l "ai"]
+   [z "ei"] [x "ie"] [c "iao"] [v "zh/ui"] [b "ou"] [n "in"] [m "ian"]]
+  [abc-dp
+   [q "ei"] [w "ian"] [e "ch"] [r "er/iu"] [t "iang"] [y "ing"] [u "u"] [i "i"] [o "uo/零"] [p "uan"]
+   [a "zh"] [s "ong"] [d "ia/ua"] [f "en"] [g "eng"] [h "ang"] [j "an"] [k "ao"] [l "ai"]
+   [z "iao"] [x "ie"] [c "in/uai"] [v "sh"] [b "ou"] [n "un"] [m "ui/ue"]]
+  [mspy
+   [q "iu"] [w "ia/ua"] [e "e"] [r "er/uan"] [t "ue/ve"] [y "v/uai"] [u "sh"] [i "ch"] [o "uo"] [p "un"]
+   [a "a"] [s "ong"] [d "uang"] [f "en"] [g "eng"] [h "ang"] [j "an"] [k "ao"] [l "ai"]
+   [z "ei"] [x "ie"] [c "iao"] [v "zh/ui"] [b "ou"] [n "in"] [m "ian"]]
+  [pyjj
+   [q "er/ing"] [w "ei"] [e "e"] [r "en"] [t "eng"] [y "ong"] [u "ch"] [i "sh"] [o "uo"] [p "ou"]
+   [a "a"] [s "ai"] [d "ao"] [f "an"] [g "ang"] [h "uang"] [j "ian"] [k "iao"] [l "in"]
+   [z "un"] [x "ve/uai"] [c "uan"] [v "zh/ui"] [b "ia/ua"] [n "iu"] [m "ie"]]
+  [st
+   [q "er"] [w "ei"] [e "e"] [r "en"] [t "eng"] [y "ong"] [u "ch"] [i "sh"] [o "uo"] [p "ou"]
+   [a "zh"] [s "ai"] [d "ao"] [f "an"] [g "ang"] [h "uang"] [j "ian"] [k "iao"] [l "in"]
+   [z "un"] [x "v/uai"] [c "uan"] [v "ui/ue"] [b "ia/ua"] [n "iu"] [m "ie"]]
+  [jyutping
+   [q "—"] [w "w"] [e "e/eo"] [r "—"] [t "t"] [y "yu"] [u "u/yun"] [i "i"] [o "o/oe"] [p "p"]
+   [a "aa/a"] [s "s"] [d "d"] [f "f"] [g "g/gw"] [h "h"] [j "j"] [k "k/kw"] [l "l"]
+   [z "z"] [x "—"] [c "c"] [v "—"] [b "b"] [n "n/ng"] [m "m/ng"]])
 
 (define (keyboard-legend-definition-ref layer [default #f])
   (define layer-symbol
