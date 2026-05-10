@@ -59,7 +59,7 @@
 (define skin-module-ref keyboard-layout-module-ref)
 
 (define (schema-module-path schema)
-  (build-path schema-dir (string-append (schema-source-id schema) ".rkt")))
+  (build-path rime-source-dir (string-append (schema-source-id schema) ".rkt")))
 
 (define (schema-module-ref schema prop [default #f])
   (define source (schema-source-id schema))
@@ -69,8 +69,12 @@
           (dynamic-require rkt prop (lambda () default))
           (let ([meta (dynamic-require rkt 'schema-meta (lambda () #f))])
             (if (hash? meta)
-                (hash-ref (hash-ref meta schema (hash)) prop default)
-                default)))
+                (hash-ref (hash-ref meta schema
+                                    (hash-ref meta (schema-config-id schema) (hash)))
+                          prop
+                          (lambda ()
+                            (dynamic-require rkt prop (lambda () default))))
+                (dynamic-require rkt prop (lambda () default)))))
       default))
 
 (define (read-schema-keyboard-layouts schema)

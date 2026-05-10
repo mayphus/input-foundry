@@ -16,7 +16,7 @@
          "web/forms.rkt"
          "web/locale.rkt"
          "build.rkt"
-         "input-method/registry.rkt")
+         (except-in "input-method/registry.rkt" generated-config-ids))
 
 (provide keyboard-layout-items
          skin-items
@@ -86,7 +86,7 @@
 (define (schema-preview-svg schema-id [theme 'light] #:skin? [skin? #f])
   (define schema
     (schema-item-by-ref schema-id))
-  (define artifacts (and schema (hash-ref schema 'artifacts '())))
+  (define artifacts (if schema (hash-ref schema 'artifacts '()) '()))
   (define mobile-only?
     (and (member "yuanshu" artifacts)
          (not (member "rime" artifacts))))
@@ -110,7 +110,7 @@
    (directory-list rime-dir)))
 
 (define schema-ids
-  (remove-duplicates (append generated-config-ids (list-static-schemas))))
+  (schema-entry-ids))
 
 (define legacy-host "rime-config.mayphus.org")
 (define canonical-host "rime.mayphus.org")
@@ -177,6 +177,7 @@
           'descriptions (or (schema-display-descriptions s)
                             (hash 'en description
                                   'zh-Hant description))
+          'input-method? (input-method-id? s)
           'deps deps
           'artifacts artifacts
           'keyboard-layouts keyboard-layouts)))
@@ -244,6 +245,10 @@
     [else
      (define schema (schema-item-by-ref schema-id))
      (cond
+       [(not schema)
+        (response/full
+         404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
+         (list #"Exhibit not found"))]
        [(and schema (not (equal? schema-id (schema-public-ref schema))))
         (redirect-response (exhibit-location schema req) 301)]
        [else

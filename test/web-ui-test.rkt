@@ -8,46 +8,60 @@
          "../web/forms.rkt")
 
 (define schemas
-  (list (hash 'id "flypy"
-              'slug "flypy"
+  (list (hash 'id "double-pinyin-flypy"
+              'slug "double-pinyin-flypy"
               'name "小鶴"
               'names (hash 'en "Flypy" 'zh-Hant "小鶴")
               'description "Flypy double pinyin exhibit."
               'descriptions (hash 'en "Flypy double pinyin exhibit."
                                   'zh-Hant "小鶴展品。")
+              'input-method? #t
               'deps '("cangjie6")
               'artifacts '("rime" "yuanshu")
-              'keyboard-layouts '("flypy"))
-        (hash 'id "flypy_14"
-              'slug "flypy-14"
+              'keyboard-layouts '("double-pinyin-flypy"))
+        (hash 'id "double-pinyin-flypy-14"
+              'slug "double-pinyin-flypy-14"
               'name "小鶴十四鍵"
               'names (hash 'en "Flypy 14" 'zh-Hant "小鶴十四鍵")
               'description "A compact Yuanshu-only 14-key exhibit."
               'descriptions (hash 'en "A compact Yuanshu-only 14-key exhibit."
                                   'zh-Hant "緊湊的元書十四鍵展品。")
-              'deps '("flypy")
+              'input-method? #t
+              'deps '("double-pinyin-flypy")
               'artifacts '("yuanshu")
-              'keyboard-layouts '("flypy_14"))
-        (hash 'id "flypy_ice"
+              'keyboard-layouts '("double-pinyin-flypy-14"))
+        (hash 'id "flypy-ice"
               'slug "flypy-ice"
               'name "小鶴霧凇"
               'names (hash 'en "Flypy Ice" 'zh-Hant "小鶴霧凇")
               'description "Flypy with rime-ice dictionaries."
               'descriptions (hash 'en "Flypy with rime-ice dictionaries."
                                   'zh-Hant "使用霧凇詞庫的小鶴。")
+              'input-method? #f
               'deps '("cangjie6")
               'artifacts '("rime" "yuanshu")
-              'keyboard-layouts '("flypy"))))
+              'keyboard-layouts '("double-pinyin-flypy"))
+        (hash 'id "double-pinyin-flypy-upstream"
+              'slug "double-pinyin-flypy"
+              'name "小鶴雙拼"
+              'names (hash 'en "Double Pinyin: Flypy" 'zh-Hant "小鶴雙拼")
+              'description "Static upstream Flypy schema."
+              'descriptions (hash 'en "Static upstream Flypy schema."
+                                  'zh-Hant "上游小鶴雙拼方案。")
+              'input-method? #f
+              'deps '("stroke")
+              'artifacts '("rime" "yuanshu")
+              'keyboard-layouts '("double-pinyin-flypy"))))
 
 (define layouts
-  (list (hash 'id "flypy"
-              'schemas '("flypy")
+  (list (hash 'id "double-pinyin-flypy"
+              'schemas '("double-pinyin-flypy")
               'name "小鶴"
               'names (hash 'en "Flypy" 'zh-Hant "小鶴")
               'preview-svgs (hash 'light "<svg/>")
               'skin-preview-svgs (hash 'light "<svg/>"))
-        (hash 'id "flypy_14"
-              'schemas '("flypy_14")
+        (hash 'id "double-pinyin-flypy-14"
+              'schemas '("double-pinyin-flypy-14")
               'name "小鶴十四鍵"
               'names (hash 'en "Flypy 14-Key" 'zh-Hant "小鶴十四鍵")
               'preview-svgs (hash 'light "<svg/>")
@@ -67,28 +81,29 @@
   (length (regexp-match* rx s)))
 
 (module+ test
-  (test-case "museum catalog has exhibit cards instead of platform tabs"
+  (test-case "museum home has exhibit cards instead of platform tabs"
     (define html (render-page (req "/") schemas layouts))
     (check-true (regexp-match? #rx"Chinese Input Method Museum" html))
     (check-false (regexp-match? #rx"Explore Chinese input methods from history to hands-on interaction" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy\\?platform=desktop\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy\\?platform=mobile\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-14\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=desktop\"" html))
-    (check-true (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=mobile\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/double-pinyin-flypy\\?platform=desktop\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/double-pinyin-flypy\\?platform=mobile\"" html))
+    (check-true (regexp-match? #rx"href=\"/exhibits/double-pinyin-flypy-14\"" html))
+    (check-false (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=desktop\"" html))
+    (check-false (regexp-match? #rx"href=\"/exhibits/flypy-ice\\?platform=mobile\"" html))
     (check-false (regexp-match? #rx"id=\"filter-desktop\"" html))
     (check-false (regexp-match? #rx"id=\"filter-mobile\"" html))
-    (check-false (regexp-match? #rx"rime-catalog-filter" html))
+    (check-false (regexp-match? #rx"rime-category-filter" html))
     (check-false (regexp-match? #rx"data-platforms=" html))
     (check-false (regexp-match? #rx"data-card-platform=" html))
     (check-false (regexp-match? #rx"data-href=" html))
-    (check-true (regexp-match? #rx"/schemas/flypy/preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy/skin-preview.svg" html))
-    (check-false (regexp-match? #rx"/schemas/flypy_14/preview.svg" html))
-    (check-false (regexp-match? #rx"/schemas/flypy_14/skin-preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy-14/skin-preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy-ice/preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy-ice/skin-preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/double-pinyin-flypy/preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/double-pinyin-flypy/skin-preview.svg" html))
+    (check-false (regexp-match? #rx"/schemas/double-pinyin-flypy-14/preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/double-pinyin-flypy-14/skin-preview.svg" html))
+    (check-false (regexp-match? #rx"Flypy Ice" html))
+    (check-false (regexp-match? #rx"Double Pinyin: Flypy" html))
+    (check-false (regexp-match? #rx"/schemas/flypy-ice/preview.svg" html))
+    (check-false (regexp-match? #rx"/schemas/flypy-ice/skin-preview.svg" html))
     (check-false (regexp-match? #rx"rime-schema-preview--desktop" html))
     (check-false (regexp-match? #rx"rime-schema-preview--mobile" html))
     (check-false (regexp-match? #rx"rime-platform-chip" html))
@@ -107,7 +122,7 @@
     (check-false (regexp-match? #rx"href=\"/desktop\"" html))
     (check-false (regexp-match? #rx"htmx.org" html)))
 
-  (test-case "catalog supports Traditional Chinese copy"
+  (test-case "home supports Traditional Chinese copy"
     (define html (render-page (req "/?locale=zh-Hant") schemas layouts))
     (check-true (regexp-match? #rx"<html lang=\"zh-Hant\"" html))
     (check-true (regexp-match? #rx"中文輸入博物館" html))
@@ -119,35 +134,35 @@
     (check-true (regexp-match? #rx">EN</a>" html)))
 
   (test-case "exhibit page shows one detailed preview and selected artifact action"
-    (define html (render-exhibit-page (req "/exhibits/flypy") schemas layouts "flypy"))
+    (define html (render-exhibit-page (req "/exhibits/double-pinyin-flypy") schemas layouts "double-pinyin-flypy"))
     (check-true (regexp-match? #rx"Flypy double pinyin exhibit" html))
     (check-false (regexp-match? #rx"<code>cangjie6</code>" html))
     (check-false (regexp-match? #rx"Dependencies" html))
-    (check-false (regexp-match? #rx"/schemas/flypy/preview-dark.svg" html))
+    (check-false (regexp-match? #rx"/schemas/double-pinyin-flypy/preview-dark.svg" html))
     (check-false (regexp-match? #rx"Keyboard layouts" html))
     (check-true (regexp-match? #rx"name=\"artifact\" value=\"yuanshu\"" html))
     (check-false (regexp-match? #rx"name=\"artifact\" value=\"rime\"" html))
     (check-false (regexp-match? #rx"<select[^>]+name=\"schemas\"" html))
-    (check-true (regexp-match? #rx"type=\"hidden\" name=\"schemas\" value=\"flypy\"" html))
+    (check-true (regexp-match? #rx"type=\"hidden\" name=\"schemas\" value=\"double-pinyin-flypy\"" html))
     (check-false (regexp-match? #rx"Dictionary" html))
     (check-true (regexp-match? #rx"Download package" html))
     (check-false (regexp-match? #rx"Download Rime package" html))
     (check-false (regexp-match? #rx"Download Yuanshu package" html))
-    (check-false (regexp-match? #rx"/schemas/flypy/preview.svg" html))
-    (check-true (regexp-match? #rx"/schemas/flypy/skin-preview.svg" html))
-    (check-equal? (match-count #rx"/schemas/flypy/skin-preview.svg" html) 1)
+    (check-false (regexp-match? #rx"/schemas/double-pinyin-flypy/preview.svg" html))
+    (check-true (regexp-match? #rx"/schemas/double-pinyin-flypy/skin-preview.svg" html))
+    (check-equal? (match-count #rx"/schemas/double-pinyin-flypy/skin-preview.svg" html) 1)
     (check-false (regexp-match? #rx"rime-exhibit-meta" html))
     (check-false (regexp-match? #rx"rime-layout-title" html))
     (check-false (regexp-match? #rx"<span class=\"rime-option-id\">flypy" html)))
 
   (test-case "desktop exhibit page shows desktop artifact action"
-    (define html (render-exhibit-page (req "/exhibits/flypy?platform=desktop") schemas layouts "flypy"))
+    (define html (render-exhibit-page (req "/exhibits/double-pinyin-flypy?platform=desktop") schemas layouts "double-pinyin-flypy"))
     (check-true (regexp-match? #rx"name=\"artifact\" value=\"rime\"" html))
     (check-false (regexp-match? #rx"name=\"artifact\" value=\"yuanshu\"" html))
     (check-true (regexp-match? #rx"Download package" html)))
 
   (test-case "yuanshu-only exhibit omits Rime download"
-    (define html (render-exhibit-page (req "/exhibits/flypy_14") schemas layouts "flypy_14"))
+    (define html (render-exhibit-page (req "/exhibits/double-pinyin-flypy-14") schemas layouts "double-pinyin-flypy-14"))
     (check-false (regexp-match? #rx"name=\"artifact\" value=\"rime\"" html))
     (check-true (regexp-match? #rx"name=\"artifact\" value=\"yuanshu\"" html)))
 
@@ -168,10 +183,10 @@
            #:method #"POST"
            #:headers (list (header #"Content-Type" #"application/x-www-form-urlencoded"))
            #:bindings (list (binding:form #"artifact" #"yuanshu")
-                            (binding:form #"schemas" #"flypy_ice"))))
+                            (binding:form #"schemas" #"flypy-ice"))))
     (check-true (form-request? request))
     (check-equal? (form-profile request)
-                  (hash 'schemas '("flypy_ice")
+                  (hash 'schemas '("flypy-ice")
                         'artifact "yuanshu")))
 
   (test-case "legacy desktop form posts map to rime and yuanshu artifacts"
@@ -180,16 +195,16 @@
            #:method #"POST"
            #:headers (list (header #"Content-Type" #"application/x-www-form-urlencoded"))
            #:bindings (list (binding:form #"desktop?" #"true")
-                            (binding:form #"schemas" #"flypy"))))
+                            (binding:form #"schemas" #"double-pinyin-flypy"))))
     (define yuanshu-request
       (req "/build"
            #:method #"POST"
            #:headers (list (header #"Content-Type" #"application/x-www-form-urlencoded"))
            #:bindings (list (binding:form #"desktop?" #"false")
-                            (binding:form #"schemas" #"flypy"))))
+                            (binding:form #"schemas" #"double-pinyin-flypy"))))
     (check-equal? (form-profile rime-request)
-                  (hash 'schemas '("flypy")
+                  (hash 'schemas '("double-pinyin-flypy")
                         'artifact "rime"))
     (check-equal? (form-profile yuanshu-request)
-                  (hash 'schemas '("flypy")
+                  (hash 'schemas '("double-pinyin-flypy")
                         'artifact "yuanshu"))))

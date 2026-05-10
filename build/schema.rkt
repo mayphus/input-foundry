@@ -22,7 +22,7 @@
          compute-assets)
 
 (define (schema-module-path schema)
-  (build-path schema-dir (string-append (schema-source-id schema) ".rkt")))
+  (build-path rime-source-dir (string-append (schema-source-id schema) ".rkt")))
 
 (define (schema-module-ref schema prop [default #f])
   (define source (schema-source-id schema))
@@ -32,8 +32,12 @@
           (dynamic-require rkt prop (lambda () default))
           (let ([meta (dynamic-require rkt 'schema-meta (lambda () #f))])
             (if (hash? meta)
-                (hash-ref (hash-ref meta schema (hash)) prop default)
-                default)))
+                (hash-ref (hash-ref meta schema
+                                    (hash-ref meta (schema-config-id schema) (hash)))
+                          prop
+                          (lambda ()
+                            (dynamic-require rkt prop (lambda () default))))
+                (dynamic-require rkt prop (lambda () default)))))
       default))
 
 (define yuanshu-profiles-dir (build-path profiles-dir "yuanshu"))
@@ -116,7 +120,7 @@
   (define raw (hash-ref profile 'schemas '()))
   (define lst (if (list? raw) raw (list raw)))
   (if (member "all" lst)
-      (remove-duplicates (append generated-config-ids (list-static-schema-ids)))
+      (schema-entry-ids)
       lst))
 
 (define (expand-schema-deps schemas)
@@ -165,16 +169,17 @@
     (set! keyboard-layouts (cons layout keyboard-layouts)))
 
   (for ([schema schemas])
-    (cond
-      [(member schema generated-schema-ids)
-       (add-gen! (string-append schema ".schema.yaml"))]
-      [(file-exists? (build-path rime-dir (string-append schema ".schema.yaml")))
-       (add-rime-yaml! (string-append schema ".schema.yaml"))])
+    (define source (schema-config-id schema))
     (cond
       [(member schema generated-config-ids)
-       (add-gen! (string-append schema ".custom.yaml"))]
-      [(file-exists? (build-path rime-dir (string-append schema ".custom.yaml")))
-       (add-rime-yaml! (string-append schema ".custom.yaml"))]))
+       (add-gen! (string-append source ".schema.yaml"))]
+      [(file-exists? (build-path rime-dir (string-append source ".schema.yaml")))
+       (add-rime-yaml! (string-append source ".schema.yaml"))])
+    (cond
+      [(member schema generated-config-ids)
+       (add-gen! (string-append source ".custom.yaml"))]
+      [(file-exists? (build-path rime-dir (string-append source ".custom.yaml")))
+       (add-rime-yaml! (string-append source ".custom.yaml"))]))
 
   (for ([schema schemas])
     (for ([f (schema-module-ref schema 'static-dep-files '())]) (add-rime-yaml! f))

@@ -6,16 +6,16 @@
          racket/runtime-path
          racket/string
          (prefix-in keyboard: "../input-method/keyboard/catalog.rkt")
-         (prefix-in catalog: "../input-method/catalog.rkt")
+         (prefix-in schema-index: "../input-method/schema-registry.rkt")
          (prefix-in model: "../input-method/model.rkt")
          (prefix-in recipes: "../input-method/recipes.rkt")
          (prefix-in registry: "../input-method/registry.rkt")
-         (prefix-in flypy: "../input-method/schema/flypy.rkt")
-         (prefix-in flypy_14: "../input-method/schema/flypy_14.rkt")
-         (prefix-in luna_pinyin: "../input-method/schema/luna_pinyin.rkt")
-         (prefix-in pinyin_14: "../input-method/schema/pinyin_14.rkt")
-         (prefix-in terra_pinyin: "../input-method/schema/terra_pinyin.rkt")
-         (prefix-in jyut6ping3: "../input-method/schema/jyut6ping3.rkt")
+         (prefix-in flypy: "../rime/flypy.rkt")
+         (prefix-in flypy_14: "../rime/flypy_14.rkt")
+         (prefix-in luna_pinyin: "../rime/luna_pinyin.rkt")
+         (prefix-in pinyin_14: "../rime/pinyin_14.rkt")
+         (prefix-in terra_pinyin: "../rime/terra_pinyin.rkt")
+         (prefix-in jyut6ping3: "../rime/jyut6ping3.rkt")
          "../build.rkt"
          "../lib/preview/svg.rkt"
          "../yuanshu/skin/core/preview.rkt"
@@ -28,7 +28,7 @@
          (prefix-in zrm18-layout: "../yuanshu/skin/layouts/zrm-18-page.rkt")
          (prefix-in zrm18-aux-layout: "../yuanshu/skin/layouts/zrm-18-aux-page.rkt"))
 
-(define-runtime-path schema-dir "../input-method/schema")
+(define-runtime-path rime-source-dir "../rime")
 
 (define (generated-file files path)
   (hash-ref files path (lambda () (error 'generated-file "missing ~a" path))))
@@ -93,19 +93,20 @@
     item))
 
 (module+ test
-  (test-case "schema catalog ids are unique"
-    (define ids (catalog:schema-definition-ids))
+  (test-case "schema entry ids are unique"
+    (define ids (schema-index:schema-entry-ids))
     (check-equal? (length ids) (length (remove-duplicates ids))))
 
-  (test-case "input-method catalog exposes recipe-backed definitions"
+  (test-case "input-method schema index exposes recipe-backed entries"
     (define recipe-ids
       (map recipes:input-method-recipe-id recipes:input-method-recipes))
-    (check-equal? (catalog:input-method-definition-ids) recipe-ids)
-    (check-not-false (member "flypy" (catalog:input-method-definition-ids)))
-    (check-false (member "flypy_ice" (catalog:input-method-definition-ids)))
-    (for ([id (in-list (catalog:input-method-definition-ids))])
-      (check-true (model:input-method-definition?
-                   (catalog:input-method-definition-ref id))
+    (check-equal? (schema-index:input-method-schema-entry-ids) recipe-ids)
+    (check-not-false (member "double-pinyin-flypy" (schema-index:input-method-schema-entry-ids)))
+    (check-false (member "flypy-ice" (schema-index:input-method-schema-entry-ids)))
+    (check-false (member "double-pinyin-flypy-upstream" (schema-index:input-method-schema-entry-ids)))
+    (for ([id (in-list (schema-index:input-method-schema-entry-ids))])
+      (check-true (model:input-method-schema-entry?
+                   (schema-index:input-method-schema-entry-ref id))
                   id)
       (check-not-false (recipes:input-method-recipe-ref id #f) id)))
 
@@ -124,25 +125,23 @@
     (check-not-false (keyboard:keyboard-shape-definition-ref "compact-14"))
     (check-false (keyboard:keyboard-layout-definition-ref "missing-layout")))
 
-  (test-case "generated schema catalog entries point at module files"
-    (for ([id (in-list catalog:generated-config-ids)])
-      (define definition (catalog:schema-definition-ref id))
-      (check-true (model:schema-definition? definition) id)
+  (test-case "generated schema entries point at Rime source module files"
+    (for ([id (in-list registry:generated-config-ids)])
       (check-true
        (file-exists?
-        (build-path schema-dir
-                    (string-append (model:schema-definition-source-id definition)
+        (build-path rime-source-dir
+                    (string-append (registry:schema-source-id id)
                                    ".rkt")))
        id)))
 
-  (test-case "schema catalog keeps variant and dependency metadata"
-    (check-equal? (registry:schema-source-id "flypy_ice") "flypy")
-    (check-equal? (registry:static-schema-deps "double_pinyin") '("stroke"))
-    (check-equal? (registry:static-schema-extra-files "wubi_pinyin") '("wubi86.dict.yaml"))
-    (check-equal? (registry:static-schema-artifacts "double_pinyin") '("rime" "yuanshu"))
+  (test-case "schema index keeps variant and dependency metadata"
+    (check-equal? (registry:schema-source-id "flypy-ice") "flypy")
+    (check-equal? (registry:static-schema-deps "double-pinyin") '("stroke"))
+    (check-equal? (registry:static-schema-extra-files "wubi-pinyin") '("wubi86.dict.yaml"))
+    (check-equal? (registry:static-schema-artifacts "double-pinyin") '("rime" "yuanshu"))
     (check-equal? (registry:static-schema-artifacts "bopomofo") '("yuanshu"))
-    (check-equal? (registry:schema-id->catalog-id "cangjie6") "shape")
-    (check-equal? (registry:schema-catalog-label "double-pinyin" 'zh-Hant) "雙拼"))
+    (check-equal? (registry:schema-id->category-id "cangjie6") "shape")
+    (check-equal? (registry:schema-category-label "double-pinyin" 'zh-Hant) "雙拼"))
 
   (test-case "flypy shared config emits desktop schema YAML"
     (define yaml (generated-file flypy:config-files "flypy.schema.yaml"))
@@ -154,7 +153,7 @@
 
   (test-case "flypy skin preview includes flypy legends"
     (define flypy-layout-module
-      (for/first ([item (in-list (list-keyboard-layout-items catalog:generated-config-ids))]
+      (for/first ([item (in-list (list-keyboard-layout-items registry:generated-config-ids))]
                   #:when (equal? (cadr item) "flypy"))
         (caddr item)))
     (define preview
@@ -166,7 +165,7 @@
        (equal? (hash-ref layer 'text) "iu"))))
 
   (test-case "generated Yuanshu layouts do not emit swipe-down actions"
-    (for* ([item (in-list (list-keyboard-layout-items catalog:generated-config-ids))]
+    (for* ([item (in-list (list-keyboard-layout-items registry:generated-config-ids))]
            [files (in-value ((keyboard-layout-module-ref (caddr item)
                                                          'keyboard-layout-files-with-docs)))]
            [(path content) (in-hash files)]
@@ -181,8 +180,8 @@
     (check-not-false (string-contains? yaml "name: \"小鶴雙拼-霧凇\""))
     (check-not-false (string-contains? yaml "dictionary: rime_ice"))
     (check-not-false (string-contains? yaml "prism: flypy_ice"))
-    (check-equal? (read-schema-artifacts "flypy_ice") '("rime" "yuanshu"))
-    (check-equal? (read-schema-keyboard-layouts "flypy_ice") '("flypy")))
+    (check-equal? (read-schema-artifacts "flypy-ice") '("rime" "yuanshu"))
+    (check-equal? (read-schema-keyboard-layouts "flypy-ice") '("flypy")))
 
   (test-case "luna pinyin emits desktop schema YAML"
     (define yaml (generated-file luna_pinyin:config-files "luna_pinyin.schema.yaml"))

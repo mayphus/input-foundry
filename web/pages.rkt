@@ -7,7 +7,7 @@
 (provide render-page
          render-exhibit-page)
 
-(define (catalog-page req schemas layouts)
+(define (home-page req schemas layouts)
   (define locale (request-locale req))
   (page-xexpr
    locale
@@ -16,9 +16,9 @@
               (div ((class "rime-hero-head"))
                    (div
                     (h1 ((class "page-title")) ,(t locale 'title)))))
-     (div ((class "rime-schema-catalogs"))
-          ,@(for/list ([catalog (in-list (cataloged-schemas schemas))])
-              (catalog-section locale layouts catalog))))))
+     (div ((class "rime-schema-categories"))
+          ,@(for/list ([category (in-list (categorized-schemas schemas))])
+              (schema-category-section locale layouts category))))))
 
 (define (exhibit-page req schemas layouts schema-ref)
   (define locale (request-locale req))
@@ -57,7 +57,7 @@
                   (h1 ((class "page-title")) ,(t locale 'missing)))))))
 
 (define (render-page req schemas layouts #:route [_route 'home])
-  (xexpr->string (catalog-page req schemas layouts)))
+  (xexpr->string (home-page req schemas layouts)))
 
 (define (render-exhibit-page req schemas layouts schema-id)
   (xexpr->string (exhibit-page req schemas layouts schema-id)))

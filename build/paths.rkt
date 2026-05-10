@@ -5,6 +5,7 @@
 
 (provide root-dir
          schema-dir
+         rime-source-dir
          rime-dir
          profiles-dir
          output-dir
@@ -13,6 +14,7 @@
 
 (define-runtime-path root-dir "..")
 (define schema-dir   (build-path root-dir "input-method" "schema"))
+(define rime-source-dir (build-path root-dir "rime"))
 (define rime-dir     (build-path root-dir "assets" "rime"))
 (define profiles-dir (build-path root-dir "profiles"))
 (define output-dir   (build-path root-dir "output" "rime"))

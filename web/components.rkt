@@ -14,9 +14,9 @@
          schema-by-slug
          schema-layout-items
          schema-detail-preview
-         cataloged-schemas
+         categorized-schemas
          page-xexpr
-         catalog-section
+         schema-category-section
          artifact-form
          layout-detail-card)
 
@@ -42,6 +42,9 @@
 
 (define (schema-artifacts schema)
   (hash-ref schema 'artifacts '()))
+
+(define (schema-input-method? schema)
+  (hash-ref schema 'input-method? #t))
 
 (define (schema-keyboard-layouts schema)
   (hash-ref schema 'keyboard-layouts '()))
@@ -75,15 +78,16 @@
           (for/list ([layout-id (in-list (schema-keyboard-layouts schema))])
             (layout-by-id layouts layout-id))))
 
-(define (cataloged-schemas schemas)
+(define (categorized-schemas schemas)
   (filter-map
-   (lambda (catalog-id)
+   (lambda (category-id)
      (define items
        (filter (lambda (schema)
-                 (equal? (schema-id->catalog-id (schema-id schema)) catalog-id))
+                 (and (schema-input-method? schema)
+                      (equal? (schema-id->category-id (schema-id schema)) category-id)))
                schemas))
-     (and (pair? items) (cons catalog-id items)))
-   schema-catalog-order))
+     (and (pair? items) (cons category-id items)))
+   schema-category-order))
 
 (define (classes . parts)
   (string-join (filter (lambda (part) part) parts) " "))
@@ -171,13 +175,13 @@
         (schema-card locale schema layouts #:platform platform))
       (list (schema-card locale schema layouts))))
 
-(define (catalog-section locale layouts catalog)
-  (define catalog-id (car catalog))
-  (define schemas (cdr catalog))
-  `(section ((class "rime-schema-catalog"))
-            (div ((class "rime-catalog-heading"))
-                 (h2 ((class "rime-schema-catalog-title"))
-                     ,(schema-catalog-label catalog-id locale)))
+(define (schema-category-section locale layouts category)
+  (define category-id (car category))
+  (define schemas (cdr category))
+  `(section ((class "rime-schema-category"))
+            (div ((class "rime-category-heading"))
+                 (h2 ((class "rime-schema-category-title"))
+                     ,(schema-category-label category-id locale)))
             (div ((class "rime-option-grid"))
                  ,@(append-map (lambda (schema)
                                   (schema-cards locale schema layouts))

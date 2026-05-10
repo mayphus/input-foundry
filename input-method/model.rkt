@@ -1,75 +1,50 @@
 #lang racket/base
 
-(provide (struct-out schema-definition)
-         input-method-definition?
-         input-method-definition-id
-         input-method-definition-source-id
-         input-method-definition-kind
-         input-method-definition-catalog
-         input-method-definition-artifacts
-         input-method-definition-deps
-         input-method-definition-static-files
-         input-method-definition-static-dirs
-         input-method-definition-slug
-         input-method-definition-names
-         input-method-definition-descriptions
-         input-method-definition-keyboard-layouts
-         make-schema-definition
+(provide (struct-out schema-entry)
+         input-method-schema-entry?
+         input-method-schema-entry-id
+         input-method-schema-entry-category
+         input-method-schema-entry-rule
+         input-method-schema-entry-deps
+         input-method-schema-entry-slug
+         input-method-schema-entry-names
+         input-method-schema-entry-descriptions
+         make-schema-entry
          localized-schema-value)
 
-(struct schema-definition
+(struct schema-entry
   (id
-   source-id
-   kind
-   catalog
-   artifacts
+   category
+   rule
    deps
-   static-files
-   static-dirs
    slug
    names
-   descriptions
-   keyboard-layouts)
+   descriptions)
   #:transparent)
 
-(define (make-schema-definition #:id id
-                                #:source-id [source-id id]
-                                #:kind [kind 'static]
-                                #:catalog [catalog "other"]
-                                #:artifacts [artifacts '("rime" "yuanshu")]
-                                #:deps [deps '()]
-                                #:static-files [static-files '()]
-                                #:static-dirs [static-dirs '()]
-                                #:slug [slug id]
-                                #:names [names #f]
-                                #:descriptions [descriptions #f]
-                                #:keyboard-layouts [keyboard-layouts '()])
-  (schema-definition id
-                     source-id
-                     kind
-                     catalog
-                     artifacts
-                     deps
-                     static-files
-                     static-dirs
-                     slug
-                     names
-                     descriptions
-                     keyboard-layouts))
+(define (make-schema-entry #:id id
+                            #:category [category "other"]
+                            #:rule [rule category]
+                            #:deps [deps '()]
+                            #:slug [slug id]
+                            #:names [names #f]
+                            #:descriptions [descriptions #f])
+  (schema-entry id
+                 category
+                 rule
+                 deps
+                 slug
+                 names
+                 descriptions))
 
-(define input-method-definition? schema-definition?)
-(define input-method-definition-id schema-definition-id)
-(define input-method-definition-source-id schema-definition-source-id)
-(define input-method-definition-kind schema-definition-kind)
-(define input-method-definition-catalog schema-definition-catalog)
-(define input-method-definition-artifacts schema-definition-artifacts)
-(define input-method-definition-deps schema-definition-deps)
-(define input-method-definition-static-files schema-definition-static-files)
-(define input-method-definition-static-dirs schema-definition-static-dirs)
-(define input-method-definition-slug schema-definition-slug)
-(define input-method-definition-names schema-definition-names)
-(define input-method-definition-descriptions schema-definition-descriptions)
-(define input-method-definition-keyboard-layouts schema-definition-keyboard-layouts)
+(define input-method-schema-entry? schema-entry?)
+(define input-method-schema-entry-id schema-entry-id)
+(define input-method-schema-entry-category schema-entry-category)
+(define input-method-schema-entry-rule schema-entry-rule)
+(define input-method-schema-entry-deps schema-entry-deps)
+(define input-method-schema-entry-slug schema-entry-slug)
+(define input-method-schema-entry-names schema-entry-names)
+(define input-method-schema-entry-descriptions schema-entry-descriptions)
 
 (define (localized-schema-value values locale [default #f])
   (cond

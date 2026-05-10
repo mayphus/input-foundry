@@ -96,32 +96,35 @@
 
 (define input-method-dimensions
   (list
-   (method "flypy"
+   (method "double-pinyin-flypy"
+           #:schema "double-pinyin-flypy"
            #:legends '(abc flypy)
            #:keyboards
            (list
-            (keyboard "flypy" 'standard-26 "flypy" 'split-flypy)
-            (keyboard "flypy_14" 'compact-14 "flypy_14" 'compact-center)
-            (keyboard "flypy_18" 'compact-18 "flypy_18" 'compact-center)
-            (keyboard "shuffle_17" 'shuffle-17 "shuffle_17" 'compact-center)))
-   (method "luna_pinyin"
+            (keyboard "double-pinyin-flypy" 'standard-26 "flypy" 'split-flypy)
+            (keyboard "double-pinyin-flypy-14" 'compact-14 "flypy_14" 'compact-center)
+            (keyboard "double-pinyin-flypy-18" 'compact-18 "flypy_18" 'compact-center)
+            (keyboard "double-pinyin-flypy-shuffle-17" 'shuffle-17 "shuffle_17" 'compact-center)))
+   (method "luna-pinyin"
+           #:schema "luna-pinyin"
            #:legends '(abc)
            #:keyboards
            (list
-            (keyboard "luna_pinyin" 'standard-26 "luna_pinyin" 'standard-center)
-            (keyboard "pinyin_14" 'compact-14 "pinyin_14" 'compact-center)))
-   (method "terra_pinyin"
+            (keyboard "luna-pinyin" 'standard-26 "luna_pinyin" 'standard-center)
+            (keyboard "pinyin-14" 'compact-14 "pinyin_14" 'compact-center)))
+   (method "terra-pinyin"
+           #:schema "terra-pinyin"
            #:legends '(abc)
            #:keyboards
            (list
-            (keyboard "terra_pinyin" 'standard-26 "terra_pinyin" 'standard-center)))
+            (keyboard "terra-pinyin" 'standard-26 "terra_pinyin" 'standard-center)))
    (method "cangjie6"
            #:legends '(cangjie)
            #:keyboards
            (list
             (keyboard "cangjie6" 'standard-26 "cangjie6" 'standard-center)
             (keyboard "cangjie5" 'standard-26 "cangjie6" 'standard-center)
-            (keyboard "cangjie5_express" 'standard-26 "cangjie6" 'standard-center)
+            (keyboard "cangjie5-express" 'standard-26 "cangjie6" 'standard-center)
             (keyboard "quick5" 'standard-26 "cangjie6" 'standard-center)))
    (method "jyut6ping3"
            #:legends '(abc jyutping)
@@ -133,61 +136,60 @@
            #:keyboards
            (list
             (keyboard "bopomofo" 'zhuyin "bopomofo" 'standard-center)))
-   (method "double_pinyin"
+   (method "double-pinyin"
+           #:schema "double-pinyin"
            #:legends '(abc zrm)
            #:keyboards
            (list
-            (keyboard "double_pinyin" 'standard-26 "double_pinyin_zrm" 'double-pinyin-center)))
-   (method "double_pinyin_abc"
+            (keyboard "double-pinyin" 'standard-26 "double_pinyin_zrm" 'double-pinyin-center)))
+   (method "double-pinyin-abc"
+           #:schema "double-pinyin-abc"
            #:legends '(abc abc-dp)
            #:keyboards
            (list
-            (keyboard "double_pinyin_abc" 'standard-26 "double_pinyin_abc" 'double-pinyin-center)))
-   (method "double_pinyin_flypy"
-           #:schema "flypy"
-           #:legends '(abc flypy)
-           #:keyboards
-           (list
-            (keyboard "double_pinyin_flypy" 'standard-26 "flypy" 'split-flypy)))
-   (method "double_pinyin_mspy"
+            (keyboard "double-pinyin-abc" 'standard-26 "double_pinyin_abc" 'double-pinyin-center)))
+   (method "double-pinyin-mspy"
+           #:schema "double-pinyin-mspy"
            #:legends '(abc mspy)
            #:keyboards
            (list
-            (keyboard "double_pinyin_mspy" 'standard-26 "double_pinyin_mspy" 'double-pinyin-center)))
-   (method "double_pinyin_pyjj"
+            (keyboard "double-pinyin-mspy" 'standard-26 "double_pinyin_mspy" 'double-pinyin-center)))
+   (method "double-pinyin-pyjj"
+           #:schema "double-pinyin-pyjj"
            #:legends '(abc pyjj)
            #:keyboards
            (list
-            (keyboard "double_pinyin_pyjj" 'standard-26 "double_pinyin_pyjj" 'double-pinyin-center)))
-   (method "double_pinyin_st"
+            (keyboard "double-pinyin-pyjj" 'standard-26 "double_pinyin_pyjj" 'double-pinyin-center)))
+   (method "double-pinyin-st"
+           #:schema "double-pinyin-st"
            #:legends '(abc st)
            #:keyboards
            (list
-            (keyboard "double_pinyin_st" 'standard-26 "double_pinyin_st" 'double-pinyin-center)))
+            (keyboard "double-pinyin-st" 'standard-26 "double_pinyin_st" 'double-pinyin-center)))
    (method "wubi86"
            #:legends '(abc wubi)
            #:keyboards
            (list
             (keyboard "wubi86" 'standard-26 "wubi86" 'standard-top-center)
-            (keyboard "wubi_pinyin" 'standard-26 "wubi86" 'standard-top-center)
-            (keyboard "wubi_trad" 'standard-26 "wubi86" 'standard-top-center)))
+            (keyboard "wubi-pinyin" 'standard-26 "wubi86" 'standard-top-center)
+            (keyboard "wubi-trad" 'standard-26 "wubi86" 'standard-top-center)))
    (method "stroke"
            #:legends '(abc stroke)
            #:keyboards
            (list
             (keyboard "stroke" 'standard-26 "stroke" 'standard-top-center)))
-   (method "pinyin_simp"
-           #:schema "luna_pinyin"
+   (method "pinyin-simp"
+           #:schema "luna-pinyin"
            #:legends '(abc)
            #:keyboards
            (list
-            (keyboard "pinyin_simp" 'standard-26 "luna_pinyin" 'standard-center)))
-   (method "luna_quanpin"
-           #:schema "luna_pinyin"
+            (keyboard "pinyin-simp" 'standard-26 "luna_pinyin" 'standard-center)))
+   (method "luna-quanpin"
+           #:schema "luna-pinyin"
            #:legends '(abc)
            #:keyboards
            (list
-            (keyboard "luna_quanpin" 'standard-26 "luna_pinyin" 'standard-center)))))
+            (keyboard "luna-quanpin" 'standard-26 "luna_pinyin" 'standard-center)))))
 
 (define input-method-keyboards
   (append-map input-method-dimension-keyboards input-method-dimensions))

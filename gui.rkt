@@ -9,7 +9,7 @@
 
 (provide start-gui)
 
-(struct option (id name catalog) #:transparent)
+(struct option (id name category) #:transparent)
 
 (define app-profile-name "input-foundry")
 (define mobile-output-name "gui-mobile")
@@ -23,18 +23,18 @@
     (define name (or (schema-module-ref id 'chinese-name #f)
                      (read-schema-name-from-yaml id)
                      id))
-    (option id name (schema-id->catalog-id id))))
+    (option id name (schema-id->category-id id))))
 
-(define (cataloged-options options)
+(define (categorized-options options)
   (filter-map
-   (lambda (catalog-id)
+   (lambda (category-id)
      (define items
        (filter (lambda (item)
-                 (equal? (option-catalog item) catalog-id))
+                 (equal? (option-category item) category-id))
                options))
      (and (pair? items)
-          (cons catalog-id (sort items string<? #:key option-id))))
-   schema-catalog-order))
+          (cons category-id (sort items string<? #:key option-id))))
+   schema-category-order))
 
 (define (option-label item)
   (option-name item))
@@ -187,10 +187,10 @@
              (set-status! status done)
              (append-log! log-field done)])))))))
 
-(define (make-section parent catalog-id options default-ids)
+(define (make-section parent category-id options default-ids)
   (new message%
        [parent parent]
-       [label (schema-catalog-label catalog-id)])
+       [label (schema-category-label category-id)])
   (define rows '())
   (for ([item (in-list options)])
     (define checkbox
@@ -204,24 +204,24 @@
 (define (lightest-column columns)
   (argmin cdr columns))
 
-(define (add-catalog-to-column column catalog)
-  (cons (cons catalog (car column))
-        (+ (cdr column) (length (cdr catalog)))))
+(define (add-category-to-column column category)
+  (cons (cons category (car column))
+        (+ (cdr column) (length (cdr category)))))
 
-(define (split-catalogs catalogs column-count)
-  (let loop ([remaining catalogs]
+(define (split-categories categories column-count)
+  (let loop ([remaining categories]
              [columns (for/list ([_ (in-range column-count)])
                         (cons '() 0))])
     (cond
       [(null? remaining)
        (map (lambda (column) (reverse (car column))) columns)]
       [else
-       (define catalog (car remaining))
+       (define category (car remaining))
        (define target (lightest-column columns))
        (loop (cdr remaining)
              (for/list ([column (in-list columns)])
                (if (eq? column target)
-                   (add-catalog-to-column column catalog)
+                   (add-category-to-column column category)
                    column)))])))
 
 (define (start-gui)
@@ -330,15 +330,15 @@
            [stretchable-width #t]
            [stretchable-height #t])))
 
-  (define catalog-columns
-    (split-catalogs (cataloged-options (schema-options)) 3))
+  (define category-columns
+    (split-categories (categorized-options (schema-options)) 3))
   (define schema-rows
     (append*
      (for/list ([column (in-list schema-columns)]
-                [catalogs (in-list catalog-columns)])
+                [categories (in-list category-columns)])
        (append*
-        (for/list ([catalog (in-list catalogs)])
-          (make-section column (car catalog) (cdr catalog) default-schema-ids))))))
+        (for/list ([category (in-list categories)])
+          (make-section column (car category) (cdr category) default-schema-ids))))))
 
   (set! action-buttons (list build-button push-button))
 

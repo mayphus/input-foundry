@@ -263,19 +263,19 @@ select {
   gap: 0.75rem;
 }
 
-.rime-schema-catalogs {
+.rime-schema-categories {
   display: flex;
   flex-direction: column;
   gap: 1.35rem;
 }
 
-.rime-schema-catalog {
+.rime-schema-category {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.rime-schema-catalog-title {
+.rime-schema-category-title {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -287,7 +287,7 @@ select {
   text-transform: none;
 }
 
-.rime-schema-catalog-title::after {
+.rime-schema-category-title::after {
   content: "";
   height: 1px;
   flex: 1 1 auto;
@@ -558,14 +558,14 @@ select {
   font-size: 0.82rem;
 }
 
-.rime-catalog-heading,
+.rime-category-heading,
 .rime-exhibit-section,
 .rime-layout-card {
   display: flex;
   flex-direction: column;
 }
 
-.rime-catalog-heading {
+.rime-category-heading {
   gap: 0.35rem;
 }
 

@@ -1,16 +1,8 @@
-#lang s-exp "lib/lang.rkt"
+#lang racket/base
 
-(rime-schema bopomofo
-  (name "注音")
-  (keyboard bopomofo
-    (model zhuyin)
-    (meta
-     (name "Bopomofo" "注音")
-     (summary "A Yuanshu keyboard layout for Bopomofo input with the standard secondary pages.")
-     (features
-      "Bopomofo phone layout"
-      "Bundled custom iPad pages"))
-    (variant bopomofo)
-    (print zhuyin center))
-  (static-files "terra_pinyin.dict.yaml" "zhuyin.yaml")
-  (artifacts yuanshu))
+(require "../define-schema.rkt")
+
+(define-schema "bopomofo" #:category "phonetic"
+         #:en-name "Bopomofo" #:zh-name "注音"
+         #:en-description "Bopomofo phonetic input for Mandarin, arranged for Yuanshu keyboard layouts."
+         #:zh-description "注音符號普通話輸入，配置為元書鍵盤佈局。")

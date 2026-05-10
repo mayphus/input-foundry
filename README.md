@@ -10,10 +10,12 @@ Input Foundry is a Chinese input museum and Rime/Yuanshu package builder, served
 - `web/` contains server-rendered UI pages, components, locale handling, and form parsing.
 - `k8s.rkt` generates and checks the Kubernetes YAML.
 - `assets/rime/` holds native Rime YAML and dictionaries.
-- `input-method/` is the canonical source for generated input method
-  definitions. `input-method/schema/` holds pure Rime schema logic and the
-  schema DSL language; `input-method/keyboard/` holds skeletons, projections,
-  legends, placements, interactions, and the public keyboard resolver.
+- `rime/` holds Rime/Yuanshu generation logic, including the `rime-schema`
+  DSL, generated schema modules, and generated keyboard-layout exports.
+- `input-method/` is the canonical source for input method definitions.
+  `input-method/schema/` holds pure schema registry entries; `input-method/keyboard/`
+  holds skeletons, projections, legends, placements, interactions, and the
+  public keyboard resolver.
 - `lib/preview/` contains shared preview layout and SVG rendering code used by
   the web app and Yuanshu build outputs.
 - `lib/yaml/` contains the internal YAML renderer.
@@ -22,9 +24,10 @@ Input Foundry is a Chinese input museum and Rime/Yuanshu package builder, served
 - `tools/` contains maintenance scripts.
 - `k8s/` is ignored generated deploy output from `k8s.rkt`.
 
-Generated schema modules use `#lang s-exp "lib/lang.rkt"` and declare their
-artifact support in the schema itself. Reusable keyboard dimensions live under
-`input-method/keyboard/`; input method recipes compose schema logic, keyboard
+Generated Rime modules in `rime/` use `#lang s-exp "lib/lang.rkt"` and declare
+their generated artifact support in the Rime source itself. Schema identity and
+display metadata live under `input-method/schema/`. Reusable keyboard dimensions
+live under `input-method/keyboard/`; input method recipes compose schema logic, keyboard
 skeletons, projections, legends, placements, and target-specific mobile
 behavior. Inline `(keyboard-layout ...)` clauses remain the generated Yuanshu
 skin definition surface:

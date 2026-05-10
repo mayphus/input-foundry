@@ -156,7 +156,7 @@
         (define zip-path (build-path tmp "profile.zip"))
         (define-values (_built-out _built-zip _layout-dir)
           (build-bundle!
-           (hash 'schemas (list "flypy_ice")
+           (hash 'schemas (list "flypy-ice")
                  'artifact "rime"
                  'extra-src-files '("squirrel.custom.yaml"))
            "test-flypy-ice"
@@ -185,7 +185,7 @@
         (define zip-path (build-path tmp "profile.zip"))
         (define-values (_built-out _built-zip _layout-dir)
           (build-bundle!
-           (hash 'schemas (list "double_pinyin" "wubi86" "quick5" "cangjie5")
+           (hash 'schemas (list "double-pinyin" "wubi86" "quick5" "cangjie5")
                  'artifact "rime")
            "test-static-upstream"
            profile-out
@@ -208,12 +208,12 @@
         (delete-directory/files tmp #:must-exist? #f))))
 
   (test-case "static upstream schemas reuse preview keyboard layouts"
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin") '("double_pinyin_zrm"))
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin_abc") '("double_pinyin_abc"))
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin_flypy") '("flypy"))
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin_mspy") '("double_pinyin_mspy"))
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin_pyjj") '("double_pinyin_pyjj"))
-    (check-equal? (read-schema-keyboard-layouts "double_pinyin_st") '("double_pinyin_st"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin") '("double_pinyin_zrm"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin-abc") '("double_pinyin_abc"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin-flypy-upstream") '("flypy"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin-mspy") '("double_pinyin_mspy"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin-pyjj") '("double_pinyin_pyjj"))
+    (check-equal? (read-schema-keyboard-layouts "double-pinyin-st") '("double_pinyin_st"))
     (check-equal? (read-schema-keyboard-layouts "cangjie5") '("cangjie6"))
     (check-equal? (read-schema-keyboard-layouts "quick5") '("cangjie6"))
     (check-equal? (read-schema-keyboard-layouts "wubi86") '("wubi86"))

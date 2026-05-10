@@ -32,37 +32,46 @@
   (define entrypoints
     (sort
      (filter (lambda (p)
-               (set-member? needed (path->string (file-name-from-path p))))
-             (directory-list schema-dir #:build? #t))
+             (set-member? needed (path->string (file-name-from-path p))))
+             (directory-list rime-source-dir #:build? #t))
      path<?))
   (for ([f entrypoints])
     (define schema-config-files
       (dynamic-require f 'schema-config-files (lambda () #f)))
-    (if (hash? schema-config-files)
-        (for ([schema (in-list schemas)]
-              #:when (equal? (path->string (file-name-from-path f))
-                             (string-append (schema-source-id schema) ".rkt")))
-          (define files
-            (hash-ref schema-config-files schema
-                      (lambda ()
-                        (error 'build-schemas!
-                               "~a: missing generated config for ~a"
-                               f
-                               schema))))
-          (for ([(rel-path content) (in-hash files)])
-            (define target (build-path profile-out (string->path rel-path)))
-            (make-directory* (path-only target))
-            (call-with-output-file target #:exists 'truncate/replace
-              (lambda (out)
-                (cond
-                  [(string? content) (display content out)]
-                  [(bytes? content) (write-bytes content out)]
-                  [else (error 'build-schemas!
-                               "~a: expected string or bytes for ~a, got ~v"
-                               f
-                               rel-path
-                               content)])))))
-        (write-module-files! f profile-out 'config-files))))
+    (define config-files
+      (dynamic-require f 'config-files (lambda () #f)))
+    (cond
+      [(hash? schema-config-files)
+       (for ([schema (in-list schemas)]
+             #:when (equal? (path->string (file-name-from-path f))
+                            (string-append (schema-source-id schema) ".rkt")))
+         (define files
+           (hash-ref schema-config-files schema
+                     (lambda ()
+                       (hash-ref schema-config-files (schema-config-id schema)
+                                 (lambda ()
+                                   (hash-ref schema-config-files (schema-source-id schema)
+                                             (lambda ()
+                                               (error 'build-schemas!
+                                                      "~a: missing generated config for ~a"
+                                                      f
+                                                      schema))))))))
+         (for ([(rel-path content) (in-hash files)])
+           (define target (build-path profile-out (string->path rel-path)))
+           (make-directory* (path-only target))
+           (call-with-output-file target #:exists 'truncate/replace
+             (lambda (out)
+               (cond
+                 [(string? content) (display content out)]
+                 [(bytes? content) (write-bytes content out)]
+                 [else (error 'build-schemas!
+                              "~a: expected string or bytes for ~a, got ~v"
+                              f
+                              rel-path
+                              content)])))))]
+      [(or (hash? config-files) (procedure? config-files))
+       (write-module-files! f profile-out 'config-files)]
+      [else (void)])))
 
 (define (keyboard-layout-module-path! layout schemas)
   (or (schema-keyboard-layout-module-path layout schemas)
@@ -157,7 +166,7 @@
             (displayln "patch:" out)
             (displayln "  schema_list:" out)
             (for ([s display-schemas])
-              (fprintf out "    - schema: ~a\n" s)))))
+              (fprintf out "    - schema: ~a\n" (schema-config-id s))))))
       (delete-file* default-custom))
 
   (define tmp-layout-dir #f)
