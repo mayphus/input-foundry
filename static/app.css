@@ -269,53 +269,6 @@ select {
   gap: 1.35rem;
 }
 
-.rime-catalog-filter {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  gap: 0.35rem;
-  padding: 0.25rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-}
-
-.rime-filter-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.rime-filter-button {
-  min-height: 2rem;
-  padding: 0.36rem 0.85rem;
-  border-radius: 999px;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.rime-filter-button:hover,
-#filter-mobile:checked ~ .rime-catalog-filter label[for="filter-mobile"],
-#filter-desktop:checked ~ .rime-catalog-filter label[for="filter-desktop"] {
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-
-#filter-mobile:not(:checked) ~ #filter-desktop:checked ~ .rime-schema-catalogs .rime-exhibit-card:not([data-platforms~="desktop"]),
-#filter-mobile:checked ~ #filter-desktop:not(:checked) ~ .rime-schema-catalogs .rime-exhibit-card:not([data-platforms~="mobile"]) {
-  display: none;
-}
-
-#filter-mobile:not(:checked) ~ #filter-desktop:checked ~ .rime-schema-catalogs .rime-schema-catalog:not(:has(.rime-exhibit-card[data-platforms~="desktop"])),
-#filter-mobile:checked ~ #filter-desktop:not(:checked) ~ .rime-schema-catalogs .rime-schema-catalog:not(:has(.rime-exhibit-card[data-platforms~="mobile"])) {
-  display: none;
-}
-
 .rime-schema-catalog {
   display: flex;
   flex-direction: column;
@@ -693,19 +646,6 @@ select {
 .rime-layout-preview {
   overflow: hidden;
   width: 100%;
-}
-
-.rime-schema-preview-set {
-  display: grid;
-  gap: 0.45rem;
-}
-
-#filter-mobile:checked ~ #filter-desktop:not(:checked) ~ .rime-schema-catalogs .rime-schema-preview--desktop {
-  display: none;
-}
-
-#filter-mobile:not(:checked) ~ #filter-desktop:checked ~ .rime-schema-catalogs .rime-schema-preview--mobile {
-  display: none;
 }
 
 .keyboard-preview-svg {

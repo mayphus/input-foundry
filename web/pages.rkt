@@ -12,11 +12,10 @@
   (page-xexpr
    locale
    "/"
-   `((section ((class "rime-hero-card"))
+     `((section ((class "rime-hero-card"))
               (div ((class "rime-hero-head"))
                    (div
                     (h1 ((class "page-title")) ,(t locale 'title)))))
-     ,@(catalog-filter locale)
      (div ((class "rime-schema-catalogs"))
           ,@(for/list ([catalog (in-list (cataloged-schemas schemas))])
               (catalog-section locale layouts catalog))))))

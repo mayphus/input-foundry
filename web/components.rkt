@@ -2,7 +2,6 @@
 
 (require racket/list
          racket/string
-         xml
          "../input-method/registry.rkt"
          "locale.rkt")
 
@@ -15,7 +14,6 @@
          schema-detail-preview
          cataloged-schemas
          page-xexpr
-         catalog-filter
          catalog-section
          artifact-form
          layout-detail-card)
@@ -111,7 +109,6 @@
 (define (schema-card-preview locale schema #:platform [platform #f])
   (define name (schema-name locale schema))
   (define artifacts (schema-artifacts schema))
-  (define has-rime? (member "rime" artifacts))
   (define has-yuanshu? (member "yuanshu" artifacts))
   (cond
     [(equal? platform "desktop")
@@ -122,16 +119,6 @@
      (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
                     (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
                     name)]
-    [(and has-rime? has-yuanshu?)
-     `(div ((class "rime-schema-preview-set"))
-           ,(preview-image (format "/schemas/~a/preview.svg" (schema-id schema))
-                           (format "/schemas/~a/preview-dark.svg" (schema-id schema))
-                           name
-                           #:class "rime-schema-preview--desktop")
-           ,(preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
-                           (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
-                           name
-                           #:class "rime-schema-preview--mobile"))]
     [has-yuanshu?
      (preview-image (format "/schemas/~a/skin-preview.svg" (schema-id schema))
                     (format "/schemas/~a/skin-preview-dark.svg" (schema-id schema))
@@ -151,11 +138,7 @@
 
 (define (schema-card locale schema layouts #:platform [platform #f])
   (define preview-layouts (schema-layout-items schema layouts))
-  (define platforms (if platform (list platform) (schema-platforms schema)))
   `(a ((class "rime-exhibit-card")
-       (data-platforms ,(string-join platforms " "))
-       (data-href ,(format "/exhibits/~a" (schema-id schema)))
-       ,@(if platform `((data-card-platform ,platform)) '())
        (href ,(format "/exhibits/~a~a"
                       (schema-id schema)
                       (if platform (format "?platform=~a" platform) ""))))
@@ -174,25 +157,6 @@
       (for/list ([platform (in-list platforms)])
         (schema-card locale schema layouts #:platform platform))
       (list (schema-card locale schema layouts))))
-
-(define (catalog-filter locale)
-  `((input ((class "rime-filter-input")
-            (type "checkbox")
-            (id "filter-mobile")
-            (name "platform-mobile")
-            (value "mobile")
-            (checked "checked")))
-    (input ((class "rime-filter-input")
-            (type "checkbox")
-            (id "filter-desktop")
-            (name "platform-desktop")
-            (value "desktop")
-            (checked "checked")))
-    (div ((class "rime-catalog-filter") (aria-label "Platform filter"))
-         (label ((class "rime-filter-button") (for "filter-mobile"))
-                ,(t locale 'mobile))
-         (label ((class "rime-filter-button") (for "filter-desktop"))
-                ,(t locale 'desktop)))))
 
 (define (catalog-section locale layouts catalog)
   (define catalog-id (car catalog))
@@ -233,32 +197,6 @@ async function check(){
 setInterval(check, 700);
 check();"))
 
-(define platform-link-script
-  `(script
-    ((type "module"))
-    ,(cdata #f #f
-            "const filters=[...document.querySelectorAll('.rime-filter-input')];
-const cards=[...document.querySelectorAll('.rime-exhibit-card[data-href]')];
-function selectedPlatform(){
-  return filters.find((input)=>input.checked)?.value || 'mobile';
-}
-function syncLinks(){
-  const platform=selectedPlatform();
-  cards.forEach((card)=>{
-    const targetPlatform=card.dataset.cardPlatform || platform;
-    card.href=`${card.dataset.href}?platform=${encodeURIComponent(targetPlatform)}`;
-  });
-}
-filters.forEach((input)=>{
-  input.addEventListener('click',(event)=>{
-    if(input.checked) return;
-    const activeCount=filters.filter((item)=>item.checked).length;
-    if(activeCount===0) event.preventDefault();
-  });
-});
-filters.forEach((input)=>input.addEventListener('change', syncLinks));
-syncLinks();")))
-
 (define (page-xexpr locale current-path body)
   `(html ((lang ,(if (eq? locale 'zh-Hant) "zh-Hant" "en")))
          (head
@@ -271,7 +209,6 @@ syncLinks();")))
                 (div ((class "rime-museum-shell"))
                      ,@body
                      ,(footer locale current-path)))
-          ,platform-link-script
           ,@(if (getenv "INPUT_FOUNDRY_DEV_RELOAD")
                 (list dev-reload-script)
                 '()))))
