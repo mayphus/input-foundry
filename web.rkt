@@ -17,7 +17,8 @@
          "web/locale.rkt"
          "build.rkt"
          "input-method/calculate.rkt"
-         "input-method/schema.rkt")
+         "input-method/schema.rkt"
+         "keymap/registry.rkt")
 
 (provide keyboard-layout-items
          skin-items
@@ -135,6 +136,64 @@
     (format "  #:interactions ~a)" (lisp-atom (input-method-recipe-interactions recipe))))
    "\n"))
 
+(define standard-zhuyin-rows
+  '((one two three four five six seven eight nine zero minus)
+    (q w e r t y u i o p)
+    (a s d f g h j k l semicolon)
+    (z x c v b n m comma period slash)))
+
+(define standard-zhuyin-key-labels
+  (hash 'one "1" 'two "2" 'three "3" 'four "4" 'five "5"
+        'six "6" 'seven "7" 'eight "8" 'nine "9" 'zero "0"
+        'minus "-" 'semicolon ";" 'comma "," 'period "." 'slash "/"))
+
+(define (standard-zhuyin-key key)
+  (define label (hash-ref standard-zhuyin-key-labels key (symbol->string key)))
+  (define zhuyin (keymap-text 'zhuyin-standard key))
+  (hash 'id (format "~aKey" key)
+        'label label
+        'layers
+        (filter values
+                (list (hash 'text label
+                            'x 0.5
+                            'y 0.24
+                            'font-size 10
+                            'font-weight "500")
+                      (and (not (string=? zhuyin ""))
+                           (hash 'text zhuyin
+                                 'x 0.5
+                                 'y 0.62
+                                 'font-size 19
+                                 'font-weight "500"))))))
+
+(define standard-zhuyin-preview-rows
+  (for/list ([row (in-list standard-zhuyin-rows)])
+    (for/list ([key (in-list row)])
+      (standard-zhuyin-key key))))
+
+(define standard-zhuyin-preview
+  (hash 'size (hash 'width 520 'height 220)
+        'background "#f6f7f9"
+        'dark (hash 'size (hash 'width 520 'height 220)
+                    'background "#111418"
+                    'source 'static
+                    'key-shape 'square
+                    'visible-keys 'typing
+                    'rows standard-zhuyin-preview-rows)
+        'source 'static
+        'key-shape 'square
+        'visible-keys 'typing
+        'rows standard-zhuyin-preview-rows))
+
+(define standard-zhuyin-layout-item
+  (hash 'id "bopomofo_standard"
+        'schemas '("bopomofo-standard")
+        'name "標準注音"
+        'names (hash 'en "Bopomofo Standard"
+                     'zh-Hant "標準注音")
+        'preview-svgs (preview-spec->svgs standard-zhuyin-preview)
+        'skin-preview-svgs (preview-spec->svgs standard-zhuyin-preview)))
+
 (define legacy-host "rime-config.mayphus.org")
 (define canonical-host "rime.mayphus.org")
 
@@ -164,17 +223,19 @@
 ;; declared by schema modules and materialized into temporary modules for the
 ;; Yuanshu .cskin compiler.
 (define keyboard-layout-items
-  (for/list ([item (in-list (list-keyboard-layout-items schema-ids))])
-    (define schema-id (car item))
-    (define layout-id (cadr item))
-    (define layout-module (caddr item))
-    (hash 'id layout-id
-          'schemas (list schema-id)
-          'name (keyboard-layout-module-ref layout-module 'chinese-name (lambda () ""))
-          'names (hash 'en (keyboard-layout-module-ref layout-module 'english-name (lambda () ""))
-                       'zh-Hant (keyboard-layout-module-ref layout-module 'chinese-name (lambda () "")))
-          'preview-svgs (keyboard-layout-preview-svgs layout-module)
-          'skin-preview-svgs (keyboard-layout-skin-preview-svgs layout-module))))
+  (append
+   (for/list ([item (in-list (list-keyboard-layout-items schema-ids))])
+     (define schema-id (car item))
+     (define layout-id (cadr item))
+     (define layout-module (caddr item))
+     (hash 'id layout-id
+           'schemas (list schema-id)
+           'name (keyboard-layout-module-ref layout-module 'chinese-name (lambda () ""))
+           'names (hash 'en (keyboard-layout-module-ref layout-module 'english-name (lambda () ""))
+                        'zh-Hant (keyboard-layout-module-ref layout-module 'chinese-name (lambda () "")))
+           'preview-svgs (keyboard-layout-preview-svgs layout-module)
+           'skin-preview-svgs (keyboard-layout-skin-preview-svgs layout-module)))
+   (list standard-zhuyin-layout-item)))
 
 (define skin-items
   (for/list ([layout (in-list keyboard-layout-items)])

@@ -59,11 +59,24 @@
       (mo ne ke qi shi ci wu e ao ang)
       (fo le he xi ri si yu eh ou eng))
      (row-offsets 0 0 0 0)
+     (slots ,standard-key-slots))
+    (standard-zhuyin
+     (columns 11)
+     (rows
+      (one two three four five six seven eight nine zero minus)
+      (q w e r t y u i o p)
+      (a s d f g h j k l semicolon)
+      (z x c v b n m comma period slash))
+     (row-offsets 0 1/2 3/4 5/4)
+     (aliases
+      (one "1") (two "2") (three "3") (four "4") (five "5")
+      (six "6") (seven "7") (eight "8") (nine "9") (zero "0")
+      (minus "-") (semicolon ";") (comma ",") (period ".") (slash "/"))
      (slots ,standard-key-slots))))
 
 (define keyboard-model-definitions keyboard-skeleton-definitions)
 
-(define (keyboard-skeleton-definition-ref skeleton [default #f])
+(define (keyboard-skeleton-definition-ref skeleton (default #f))
   (catalog-definition-ref keyboard-skeleton-definitions skeleton default))
 
 (define keyboard-model-definition-ref keyboard-skeleton-definition-ref)

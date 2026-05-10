@@ -155,8 +155,6 @@
 
 (define (compute-assets schemas profile)
   (define extra-rime  (hash-ref profile 'extra-src-files  '()))
-  (define selected-keyboard-layouts
-    (append-map read-schema-keyboard-layouts (profile-schema-list profile)))
   (define artifact (profile-artifact profile))
 
   (define gen-yaml  '())
@@ -193,7 +191,11 @@
   (for ([f extra-rime]) (add-rime-yaml! f))
 
   (when (equal? artifact "yuanshu")
-    (for ([layout selected-keyboard-layouts]) (add-keyboard-layout! layout)))
+    (define selected-keyboard-layout-schemas
+      (filter (lambda (schema) (schema-supports-artifact? schema artifact))
+              (profile-schema-list profile)))
+    (for ([layout (append-map read-schema-keyboard-layouts selected-keyboard-layout-schemas)])
+      (add-keyboard-layout! layout)))
 
   (values (remove-duplicates (reverse gen-yaml))
           (remove-duplicates (reverse rime-yaml))

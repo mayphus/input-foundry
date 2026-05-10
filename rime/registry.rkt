@@ -46,6 +46,10 @@
    (entry "pinyin-14" #:source-id "pinyin_14" #:generated? #t)
    (entry "cangjie6" #:generated? #t #:custom? #t #:deps '("double-pinyin-flypy"))
    (entry "jyut6ping3" #:generated? #t #:custom? #t #:deps '("double-pinyin-flypy" "cangjie6"))
+   (entry "bopomofo-standard" #:source-id "bopomofo-standard" #:config-id "bopomofo"
+          #:extra-files '("terra_pinyin.dict.yaml" "zhuyin.yaml")
+          #:keyboard-layouts '("bopomofo_standard")
+          #:artifacts '("rime"))
    (entry "bopomofo" #:generated? #t #:artifacts '("yuanshu"))
 
    (entry "double-pinyin" #:source-id "double_pinyin" #:deps '("stroke")
