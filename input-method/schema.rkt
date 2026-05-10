@@ -3,7 +3,7 @@
 (require racket/list
          racket/runtime-path
          "model.rkt"
-         "recipes.rkt")
+         "calculate.rkt")
 
 (provide schema-entries
          schema-entry-ref
@@ -24,12 +24,8 @@
 
 (define schema-entry-modules
   '("double-pinyin-flypy.rkt"
-    "double-pinyin-flypy-14.rkt"
-    "double-pinyin-flypy-18.rkt"
-    "double-pinyin-flypy-shuffle-17.rkt"
     "luna-pinyin.rkt"
     "terra-pinyin.rkt"
-    "pinyin-14.rkt"
     "double-pinyin.rkt"
     "double-pinyin-abc.rkt"
     "double-pinyin-mspy.rkt"

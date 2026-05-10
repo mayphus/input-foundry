@@ -38,9 +38,6 @@
 (define rime-entries
   (list
    (entry "double-pinyin-flypy" #:source-id "flypy" #:generated? #t #:custom? #t)
-   (entry "flypy-ice" #:source-id "flypy" #:config-id "flypy_ice" #:package? #t
-          #:deps '("double-pinyin-flypy" "cangjie6")
-          #:keyboard-layouts '("flypy"))
    (entry "double-pinyin-flypy-14" #:source-id "flypy_14" #:generated? #t)
    (entry "double-pinyin-flypy-18" #:source-id "flypy_18" #:generated? #t)
    (entry "double-pinyin-flypy-shuffle-17" #:source-id "shuffle_17" #:generated? #t)

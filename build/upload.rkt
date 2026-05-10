@@ -13,7 +13,7 @@
                     #:dry-run         [dry-run #f]
                     #:progress        [progress (lambda (_line) (void))])
   (define exclude-dirs
-    (if include-big-dicts '() '("jyut6ping3_dicts" "rime_ice_dicts")))
+    (if include-big-dicts '() '("jyut6ping3_dicts")))
   (parameterize ([current-yuanshu-sync-log progress])
     (sync-yuanshu-bundle! src-dir
                           #:remote-root remote-root

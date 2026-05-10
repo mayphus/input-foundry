@@ -15,16 +15,13 @@
     (print flypy center)
     (ipad standard-18))
   (deps cangjie6)
-  (static-files "rime_ice.dict.yaml")
-  (static-dirs "rime_ice_dicts")
   (schema
    (version "0.1")
    (authors
     "double pinyin layout by 鶴"
-    "screenshot-based 18-key merge layout adapted in this workspace"
-    "dictionary import from iDvel/rime-ice")
+    "screenshot-based 18-key merge layout adapted in this workspace")
    (description
-    "朙月拼音＋小鶴雙拼 18 鍵方案，使用 rime-ice 詞庫。\niPhone 佈局參照圖片分組：\nQ / WE / RT / Y / U / IO / P\nA / SD / FG / H / JK / L\nZ / XC / V / BN / M")
+    "朙月拼音＋小鶴雙拼 18 鍵方案。\niPhone 佈局參照圖片分組：\nQ / WE / RT / Y / U / IO / P\nA / SD / FG / H / JK / L\nZ / XC / V / BN / M")
    (switches
     (switch 'ascii_mode #:reset 0 #:states '("18鍵" "A"))
     (switch 'simplification #:states '("漢字" "汉字"))
@@ -68,7 +65,7 @@
       "xform/([A-Z])/$1/"
       "xlit/QWRTYUIOPSDFGHJKLZXCVBNM/qwrtyuiopsdfghjklzxcvbnm/"
       "xlit/etodgkcn/wrisfjxb/"))
-   (translator #:dictionary 'rime_ice #:prism 'flypy_18)
+   (translator #:dictionary 'luna_pinyin #:prism 'flypy_18)
    (reverse-lookup
     #:dictionary 'cangjie6
     #:prefix "`"
@@ -85,6 +82,6 @@
     (list (pattern 'reverse_lookup "`[a-z]*'?$"))))
   (custom "flypy_18.custom.yaml"
     (includes yuanshu_common_patch yuanshu_reverse_lookup_patch)
-    (version "0.1")
-    (description
-     "朙月拼音＋小鶴雙拼 18 鍵方案。\n使用 rime-ice 詞庫，適合 Yuanshu iPhone 18 鍵圖示皮膚。")))
+   (version "0.1")
+   (description
+     "朙月拼音＋小鶴雙拼 18 鍵方案。\n使用預設詞庫，適合 Yuanshu iPhone 18 鍵圖示皮膚。")))

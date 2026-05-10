@@ -19,11 +19,6 @@
 
 (define sources
   (list
-   (dict-source "iDvel/rime-ice/main/cn_dicts/8105.dict.yaml" "rime_ice_dicts/8105.dict.yaml" "8105" #f)
-   (dict-source "iDvel/rime-ice/main/cn_dicts/base.dict.yaml" "rime_ice_dicts/base.dict.yaml" "base" #f)
-   (dict-source "iDvel/rime-ice/main/cn_dicts/ext.dict.yaml" "rime_ice_dicts/ext.dict.yaml" "ext" #f)
-   (dict-source "iDvel/rime-ice/main/cn_dicts/tencent.dict.yaml" "rime_ice_dicts/tencent.dict.yaml" "tencent" #f)
-   (dict-source "iDvel/rime-ice/main/cn_dicts/others.dict.yaml" "rime_ice_dicts/others.dict.yaml" "others" #f)
    (dict-source "rime/rime-cantonese/main/jyut6ping3.chars.dict.yaml" "jyut6ping3_dicts/jyut6ping3.chars.dict.yaml" "jyut6ping3.chars" #f)
    (dict-source "rime/rime-cantonese/main/jyut6ping3.words.dict.yaml" "jyut6ping3_dicts/jyut6ping3.words.dict.yaml" "jyut6ping3.words" #f)
    (dict-source "rime/rime-cantonese/main/jyut6ping3.phrase.dict.yaml" "jyut6ping3_dicts/jyut6ping3.phrase.dict.yaml" "jyut6ping3.phrase" #f)

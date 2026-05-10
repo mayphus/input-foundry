@@ -15,15 +15,12 @@
     (print abc center)
     (ipad standard-18))
   (deps cangjie6)
-  (static-files "rime_ice.dict.yaml")
-  (static-dirs "rime_ice_dicts")
   (schema
    (version "0.1")
    (authors
-    "14-key adjacent QWERTY merge layout adapted in this workspace"
-    "dictionary import from iDvel/rime-ice")
+    "14-key adjacent QWERTY merge layout adapted in this workspace")
    (description
-    "朙月拼音全拼 14 鍵方案，使用 rime-ice 詞庫。\niPhone 佈局按相鄰 QWERTY 分組：\nQW / ER / TY / UI / OP\nAS / DF / GH / JK / L\nZX / CV / BN / M")
+    "朙月拼音全拼 14 鍵方案。\niPhone 佈局按相鄰 QWERTY 分組：\nQW / ER / TY / UI / OP\nAS / DF / GH / JK / L\nZX / CV / BN / M")
    (switches
     (switch 'ascii_mode #:reset 0 #:states '("全拼14" "A"))
     (switch 'simplification #:states '("漢字" "汉字"))
@@ -39,7 +36,7 @@
       "derive/^([jqxy])u/$1v/"
       "derive/^([nl])v/$1u/"
       "xlit/qwertyuiopasdfghjklzxcvbnm/qqeettuuooaaddggjjlzzccbbm/"))
-   (translator #:dictionary 'rime_ice #:prism 'pinyin_14)
+   (translator #:dictionary 'luna_pinyin #:prism 'pinyin_14)
    (reverse-lookup
     #:dictionary 'cangjie6
     #:prefix "`"
@@ -56,6 +53,6 @@
     (list (pattern 'reverse_lookup "`[a-z]*'?$"))))
   (custom "pinyin_14.custom.yaml"
     (includes yuanshu_common_patch yuanshu_reverse_lookup_patch)
-    (version "0.1")
-    (description
-     "朙月拼音全拼 14 鍵方案。\n使用 rime-ice 詞庫，適合 Yuanshu iPhone 14 鍵圖示皮膚。")))
+   (version "0.1")
+   (description
+     "朙月拼音全拼 14 鍵方案。\n使用預設詞庫，適合 Yuanshu iPhone 14 鍵圖示皮膚。")))

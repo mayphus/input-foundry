@@ -16,6 +16,7 @@
          "web/forms.rkt"
          "web/locale.rkt"
          "build.rkt"
+         "input-method/calculate.rkt"
          "input-method/schema.rkt")
 
 (provide keyboard-layout-items
@@ -110,7 +111,7 @@
    (directory-list rime-dir)))
 
 (define schema-ids
-  (schema-entry-ids))
+  (map input-method-recipe-id input-method-recipes))
 
 (define legacy-host "rime-config.mayphus.org")
 (define canonical-host "rime.mayphus.org")
@@ -162,22 +163,28 @@
 
 (define schema-items
   (for/list ([s (in-list schema-ids)])
+    (define recipe (input-method-recipe-ref s))
+    (define base-schema-id (input-method-recipe-schema recipe))
     (define deps (read-schema-deps s))
     (define artifacts (read-schema-artifacts s))
     (define keyboard-layouts (read-schema-keyboard-layouts s))
-    (define zh-name (schema-module-ref s 'chinese-name (read-schema-name-from-yaml s)))
+    (define zh-name (schema-module-ref s 'chinese-name
+                                       (read-schema-name-from-yaml base-schema-id)))
     (define description (or (read-schema-description s) ""))
     (hash 'id s
+          'schema-id base-schema-id
           'slug (schema-slug s)
           'name (or zh-name s)
-          'names (or (schema-display-names s)
+          'names (or (input-method-recipe-names recipe)
+                     (schema-display-names base-schema-id)
                      (hash 'en (or zh-name s)
                            'zh-Hant (or zh-name s)))
           'description description
-          'descriptions (or (schema-display-descriptions s)
+          'descriptions (or (input-method-recipe-descriptions recipe)
+                            (schema-display-descriptions base-schema-id)
                             (hash 'en description
                                   'zh-Hant description))
-          'input-method? (input-method-id? s)
+          'input-method? #t
           'deps deps
           'artifacts artifacts
           'keyboard-layouts keyboard-layouts)))

@@ -7,8 +7,7 @@
          racket/string
          (prefix-in keyboard: "../keyboard/registry.rkt")
          (prefix-in schema-index: "../input-method/schema.rkt")
-         (prefix-in model: "../input-method/model.rkt")
-         (prefix-in recipes: "../input-method/recipes.rkt")
+         (prefix-in calculate: "../input-method/calculate.rkt")
          (prefix-in rime-registry: "../rime/registry.rkt")
          (prefix-in flypy: "../rime/flypy.rkt")
          (prefix-in flypy_14: "../rime/flypy_14.rkt")
@@ -99,15 +98,25 @@
 
   (test-case "input-method schema index exposes recipe-backed entries"
     (define recipe-ids
-      (map recipes:input-method-recipe-id recipes:input-method-recipes))
+      (map calculate:input-method-recipe-id calculate:input-method-recipes))
     (check-equal? (schema-index:input-method-schema-entry-ids) recipe-ids)
     (check-not-false (member "double-pinyin-flypy" (schema-index:input-method-schema-entry-ids)))
+    (check-not-false (member "double-pinyin-flypy-14" (schema-index:input-method-schema-entry-ids)))
+    (check-not-false (member "pinyin-14" (schema-index:input-method-schema-entry-ids)))
     (check-false (member "flypy-ice" (schema-index:input-method-schema-entry-ids)))
     (for ([id (in-list (schema-index:input-method-schema-entry-ids))])
-      (check-true (model:input-method-schema-entry?
-                   (schema-index:input-method-schema-entry-ref id))
-                  id)
-      (check-not-false (recipes:input-method-recipe-ref id #f) id)))
+      (check-not-false (calculate:input-method-recipe-ref id #f) id)))
+
+  (test-case "schema registry contains only pure schemas"
+    (define schema-ids (schema-index:schema-entry-ids))
+    (check-not-false (member "double-pinyin-flypy" schema-ids))
+    (check-not-false (member "luna-pinyin" schema-ids))
+    (for ([id (in-list '("double-pinyin-flypy-14"
+                         "double-pinyin-flypy-18"
+                         "double-pinyin-flypy-shuffle-17"
+                         "pinyin-14"
+                         "flypy-ice"))])
+      (check-false (member id schema-ids) id)))
 
   (test-case "keyboard catalog owns reusable keyboard dimensions"
     (check-not-false (keyboard:keyboard-skeleton-definition-ref "standard-26"))
@@ -132,8 +141,9 @@
                                    ".rkt")))
        id)))
 
-  (test-case "schema index keeps variant and dependency metadata"
-    (check-equal? (rime-registry:rime-schema-source-id "flypy-ice") "flypy")
+  (test-case "schema index keeps dependency and artifact metadata"
+    (check-false (member "flypy-ice" (rime-registry:rime-schema-ids)))
+    (check-false (member "flypy_ice" rime-registry:generated-config-ids))
     (check-equal? (rime-registry:rime-schema-deps "double-pinyin") '("stroke"))
     (check-equal? (rime-registry:rime-schema-extra-files "wubi-pinyin") '("wubi86.dict.yaml"))
     (check-equal? (rime-registry:rime-schema-artifacts "double-pinyin") '("rime" "yuanshu"))
@@ -170,16 +180,6 @@
            #:when (regexp-match? #rx"[.]yaml$" path))
       (check-false (string-contains? content "swipeDownAction")
                    (format "~a should not contain swipeDownAction" path))))
-
-  (test-case "flypy ice is a dictionary variant in flypy config"
-    (define ice-files (hash-ref flypy:schema-config-files "flypy_ice"))
-    (define yaml (generated-file ice-files "flypy_ice.schema.yaml"))
-    (check-not-false (string-contains? yaml "schema_id: flypy_ice"))
-    (check-not-false (string-contains? yaml "name: \"小鶴雙拼-霧凇\""))
-    (check-not-false (string-contains? yaml "dictionary: rime_ice"))
-    (check-not-false (string-contains? yaml "prism: flypy_ice"))
-    (check-equal? (read-schema-artifacts "flypy-ice") '("rime" "yuanshu"))
-    (check-equal? (read-schema-keyboard-layouts "flypy-ice") '("flypy")))
 
   (test-case "luna pinyin emits desktop schema YAML"
     (define yaml (generated-file luna_pinyin:config-files "luna_pinyin.schema.yaml"))
@@ -264,7 +264,7 @@
     (check-not-false (string-contains? yaml "name: \"小鶴雙拼-14鍵\""))
     (check-not-false (string-contains? yaml "dependencies:\n    - cangjie6"))
     (check-not-false (string-contains? yaml "alphabet: qetuoadgjlzcbm"))
-    (check-not-false (string-contains? yaml "dictionary: rime_ice"))
+    (check-not-false (string-contains? yaml "dictionary: luna_pinyin"))
     (check-not-false (string-contains? yaml "prism: flypy_14")))
 
   (test-case "14-key schemas own their layout definitions"
@@ -340,7 +340,7 @@
     (check-equal? (rime-registry:rime-schema-keyboard-layouts "quick5") '("cangjie6"))
     (check-equal? (rime-registry:rime-schema-keyboard-layouts "cangjie5") '("cangjie6")))
 
-  (test-case "keyboard legends live in root catalog"
+  (test-case "keyboard legends live in keymap catalog through keyboard facade"
     (check-equal? (keyboard:keyboard-legend-text 'wubi 'q) "金/勹")
     (check-equal? (keyboard:keyboard-legend-text 'jyutping 'a) "aa/a")
     (check-equal? (keyboard:keyboard-legend-text 'missing 'q) ""))

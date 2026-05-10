@@ -30,9 +30,4 @@
        (fonts
         (abc          11   #:secondary)
         (flypy-single 18.5)
-        (flypy-double 13))))))
-
-  (variant flypy_ice
-    (name "小鶴雙拼-霧凇")
-    (dictionary ice)
-    (keyboard-layouts flypy)))
+        (flypy-double 13)))))))

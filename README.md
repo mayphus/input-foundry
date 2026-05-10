@@ -12,10 +12,12 @@ Input Foundry is a Chinese input museum and Rime/Yuanshu package builder, served
 - `assets/rime/` holds native Rime YAML and dictionaries.
 - `rime/` holds Rime/Yuanshu generation logic, including the `rime-schema`
   DSL, generated schema modules, and generated keyboard-layout exports.
-- `input-method/` is the canonical source for input method definitions.
-  `input-method/schema/` holds pure schema registry entries; `input-method/keyboard/`
-  holds skeletons, projections, legends, placements, interactions, and the
-  public keyboard resolver.
+- `input-method/` calculates concrete input methods from schema, keymap, and
+  keyboard dimensions.
+- `input-method/schema/` holds pure schema registry entries.
+- `keymap/` holds logical key mappings and reusable key labels.
+- `keyboard/` holds skeletons, projections, dimensions, placements,
+  interactions, and the public keyboard resolver.
 - `lib/preview/` contains shared preview layout and SVG rendering code used by
   the web app and Yuanshu build outputs.
 - `lib/yaml/` contains the internal YAML renderer.
@@ -27,27 +29,26 @@ Input Foundry is a Chinese input museum and Rime/Yuanshu package builder, served
 Generated Rime modules in `rime/` use `#lang s-exp "lib/lang.rkt"` and declare
 their generated artifact support in the Rime source itself. Schema identity and
 display metadata live under `input-method/schema/`. Reusable keyboard dimensions
-live under `input-method/keyboard/`; input method recipes compose schema logic, keyboard
-skeletons, projections, legends, placements, and target-specific mobile
-behavior. Inline `(keyboard-layout ...)` clauses remain the generated Yuanshu
-skin definition surface:
+live under `keyboard/`; calculated input methods compose schema logic, keymaps,
+keyboard skeletons, projections, placements, and target-specific mobile
+behavior. Inline `(keyboard ...)` clauses remain the generated Yuanshu skin
+definition surface:
 
 ```racket
 (rime-schema flypy_14
   (name "14鍵")
   (artifacts yuanshu)
-  (keyboard-layout flypy_14
+  (keyboard flypy_14
+    (model compact-14)
     (meta ...)
-    (phone-layout flypy-14)
-    (ipad-layout standard-18))
+    (variant flypy-14)
+    (print flypy center)
+    (ipad standard-18))
   (deps cangjie6)
-  (static-files "rime_ice.dict.yaml")
-  (static-dirs "rime_ice_dicts")
   (schema
     (version "0.1")
     (authors
-      "double pinyin layout by 鶴"
-      "dictionary import from iDvel/rime-ice")
+      "double pinyin layout by 鶴")
     (description "朙月拼音＋小鶴雙拼 14 鍵方案。")
     (switches ...)
     (engine ...)

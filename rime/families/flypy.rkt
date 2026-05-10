@@ -52,17 +52,9 @@
                (string-syntax ctx "朙月拼音＋小鶴雙拼方案。\n精簡版，適合移動端匯入")
                (string-list-syntax ctx '("flypy.yaml" "luna_pinyin.dict.yaml"))
                '())]
-      [(ice rime_ice)
-       (values (datum->syntax ctx 'rime_ice)
-               (string-syntax ctx "霧凇")
-               (string-syntax ctx "0.1")
-               (string-syntax ctx "朙月拼音＋小鶴雙拼方案，使用 rime-ice 詞庫。")
-               (string-syntax ctx "朙月拼音＋小鶴雙拼方案。\n使用 rime-ice 詞庫，精簡版，適合移動端匯入")
-               (string-list-syntax ctx '("rime_ice.dict.yaml"))
-               (string-list-syntax ctx '("rime_ice_dicts")))]
       [else
        (raise-syntax-error 'dictionary
-                           "unknown Flypy dictionary preset; expected luna_pinyin or ice"
+                           "unknown Flypy dictionary preset; expected luna_pinyin"
                            dict-stx)]))
 
   (define (variant-clause? clause)

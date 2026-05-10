@@ -132,7 +132,7 @@
         (define zip-path (build-path tmp "profile.zip"))
         (define-values (_built-out _built-zip _layout-dir)
           (build-bundle!
-           (hash 'schemas (list "pinyin_14" "flypy")
+           (hash 'schemas (list "pinyin-14" "double-pinyin-flypy")
                  'artifact "rime"
                  'extra-src-files '("squirrel.custom.yaml"))
            "test-rime"
@@ -147,8 +147,8 @@
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f))))
 
-  (test-case "flypy ice download selects the rime-ice dictionary variant"
-    (define tmp (make-temporary-file "input-foundry-flypy-ice-~a" 'directory))
+  (test-case "compact builds use default dictionaries without rime-ice assets"
+    (define tmp (make-temporary-file "input-foundry-compact-default-dict-~a" 'directory))
     (dynamic-wind
       void
       (lambda ()
@@ -156,23 +156,24 @@
         (define zip-path (build-path tmp "profile.zip"))
         (define-values (_built-out _built-zip _layout-dir)
           (build-bundle!
-           (hash 'schemas (list "flypy-ice")
-                 'artifact "rime"
-                 'extra-src-files '("squirrel.custom.yaml"))
-           "test-flypy-ice"
+           (hash 'schemas (list "double-pinyin-flypy-14" "pinyin-14")
+                 'artifact "yuanshu")
+           "test-compact-default-dict"
            profile-out
            zip-path))
-        (define variant-yaml (file->string (build-path profile-out "flypy_ice.schema.yaml")))
+        (define flypy-yaml (file->string (build-path profile-out "flypy_14.schema.yaml")))
+        (define pinyin-yaml (file->string (build-path profile-out "pinyin_14.schema.yaml")))
         (define default-custom (file->string (build-path profile-out "default.custom.yaml")))
-        (check-true (string-contains? variant-yaml "dictionary: rime_ice"))
-        (check-true (string-contains? default-custom "schema: flypy_ice"))
-        (check-false (regexp-match? #rx"schema: flypy\n" default-custom))
-        (check-true (file-exists? (build-path profile-out "rime_ice.dict.yaml")))
-        (check-true (directory-exists? (build-path profile-out "rime_ice_dicts")))
-        (define extract-profile (build-path tmp "extract-flypy-ice-profile"))
+        (check-true (string-contains? flypy-yaml "dictionary: luna_pinyin"))
+        (check-true (string-contains? pinyin-yaml "dictionary: luna_pinyin"))
+        (check-true (string-contains? default-custom "schema: flypy_14"))
+        (check-false (file-exists? (build-path profile-out "rime_ice.dict.yaml")))
+        (check-false (directory-exists? (build-path profile-out "rime_ice_dicts")))
+        (define extract-profile (build-path tmp "extract-compact-profile"))
         (unzip! zip-path extract-profile)
-        (check-zip-file extract-profile "profile" "flypy_ice.schema.yaml")
-        (check-zip-file extract-profile "profile" "rime_ice.dict.yaml"))
+        (check-zip-file extract-profile "profile" "flypy_14.schema.yaml")
+        (check-zip-file extract-profile "profile" "pinyin_14.schema.yaml")
+        (check-false (file-exists? (build-path extract-profile "profile" "rime_ice.dict.yaml"))))
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f))))
 

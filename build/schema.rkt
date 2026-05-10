@@ -3,6 +3,7 @@
 (require racket/list
          racket/string
          "../default-profile.rkt"
+         "../input-method/calculate.rkt"
          "../input-method/schema.rkt"
          "../rime/registry.rkt"
          "paths.rkt")
@@ -121,7 +122,7 @@
   (define raw (hash-ref profile 'schemas '()))
   (define lst (if (list? raw) raw (list raw)))
   (if (member "all" lst)
-      (schema-entry-ids)
+      (map input-method-recipe-id input-method-recipes)
       lst))
 
 (define (expand-schema-deps schemas)

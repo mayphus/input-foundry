@@ -9,8 +9,8 @@
 ;;     (name "14鍵")
 ;;     (artifacts yuanshu)
 ;;     (deps cangjie6)
-;;     (static-files "rime_ice.dict.yaml")
-;;     (static-dirs "rime_ice_dicts")
+;;     (static-files "extra.dict.yaml")
+;;     (static-dirs "extra_dicts")
 ;;     (schema
 ;;       (version "0.1")
 ;;       (authors "dictionary import from iDvel/rime-ice")

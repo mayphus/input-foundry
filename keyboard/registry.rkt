@@ -1,14 +1,22 @@
 #lang racket/base
 
 (require "skeletons.rkt"
+         "dimensions.rkt"
          "projections.rkt"
          "placements.rkt"
          "interactions.rkt"
-         "legends.rkt"
+         "../keymap/registry.rkt"
          "static-layouts.rkt")
 
 (provide keyboard-layout-definitions
          keyboard-layout-definition-ref
+         keyboard-dimensions
+         keyboard-dimension-ref
+         keyboard-dimension-id
+         keyboard-dimension-skeleton
+         keyboard-dimension-projection
+         keyboard-dimension-interactions
+         keyboard-dimension-target
          keyboard-legend-definitions
          keyboard-legend-definition-ref
          keyboard-legend-text

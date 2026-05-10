@@ -13,16 +13,13 @@
       "Custom iPad pages"))
     (variant shuffle-17)
     (print flypy center))
-  (static-files "rime_ice.dict.yaml")
-  (static-dirs "rime_ice_dicts")
   (schema
    (version "0.1")
    (authors
     "layout reference from Log Input docs"
-    "dictionary import from iDvel/rime-ice"
     "Rime schema adapted in this workspace")
    (description
-    "朙月拼音＋亂序17方案，使用 rime-ice 詞庫。\n移動端優先，17 鍵內碼採用 a-q。")
+    "朙月拼音＋亂序17方案。\n移動端優先，17 鍵內碼採用 a-q。")
    (switches
     (switch 'ascii_mode #:reset 0 #:states '("17" "A"))
     (switch 'simplification #:states '("漢字" "汉字"))
@@ -74,12 +71,12 @@
       "xform/i$/K/"
       "xform/an$/L/"
       "xlit/ABCDEFGHIJKLMNOPQ/abcdefghijklmnopq/"))
-   (translator #:dictionary 'rime_ice #:prism 'shuffle_17)
+   (translator #:dictionary 'luna_pinyin #:prism 'shuffle_17)
    (preset-section 'punctuator)
    (preset-section 'key_binder)
    (recognizer))
   (custom "shuffle_17.custom.yaml"
     (includes yuanshu_common_patch yuanshu_script_patch)
-    (version "0.1")
-    (description
-     "朙月拼音＋亂序17方案。\n使用 rime-ice 詞庫，精簡版，適合移動端匯入")))
+   (version "0.1")
+   (description
+     "朙月拼音＋亂序17方案。\n使用預設詞庫，精簡版，適合移動端匯入")))

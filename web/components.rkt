@@ -84,7 +84,9 @@
      (define items
        (filter (lambda (schema)
                  (and (schema-input-method? schema)
-                      (equal? (schema-id->category-id (schema-id schema)) category-id)))
+                      (equal? (schema-id->category-id
+                               (hash-ref schema 'schema-id (schema-id schema)))
+                              category-id)))
                schemas))
      (and (pair? items) (cons category-id items)))
    schema-category-order))
