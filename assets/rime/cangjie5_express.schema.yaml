@@ -17,7 +17,7 @@ schema:
       - 取消 , . 翻頁
       - 取消拼音混打
   dependencies:
-    - luna_quanpin
+    - luna_pinyin
 
 switches:
   - name: ascii_mode
@@ -78,7 +78,7 @@ translator:
 
 reverse_lookup:
   dictionary: luna_pinyin
-  prism: luna_quanpin
+  prism: luna_pinyin
   prefix: "`"
   suffix: "'"
   tips: 〔拼音〕

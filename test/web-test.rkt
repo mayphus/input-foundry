@@ -113,10 +113,10 @@
       (canonical-dispatch (req "/schemas/flypy-ice/preview.svg" "rime.mayphus.org")))
     (define mobile-only-svg
       (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/preview.svg" "rime.mayphus.org"))))
-    (define quanpin-skin-svg
-      (response-body (canonical-dispatch (req "/schemas/luna-quanpin/skin-preview.svg" "rime.mayphus.org"))))
+    (define luna-skin-svg
+      (response-body (canonical-dispatch (req "/schemas/luna-pinyin/skin-preview.svg" "rime.mayphus.org"))))
     (check-equal? (response-code flypy-ice-response) 404)
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" mobile-only-svg))
     (check-true (regexp-match? #rx">123<" mobile-only-svg))
-    (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" quanpin-skin-svg))
-    (check-true (regexp-match? #rx">123<" quanpin-skin-svg)))
+    (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" luna-skin-svg))
+    (check-true (regexp-match? #rx">123<" luna-skin-svg)))

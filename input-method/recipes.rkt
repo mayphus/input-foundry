@@ -183,13 +183,7 @@
            #:legends '(abc)
            #:keyboards
            (list
-            (keyboard "pinyin-simp" 'standard-26 "luna_pinyin" 'standard-center)))
-   (method "luna-quanpin"
-           #:schema "luna-pinyin"
-           #:legends '(abc)
-           #:keyboards
-           (list
-            (keyboard "luna-quanpin" 'standard-26 "luna_pinyin" 'standard-center)))))
+            (keyboard "pinyin-simp" 'standard-26 "luna_pinyin" 'standard-center)))))
 
 (define input-method-keyboards
   (append-map input-method-dimension-keyboards input-method-dimensions))

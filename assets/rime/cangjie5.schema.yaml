@@ -12,7 +12,7 @@ schema:
     碼表源自倉頡之友發佈的《五倉世紀版》
     www.chinesecj.com
   dependencies:
-    - luna_quanpin
+    - luna_pinyin
 
 switches:
   - name: ascii_mode
@@ -79,7 +79,7 @@ abc_segmentor:
 
 reverse_lookup:
   dictionary: luna_pinyin
-  prism: luna_quanpin
+  prism: luna_pinyin
   prefix: "`"
   suffix: "'"
   tips: 〔拼音〕

@@ -201,8 +201,7 @@
                                "quick5.dict.yaml"
                                "cangjie5.schema.yaml"
                                "cangjie5.dict.yaml"
-                               "luna_quanpin.schema.yaml"
-                               "pinyin.yaml"))])
+                               "luna_pinyin.schema.yaml"))])
           (check-true (file-exists? (build-path profile-out file)) file)))
       (lambda ()
         (delete-directory/files tmp #:must-exist? #f))))

@@ -37,7 +37,6 @@
     "quick5.rkt"
     "stroke.rkt"
     "pinyin-simp.rkt"
-    "luna-quanpin.rkt"
     "jyut6ping3.rkt"
     "bopomofo.rkt"))
 
