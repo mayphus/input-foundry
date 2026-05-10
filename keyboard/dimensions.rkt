@@ -12,33 +12,19 @@
    target)
   #:transparent)
 
-(define keyboard-dimensions
-  (list
-   (keyboard-dimension 'standard-26
-                       'standard-26
-                       'identity-26
-                       '(standard-mobile no-swipe-down)
-                       'yuanshu)
-   (keyboard-dimension 'compact-14
-                       'compact-14
-                       'adjacent-qwerty-14
-                       '(compact-mobile no-swipe-down)
-                       'yuanshu)
-   (keyboard-dimension 'compact-18
-                       'compact-18
-                       'adjacent-qwerty-18
-                       '(compact-mobile no-swipe-down)
-                       'yuanshu)
-   (keyboard-dimension 'shuffle-17
-                       'compact-17
-                       'shuffle-17
-                       '(custom-mobile-pages no-swipe-down)
-                       'yuanshu)
-   (keyboard-dimension 'zhuyin
-                       'zhuyin
-                       'zhuyin-direct
-                       '(zhuyin-mobile custom-mobile-pages no-swipe-down)
-                       'yuanshu)))
+(define-syntax-rule (define-keyboard-dimensions name
+                      [id skeleton projection (interaction ...) target] ...)
+  (define name
+    (list
+     (keyboard-dimension 'id 'skeleton 'projection '(interaction ...) 'target)
+     ...)))
+
+(define-keyboard-dimensions keyboard-dimensions
+  [standard-26 standard-26 identity-26 (standard-mobile no-swipe-down) yuanshu]
+  [compact-14 compact-14 adjacent-qwerty-14 (compact-mobile no-swipe-down) yuanshu]
+  [compact-18 compact-18 adjacent-qwerty-18 (compact-mobile no-swipe-down) yuanshu]
+  [shuffle-17 compact-17 shuffle-17 (custom-mobile-pages no-swipe-down) yuanshu]
+  [zhuyin zhuyin zhuyin-direct (zhuyin-mobile custom-mobile-pages no-swipe-down) yuanshu])
 
 (define keyboard-dimension-by-id
   (for/hash ([dimension (in-list keyboard-dimensions)])

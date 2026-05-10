@@ -1,5 +1,7 @@
 #lang racket/base
 
+(require "catalog.rkt")
+
 (provide keyboard-skeleton-definitions
          keyboard-skeleton-definition-ref
          keyboard-model-definitions
@@ -62,15 +64,6 @@
 (define keyboard-model-definitions keyboard-skeleton-definitions)
 
 (define (keyboard-skeleton-definition-ref skeleton [default #f])
-  (define model-symbol
-    (cond
-      [(symbol? skeleton) skeleton]
-      [(string? skeleton) (string->symbol skeleton)]
-      [else skeleton]))
-  (define entry
-    (for/first ([definition (in-list keyboard-skeleton-definitions)]
-                #:when (eq? (car definition) model-symbol))
-      (cdr definition)))
-  (or entry default))
+  (catalog-definition-ref keyboard-skeleton-definitions skeleton default))
 
 (define keyboard-model-definition-ref keyboard-skeleton-definition-ref)
