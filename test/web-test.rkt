@@ -42,20 +42,20 @@
     (check-equal? (response-code response) 302)
     (check-equal? (response-location response) "/"))
 
-  (test-case "schema variant detail routes redirect to their base exhibit"
+  (test-case "schema variant detail routes render directly"
     (define response (canonical-dispatch (req "/exhibits/flypy_ice" "rime.mayphus.org")))
-    (check-equal? (response-code response) 302)
-    (check-equal? (response-location response) "/exhibits/flypy"))
+    (check-equal? (response-code response) 200)
+    (check-true (regexp-match? #rx"Flypy Ice" (response-body response))))
 
   (test-case "museum catalog renders localized exhibit metadata"
     (define en-html (response-body (canonical-dispatch (req "/" "rime.mayphus.org"))))
     (define zh-html (response-body (canonical-dispatch (req "/?locale=zh-Hant" "rime.mayphus.org"))))
-    (check-true (regexp-match? #rx"Flypy double pinyin with Rime config" en-html))
+    (check-false (regexp-match? #rx"Flypy double pinyin with Rime config" en-html))
     (check-true (regexp-match? #rx"Double Pinyin" en-html))
     (check-true (regexp-match? #rx"Full Spelling" en-html))
     (check-true (regexp-match? #rx"Jyutping" en-html))
     (check-false (regexp-match? #rx"<h2[^>]*>Cantonese</h2>" en-html))
-    (check-true (regexp-match? #rx"小鶴方案，提供 Rime 設定" zh-html))
+    (check-false (regexp-match? #rx"小鶴方案，提供 Rime 設定" zh-html))
     (check-true (regexp-match? #rx"雙拼" zh-html))
     (check-true (regexp-match? #rx"粵拼" zh-html))
     (check-false (regexp-match? #rx"Compact phonetic systems" zh-html)))
@@ -98,3 +98,12 @@
     (check-true (regexp-match? #rx">123<" skin-svg))
     (check-true (regexp-match? #rx"fill=\"#e9edf2\"" skin-svg))
     (check-false (regexp-match? #rx">123<" layout-svg))))
+
+  (test-case "schema preview routes preserve schema identity over shared layouts"
+    (define flypy-ice-svg
+      (response-body (canonical-dispatch (req "/schemas/flypy_ice/preview.svg" "rime.mayphus.org"))))
+    (define quanpin-skin-svg
+      (response-body (canonical-dispatch (req "/schemas/luna_quanpin/skin-preview.svg" "rime.mayphus.org"))))
+    (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" flypy-ice-svg))
+    (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" quanpin-skin-svg))
+    (check-true (regexp-match? #rx">123<" quanpin-skin-svg)))

@@ -82,6 +82,22 @@
     (define preview-svgs (hash-ref item 'skin-preview-svgs))
     (hash-ref preview-svgs theme #f)))
 
+(define (schema-preview-svg schema-id [theme 'light] #:skin? [skin? #f])
+  (define schema
+    (for/first ([item (in-list schema-items)]
+                #:when (equal? schema-id (hash-ref item 'id)))
+      item))
+  (define layout-id
+    (and schema
+         (let ([layouts (hash-ref schema 'keyboard-layouts '())])
+           (and (pair? layouts) (car layouts)))))
+  (and layout-id
+       (if skin?
+           (or (keyboard-layout-skin-preview-svg layout-id theme)
+               (keyboard-layout-skin-preview-svg layout-id 'light))
+           (or (keyboard-layout-preview-svg layout-id theme)
+               (keyboard-layout-preview-svg layout-id 'light)))))
+
 (define (list-static-schemas)
   (filter-map
    (lambda (f)
@@ -193,8 +209,6 @@
   (cond
     [(not (valid-id? schema-id))
      (json-error "Invalid schema id")]
-    [(not (equal? schema-id (schema-source-id schema-id)))
-     (redirect-response (format "/exhibits/~a" (schema-source-id schema-id)))]
     [else
      (html-response (render-exhibit-page req schema-items keyboard-layout-items schema-id)
                     (remember-locale-headers req))]))
@@ -278,6 +292,30 @@
           404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
           (list #"Preview SVG not found")))]))
 
+(define (handle-schema-preview-svg req schema-id [theme 'light])
+  (cond
+    [(not (valid-id? schema-id))
+     (json-error "Invalid schema id")]
+    [else
+     (define svg (schema-preview-svg schema-id theme))
+     (if svg
+         (svg-response svg)
+         (response/full
+          404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
+          (list #"Preview SVG not found")))]))
+
+(define (handle-schema-skin-preview-svg req schema-id [theme 'light])
+  (cond
+    [(not (valid-id? schema-id))
+     (json-error "Invalid schema id")]
+    [else
+     (define svg (schema-preview-svg schema-id theme #:skin? #t))
+     (if svg
+         (svg-response svg)
+         (response/full
+          404 #"Not Found" (current-seconds) #"text/plain; charset=utf-8" '()
+          (list #"Preview SVG not found")))]))
+
 (define (handle-build req)
   (define body-bytes (request-post-data/raw req))
   (define data
@@ -342,6 +380,14 @@
     (lambda (req layout-id)
       (handle-keyboard-layout-skin-preview-svg req layout-id 'dark))]
    [("skins" (string-arg) "demo.png") handle-keyboard-layout-demo]
+   [("schemas" (string-arg) "preview.svg") handle-schema-preview-svg]
+   [("schemas" (string-arg) "preview-dark.svg")
+    (lambda (req schema-id)
+      (handle-schema-preview-svg req schema-id 'dark))]
+   [("schemas" (string-arg) "skin-preview.svg") handle-schema-skin-preview-svg]
+   [("schemas" (string-arg) "skin-preview-dark.svg")
+    (lambda (req schema-id)
+      (handle-schema-skin-preview-svg req schema-id 'dark))]
    [("build") #:method "post" handle-build]))
 
 (define (canonical-dispatch req)
