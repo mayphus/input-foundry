@@ -1,11 +1,11 @@
 #lang racket/base
 
 (require json
-         net/http-client
          racket/list
          racket/match
          racket/port
-         racket/string)
+         racket/string
+         racket/system)
 
 (define zone-name "mayphus.org")
 (define hostname "type.mayphus.org")
@@ -42,34 +42,35 @@
   (format "Authorization: Bearer ~a" normalized))
 
 (define (cloudflare-request method path [payload #f])
-  (define body-bytes
-    (and payload (string->bytes/utf-8 (jsexpr->string payload))))
-  (define headers
+  (define curl
+    (or (find-executable-path "curl")
+        (error 'ensure-cloudflare-domain "curl not found")))
+  (define body (and payload (jsexpr->string payload)))
+  (define command
     (append
-     (list (authorization-header api-token)
-           "Content-Type: application/json")
-     (if body-bytes
-         (list (format "Content-Length: ~a" (bytes-length body-bytes)))
-         '())))
-  (define-values (status _headers in)
-    (http-sendrecv "api.cloudflare.com"
-                   path
-                   #:ssl? #t
-                   #:method method
-                   #:headers headers
-                   #:data body-bytes))
-  (define status-line
-    (if (bytes? status) (bytes->string/utf-8 status) status))
-  (define body (port->string in))
+     (list (path->string curl)
+           "-fsS"
+           "--fail-with-body"
+           "-X" method
+           (string-append "https://api.cloudflare.com" path)
+           "-H" (authorization-header api-token)
+           "-H" "Content-Type: application/json")
+     (if body (list "--data" body) '())))
+  (define-values (out in err proc)
+    (apply process*/ports #f #f #f command))
+  (close-output-port in)
+  (define response-body (port->string out))
+  (define error-body (port->string err))
+  (proc 'wait)
+  (unless (eq? (proc 'status) 'done-ok)
+    (error 'ensure-cloudflare-domain "~a ~a failed\n~a\n~a"
+           method path response-body error-body))
   (define parsed
-    (if (string=? (string-trim body) "")
+    (if (string=? (string-trim response-body) "")
         (hash)
-        (with-input-from-string body read-json)))
-  (unless (regexp-match? #rx" 2[0-9][0-9] " status-line)
-    (error 'ensure-cloudflare-domain "~a ~a failed with ~a\n~a"
-           method path status-line body))
+        (with-input-from-string response-body read-json)))
   (when (eq? (hash-ref parsed 'success #t) #f)
-    (error 'ensure-cloudflare-domain "~a ~a failed\n~a" method path body))
+    (error 'ensure-cloudflare-domain "~a ~a failed\n~a" method path response-body))
   parsed)
 
 (define (result-list response)
