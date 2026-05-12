@@ -290,8 +290,8 @@
         'preview-svgs (preview-spec->svgs standard-zhuyin-preview)
         'skin-preview-svgs (preview-spec->svgs standard-zhuyin-preview)))
 
-(define legacy-host "rime-config.mayphus.org")
-(define canonical-host "rime.mayphus.org")
+(define legacy-hosts '("rime.mayphus.org" "rime-config.mayphus.org"))
+(define canonical-host "type.mayphus.org")
 
 (define (request-host req)
   (for/first ([header (in-list (request-headers/raw req))]
@@ -305,7 +305,7 @@
 (define (canonical-redirect-location req)
   (define host (request-host req))
   (and host
-       (string-ci=? (host-without-port host) legacy-host)
+       (member (string-downcase (host-without-port host)) legacy-hosts)
        (string-append "https://" canonical-host (url->string (request-uri req)))))
 
 (define (canonical-redirect-response location)
@@ -313,7 +313,7 @@
    308 #"Permanent Redirect" (current-seconds) #"text/plain; charset=utf-8"
    (list (make-header #"Location" (string->bytes/utf-8 location))
          (make-header #"Cache-Control" #"public, max-age=86400"))
-   (list #"Redirecting to rime.mayphus.org")))
+   (list #"Redirecting to type.mayphus.org")))
 
 ;; Precompute keyboard layout data once at startup. Concrete layouts are
 ;; declared by schema modules and materialized into temporary modules for the

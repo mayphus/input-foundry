@@ -44,38 +44,41 @@
   (and match (string->number (cadr match))))
 
 (module+ test
-  (test-case "legacy host redirects to canonical rime domain"
+  (test-case "legacy hosts redirect to canonical type domain"
     (check-equal? (canonical-redirect-location
                    (req "/desktop?locale=zh-Hant" "rime-config.mayphus.org"))
-                  "https://rime.mayphus.org/desktop?locale=zh-Hant")
+                  "https://type.mayphus.org/desktop?locale=zh-Hant")
     (check-equal? (canonical-redirect-location
                    (req "/?locale=en" "rime-config.mayphus.org:443"))
-                  "https://rime.mayphus.org/?locale=en")
+                  "https://type.mayphus.org/?locale=en")
+    (check-equal? (canonical-redirect-location
+                   (req "/?locale=en" "rime.mayphus.org:443"))
+                  "https://type.mayphus.org/?locale=en")
     (check-false (canonical-redirect-location
-                  (req "/" "rime.mayphus.org"))))
+                  (req "/" "type.mayphus.org"))))
 
   (test-case "desktop route redirects to museum home"
-    (define response (canonical-dispatch (req "/desktop" "rime.mayphus.org")))
+    (define response (canonical-dispatch (req "/desktop" "type.mayphus.org")))
     (check-equal? (response-code response) 302)
     (check-equal? (response-location response) "/"))
 
   (test-case "dictionary variants are not schema exhibit routes"
-    (define response (canonical-dispatch (req "/exhibits/flypy-ice" "rime.mayphus.org")))
+    (define response (canonical-dispatch (req "/exhibits/flypy-ice" "type.mayphus.org")))
     (check-equal? (response-code response) 404))
 
   (test-case "package variant exhibit routes are not schemas"
     (define response
-      (canonical-dispatch (req "/exhibits/flypy-ice?platform=desktop" "rime.mayphus.org")))
+      (canonical-dispatch (req "/exhibits/flypy-ice?platform=desktop" "type.mayphus.org")))
     (check-equal? (response-code response) 404))
 
   (test-case "schema preview routes use hyphen slugs"
     (define response
-      (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/skin-preview.svg" "rime.mayphus.org")))
+      (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/skin-preview.svg" "type.mayphus.org")))
     (check-equal? (response-code response) 200))
 
   (test-case "museum home renders localized exhibit metadata"
-    (define en-html (response-body (canonical-dispatch (req "/" "rime.mayphus.org"))))
-    (define zh-html (response-body (canonical-dispatch (req "/?locale=zh-Hant" "rime.mayphus.org"))))
+    (define en-html (response-body (canonical-dispatch (req "/" "type.mayphus.org"))))
+    (define zh-html (response-body (canonical-dispatch (req "/?locale=zh-Hant" "type.mayphus.org"))))
     (check-false (regexp-match? #rx"Flypy double pinyin with Rime config" en-html))
     (check-true (regexp-match? #rx"Double Pinyin" en-html))
     (check-true (regexp-match? #rx"Full Pinyin" en-html))
@@ -126,9 +129,9 @@
 
   (test-case "skin preview routes include non typing Yuanshu keys"
     (define skin-svg
-      (response-body (canonical-dispatch (req "/skins/flypy/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/skins/flypy/preview.svg" "type.mayphus.org"))))
     (define layout-svg
-      (response-body (canonical-dispatch (req "/layouts/flypy/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/layouts/flypy/preview.svg" "type.mayphus.org"))))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" skin-svg))
     (check-true (regexp-match? #rx">123<" skin-svg))
     (check-true (regexp-match? #rx"fill=\"#e9edf2\"" skin-svg))
@@ -136,9 +139,9 @@
 
   (test-case "standard zhuyin typing preview keeps punctuation input keys"
     (define layout-svg
-      (response-body (canonical-dispatch (req "/layouts/bopomofo_standard/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/layouts/bopomofo_standard/preview.svg" "type.mayphus.org"))))
     (define yuanshu-svg
-      (response-body (canonical-dispatch (req "/layouts/bopomofo/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/layouts/bopomofo/preview.svg" "type.mayphus.org"))))
     (define one-x (svg-text-x layout-svg "1"))
     (define q-x (svg-text-x layout-svg "q"))
     (define a-x (svg-text-x layout-svg "a"))
@@ -154,7 +157,7 @@
 
   (test-case "desktop detail preview includes physical keyboard controls"
     (define desktop-svg
-      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy/desktop-preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy/desktop-preview.svg" "type.mayphus.org"))))
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" desktop-svg))
     (check-true (regexp-match? #rx">Esc</text>" desktop-svg))
     (check-true (regexp-match? #rx">Tab</text>" desktop-svg))
@@ -175,13 +178,13 @@
 
   (test-case "schema preview routes preserve schema identity over shared layouts"
     (define flypy-ice-response
-      (canonical-dispatch (req "/schemas/flypy-ice/preview.svg" "rime.mayphus.org")))
+      (canonical-dispatch (req "/schemas/flypy-ice/preview.svg" "type.mayphus.org")))
     (define mobile-only-svg
-      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/preview.svg" "type.mayphus.org"))))
     (define mobile-only-skin-svg
-      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/skin-preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/double-pinyin-flypy-14/skin-preview.svg" "type.mayphus.org"))))
     (define luna-skin-svg
-      (response-body (canonical-dispatch (req "/schemas/luna-pinyin/skin-preview.svg" "rime.mayphus.org"))))
+      (response-body (canonical-dispatch (req "/schemas/luna-pinyin/skin-preview.svg" "type.mayphus.org"))))
     (check-equal? (response-code flypy-ice-response) 404)
     (check-true (regexp-match? #rx"^<svg[^>]+Keyboard preview" mobile-only-svg))
     (check-false (regexp-match? #rx">123<" mobile-only-svg))

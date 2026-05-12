@@ -65,6 +65,10 @@ definition surface:
 
 The product is served directly by the k3s-hosted Racket app:
 
+- `type.mayphus.org`
+
+Legacy hostnames redirect permanently to the main domain:
+
 - `rime.mayphus.org`
 - `rime-config.mayphus.org`
 
@@ -166,10 +170,11 @@ Deployment notes:
 - `GHCR_PULL_TOKEN` should be a GitHub personal access token for `mayphus` with
   at least `read:packages`, so the workflow can create the `ghcr-pull` image
   pull secret before deploying.
-- The ingress manifest assumes `rime.mayphus.org` and
+- The ingress manifest assumes `type.mayphus.org`, `rime.mayphus.org`, and
   `rime-config.mayphus.org` terminate in the cluster.
-- Cloudflare should route those hostnames to the k3s ingress. The old Worker
-  web UI is no longer part of this repo.
+- Cloudflare should route those hostnames to the k3s ingress. The old Rime
+  hostnames redirect permanently to `type.mayphus.org`, and the old Worker web
+  UI is no longer part of this repo.
 - The cert-manager issuer name is currently `letsencrypt`.
 - If your k3s ingress class or cert-manager setup differs, adjust `k8s.rkt` and
   regenerate with `racket k8s.rkt`.

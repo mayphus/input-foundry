@@ -16,7 +16,7 @@
 (define image-name "ghcr.io/mayphus/input-foundry")
 (define http-port 80)
 (define container-port 8080)
-(define hosts '("rime.mayphus.org" "rime-config.mayphus.org"))
+(define hosts '("type.mayphus.org" "rime.mayphus.org" "rime-config.mayphus.org"))
 
 (define (label-map)
   (mapping (kv "app" app-name)))
