@@ -22,12 +22,17 @@
 (define api-token (env! "CLOUDFLARE_API_TOKEN"))
 (define account-id (env! "CLOUDFLARE_ACCOUNT_ID"))
 
+(define (authorization-header token)
+  (if (regexp-match? #rx"(?i:^bearer[[:space:]]+)" token)
+      (format "Authorization: ~a" token)
+      (format "Authorization: Bearer ~a" token)))
+
 (define (cloudflare-request method path [payload #f])
   (define body-bytes
     (and payload (string->bytes/utf-8 (jsexpr->string payload))))
   (define headers
     (append
-     (list (format "Authorization: Bearer ~a" api-token)
+     (list (authorization-header api-token)
            "Content-Type: application/json")
      (if body-bytes
          (list (format "Content-Length: ~a" (bytes-length body-bytes)))
