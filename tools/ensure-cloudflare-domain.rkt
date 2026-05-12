@@ -24,11 +24,15 @@
 
 (define (normalized-api-token token)
   (define trimmed (string-trim token))
+  (define without-assignment
+    (regexp-replace #rx"(?i:^cloudflare_api_token[[:space:]]*=[[:space:]]*)" trimmed ""))
   (define without-header
-    (regexp-replace #rx"(?i:^authorization:[[:space:]]*)" trimmed ""))
+    (regexp-replace #rx"(?i:^authorization:[[:space:]]*)" without-assignment ""))
   (define without-bearer
     (regexp-replace #rx"(?i:^bearer[[:space:]]+)" (string-trim without-header) ""))
-  (string-trim without-bearer))
+  (define without-quotes
+    (string-trim without-bearer "\"'"))
+  (regexp-replace* #rx"[[:space:]]+" without-quotes ""))
 
 (define (authorization-header token)
   (format "Authorization: Bearer ~a" (normalized-api-token token)))
